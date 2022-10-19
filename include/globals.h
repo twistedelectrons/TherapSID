@@ -1,12 +1,12 @@
 #include <Arduino.h>
 
-extern bool sendLfo ;
-extern bool sendArp ;
+extern bool sendLfo;
+extern bool sendArp;
 extern bool lfoNewRand[3];
 extern int loadTimer;
-extern const byte version ;
-extern const byte versionDecimal ;
-extern bool fatShow ;
+extern const byte version;
+extern const byte versionDecimal;
+extern bool fatShow;
 extern float bend, bend1, bend2, bend3;
 extern bool sync;
 extern bool arpModeHeld;
@@ -18,10 +18,10 @@ extern bool pa, paLast, arping;
 extern bool pedal;
 extern bool shape1Pressed;
 extern int shape1PressedTimer;
-extern byte midiSetup ;
-extern int arpRate ;
+extern byte midiSetup;
+extern int arpRate;
 extern int clockCount;
-extern int ppq ;
+extern int ppq;
 extern byte slot[3];
 extern byte pKey[3];
 extern int lfoStep[3], resetDownTimer;
@@ -29,20 +29,20 @@ extern byte lfoClockSpeed[3];
 extern int lfoSpeed[3], lfoSpeedBase[3];
 extern int lfoDepth[3], lfoDepthBase[3];
 extern int lfoCounter[3];
-extern int presetScrollSpeed ;
+extern int presetScrollSpeed;
 extern int presetScrollTimer, saveBounce;
 extern byte lfo[3];
 extern byte velocityLast;
-extern int fat ;
+extern int fat;
 extern byte pSlot[3];
 extern float lfoStepF[3];
 extern bool presetUp, presetDown;
-extern byte preset ;
-extern int presetLast ;
-extern byte lastPot ;
+extern byte preset;
+extern int presetLast;
+extern byte lastPot;
 extern bool lfoAss[3][20];
 extern bool retrig[3];
-extern bool fatChanged ;
+extern bool fatChanged;
 extern bool looping[3];
 extern bool saveEngaged, resetDown;
 extern byte arpNotes[128];
@@ -50,25 +50,23 @@ extern byte selectedLfo, selectedLfoLast;
 extern byte lfoShape[3];
 extern byte sid2[6];
 extern byte lfoLast[3];
-extern byte fatMode ;
-extern int lfoCut1, lfoCut2, lfoCut3, cutBase, lfoSpeedLfo1, lfoSpeedLfo2,
-    lfoSpeedLfo3, lfoSpeedLfo4, lfoSpeedLfo5, lfoSpeedLfo6, lfoDepthLfo1,
-    lfoDepthLfo2, lfoDepthLfo3, lfoDepthLfo4, lfoDepthLfo5, lfoDepthLfo6;
+extern byte fatMode;
+extern int lfoCut1, lfoCut2, lfoCut3, cutBase, lfoSpeedLfo1, lfoSpeedLfo2, lfoSpeedLfo3, lfoSpeedLfo4, lfoSpeedLfo5,
+    lfoSpeedLfo6, lfoDepthLfo1, lfoDepthLfo2, lfoDepthLfo3, lfoDepthLfo4, lfoDepthLfo5, lfoDepthLfo6;
 extern byte glideCounter1, glideCounter2, glideCounter3;
 extern byte lfoClockSpeedPending[3];
 extern bool filterModeHeld;
 extern bool filterEnabled[3];
 extern bool assignmentChanged;
-extern int tuneBase1, tuneBase2, tuneBase3, lfoTune1, lfoTune2, lfoTune3, lfoTune4,
-    lfoTune5, lfoTune6, lfoTune7, lfoTune8, lfoTune9;
-extern int destiPitch1, destiPitch2,
-    destiPitch3;
+extern int tuneBase1, tuneBase2, tuneBase3, lfoTune1, lfoTune2, lfoTune3, lfoTune4, lfoTune5, lfoTune6, lfoTune7,
+    lfoTune8, lfoTune9;
+extern int destiPitch1, destiPitch2, destiPitch3;
 extern int pitch1, pitch2, pitch3, glideRange1, glideRange2, glideRange3;
 extern byte glide1, glide2, glide3;
-extern int pw1, pw2, pw3, pw1Base, pw2Base, pw3Base, pw1Lfo1, pw1Lfo2, pw1Lfo3,
-    pw2Lfo1, pw2Lfo2, pw2Lfo3, pw3Lfo1, pw3Lfo2, pw3Lfo3;
-extern float fineBase1, fineBase2, fineBase3, fine1, fine2, fine3, lfoFine1, lfoFine2,
-    lfoFine3, lfoFine4, lfoFine5, lfoFine6, lfoFine7, lfoFine8, lfoFine9;
+extern int pw1, pw2, pw3, pw1Base, pw2Base, pw3Base, pw1Lfo1, pw1Lfo2, pw1Lfo3, pw2Lfo1, pw2Lfo2, pw2Lfo3, pw3Lfo1,
+    pw3Lfo2, pw3Lfo3;
+extern float fineBase1, fineBase2, fineBase3, fine1, fine2, fine3, lfoFine1, lfoFine2, lfoFine3, lfoFine4, lfoFine5,
+    lfoFine6, lfoFine7, lfoFine8, lfoFine9;
 extern byte sid[25], sidLast[25], resLfo1, resLfo2, resLfo3;
 extern byte a1, a2, a3, d1, d2, d3, s1, s2, s3, r1, r2, r3;
 extern bool paraMode;
@@ -80,16 +78,15 @@ extern byte arpMode;
 extern int frozen;
 extern bool jumble;
 extern bool buttLast[33], lfoButtPressed;
-extern byte masterChannel ;
-extern byte masterChannelOut ;
+extern byte masterChannel;
+extern byte masterChannelOut;
 extern byte note1, note2, note3;
 extern int noteHeld1, noteHeld2, noteHeld3;
 extern int finalCut;
 extern int held, arpCounter, arpRangeBase, arpRangeLfo1, arpRangeLfo3, arpRangeLfo2;
 extern int lfoButtTimer;
 extern bool heldKeys[128];
-extern int arpSpeed, arpSpeedBase, arpSpeedLfo1, arpSpeedLfo2, arpSpeedLfo3, arpRange,
-    arpStep;
+extern int arpSpeed, arpSpeedBase, arpSpeedLfo1, arpSpeedLfo2, arpSpeedLfo3, arpRange, arpStep;
 extern int arpNote, arpSlot, arpRound;
 extern byte arpCount;
 extern bool arpPendulum;
@@ -98,7 +95,7 @@ extern int env, envCounter;
 extern int a4, d4, s4, r4;
 extern bool saveMode, saveModeFlash;
 extern int saveModeTimer;
-extern byte lastNote ;
+extern byte lastNote;
 extern int arpStepLast, arpStepBase, arpStepLfo1, arpStepLfo2, arpStepLfo3;
 extern int dotTimer;
 extern bool first;
