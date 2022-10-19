@@ -24,7 +24,7 @@ void isr(){
   
   if(shape1Pressed){shape1PressedTimer++;}
   
-  if(resetDown){resetDownTimer++;if(resetDownTimer>16000){resetDown=resetDownTimer=0;jumble=1;}}
+  if(resetDown){resetDownTimer++;if(resetDownTimer>16000){resetDown=0; resetDownTimer=0;jumble=1;}}
   
     //ENV
   switch (envState){

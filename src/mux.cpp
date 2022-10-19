@@ -1,3 +1,4 @@
+#include <Arduino.h>
 #include <digitalWriteFast.h>
 
 #include "globals.h"

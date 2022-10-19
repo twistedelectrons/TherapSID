@@ -670,7 +670,7 @@ mem[dumpCounter-2]=flash;
 
   }}
   
-  byte ledLast;
+  byte ledLast = 0;
   for(int i=0;i<4000;i++){
   
  if((i!=3998)&&(i!=3997)){ //don't overWrite MIDI channels!!

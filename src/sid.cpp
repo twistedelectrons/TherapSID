@@ -2,7 +2,7 @@
 #include "leds.h"
 #include "sid.h"
 
-static const int sidScale[] = { \
+static const int32_t sidScale[] = { \
 137,  145,  154,  163,  173,  183,  194,  205,  217,  230,  122,  \
 259,
 274,  291,  308,  326,  346,  366,  388,  411,  435,  461,  489,  \
