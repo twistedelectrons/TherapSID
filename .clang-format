@@ -1,0 +1,10 @@
+BasedOnStyle: LLVM
+IndentWidth: 4
+TabWidth: 4
+UseTab: ForIndentation
+IndentCaseLabels: true
+EmptyLineBeforeAccessModifier: Always
+IndentAccessModifiers: true
+ColumnLimit: 120
+PointerAlignment: Left
+SortIncludes: false

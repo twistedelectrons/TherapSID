@@ -1,3 +1,5 @@
 .pio
 firmware.syx
 *.pyc
+compile_commands.json
+.cache
