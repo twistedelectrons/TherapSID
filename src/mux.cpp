@@ -10,6 +10,8 @@ byte muxChannel;
 int pot;
 bool butt;
 
+const int POT_MAX = sizeof(potLast) / sizeof(*potLast); // number of array entries
+
 void setupMux() {
 
 	buttLast[32] = 1;
@@ -20,7 +22,8 @@ void setupMux() {
 		mux(i);
 		potLast[i] = ((analogRead(A0) + analogRead(A0)) / 2) >> 3;
 		potLast[i + 16] = ((analogRead(A1) + analogRead(A1)) / 2) >> 3;
-		potLast[i + 32] = ((analogRead(A2) + analogRead(A2)) / 2) >> 3;
+		if (i + 32 < POT_MAX)
+			potLast[i + 32] = ((analogRead(A2) + analogRead(A2)) / 2) >> 3;
 	}
 }
 void readMux() {
