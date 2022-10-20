@@ -10,6 +10,19 @@ byte muxChannel;
 int pot;
 bool butt;
 
+void setupMux() {
+
+	buttLast[32] = 1;
+
+	// scan all the pots so movement isn't detected after boot
+
+	for (int i = 0; i < 16; i++) {
+		mux(i);
+		potLast[i] = ((analogRead(A0) + analogRead(A0)) / 2) >> 3;
+		potLast[i + 16] = ((analogRead(A1) + analogRead(A1)) / 2) >> 3;
+		potLast[i + 32] = ((analogRead(A2) + analogRead(A2)) / 2) >> 3;
+	}
+}
 void readMux() {
 
 	muxChannel++;
@@ -26,6 +39,7 @@ void readMux() {
 		movedPot(muxChannel, pot << 3, 0);
 	}
 
+	mux(muxChannel);
 	pot = ((analogRead(A1) + analogRead(A1)) / 2) >> 3;
 
 	if ((pot > potLast[muxChannel + 16] + 1) || (pot < potLast[muxChannel + 16] - 1)) {
@@ -34,6 +48,7 @@ void readMux() {
 	}
 
 	if ((muxChannel == 0) || (muxChannel == 4) || (muxChannel == 9)) {
+		mux(muxChannel);
 		pot = ((analogRead(A2) + analogRead(A2)) / 2) >> 3;
 
 		if ((pot > potLast[muxChannel + 32] + 1) || (pot < potLast[muxChannel + 32] - 1)) {
@@ -43,11 +58,13 @@ void readMux() {
 	}
 
 	// butts
+	mux(muxChannel);
 	butt = (PINA & _BV(3)) == 0;
 	if (butt != buttLast[muxChannel]) {
 		buttLast[muxChannel] = butt;
 		buttChanged(muxChannel, !butt);
 	}
+	mux(muxChannel);
 	butt = (PINA & _BV(4)) == 0;
 	if (butt != buttLast[muxChannel + 16]) {
 		buttLast[muxChannel + 16] = butt;
@@ -56,6 +73,7 @@ void readMux() {
 
 	if (muxChannel == 6) {
 		digitalWrite(A2, HIGH);
+		mux(muxChannel);
 		butt = digitalRead(A2);
 		if (butt != buttLast[32]) {
 			buttLast[32] = butt;
@@ -195,9 +213,6 @@ void mux(byte number) {
 			break;
 	}
 }
-
-// PORTB |= _BV (0); //  HIGH;
-// PORTB &= ~_BV (0); //  LOW;
 
 void Aon() { PORTB |= _BV(0); }
 void Aoff() { PORTB &= ~_BV(0); }

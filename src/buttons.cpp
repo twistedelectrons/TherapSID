@@ -1,5 +1,3 @@
-#include <MIDI.h>
-
 #include "globals.h"
 #include "leds.h"
 #include "preset.h"
@@ -10,7 +8,6 @@
 #include "arp.h"
 
 void buttChanged(byte number, bool value) {
-
 	if (!value) {
 		// ledNumber(number);
 		//  PRESSED
@@ -440,23 +437,19 @@ void buttChanged(byte number, bool value) {
 			case 32:
 				arpModeHeld = false;
 				arpModeCounter = 0;
-				if (!fatChanged) {
-					if (!midiSetup) {
-						if (!pa) {
-							arpMode++;
-							if (arpMode > 4) {
-								arpMode = 0;
-								MIDI.sendNoteOff(lastNote, 127, masterChannelOut);
-							}
-							showArp();
+				if (!midiSetup) {
+					if (!pa) {
+						arpMode++;
+						if (arpMode > 4) {
+							arpMode = 0;
+							sendNoteOff(lastNote, 127, masterChannelOut);
 						}
-					} else if (midiSetup == 3) {
-						midiSetup = 0;
-						digit(0, 99);
-						digit(1, 99);
+						showArp();
 					}
-				} else {
-					fatChanged = false;
+				} else if (midiSetup == 3) {
+					midiSetup = 0;
+					digit(0, 99);
+					digit(1, 99);
 				}
 
 				break; // ARP MODE
@@ -507,15 +500,20 @@ void buttChanged(byte number, bool value) {
 				break; // PRESET RESET
 
 			case 7:
-				unShowFilterAssigns();
-				filterModeHeld = false;
-				if (!assignmentChanged) {
-					filterMode++;
-					if (filterMode > 4)
-						filterMode = 0;
-					updateFilter();
-					sendCC(55, map(filterMode, 0, 4, 0, 1023));
+				if (!fatChanged) {
+					unShowFilterAssigns();
+
+					if (!assignmentChanged) {
+						filterMode++;
+						if (filterMode > 4)
+							filterMode = 0;
+						updateFilter();
+						sendCC(55, map(filterMode, 0, 4, 0, 1023));
+					}
+				} else {
+					fatChanged = false;
 				}
+				filterModeHeld = false;
 				break; //  FILTER MODE
 		}
 	}

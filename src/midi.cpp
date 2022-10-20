@@ -1,4 +1,3 @@
-#include <MIDI.h>
 #include <EEPROM.h>
 #include <TimerOne.h>
 
@@ -10,113 +9,197 @@
 #include "lfo.h"
 #include "pots.h"
 
-using midi::AfterTouchChannel;
-using midi::Clock;
-using midi::ControlChange;
-using midi::NoteOff;
-using midi::NoteOn;
-using midi::PitchBend;
-using midi::ProgramChange;
-using midi::Start;
-using midi::Stop;
-
-float lfoClockRates[] = {2.6562, 5.3125, 7.96875, 10.625, 21.25, 31.875, 42.5, 85};
+byte mStatus;
+byte mData;
+byte mChannel;
 
 byte syncLfoCounter;
+float lfoClockRates[] = {2.6562, 5.3125, 7.96875, 10.625, 21.25, 31.875, 42.5, 85};
 
-void readMidi() {
+void sendMidiButt(byte number, int value) {
+	rightDot();
 
-	if (MIDI.read()) {
-		switch (MIDI.getType()) {
-
-			case AfterTouchChannel:
-				lfoDepthBase[1] = MIDI.getData1() << 3;
-				setLfo(1);
-				break;
-			case ControlChange:
-				HandleControlChange(MIDI.getChannel(), MIDI.getData1(), MIDI.getData2());
-				break;
-			case NoteOn:
-				HandleNoteOn(MIDI.getChannel(), MIDI.getData1(), MIDI.getData2());
-				break;
-			case NoteOff:
-				HandleNoteOn(MIDI.getChannel(), MIDI.getData1(), 0);
-				break;
-			case Clock:
-
-				sync = 1;
-				if ((arpMode) && (arping)) {
-					clockCount++;
-					if (clockCount >= arpRate) {
-						clockCount = 0;
-						arpTick();
-					}
-				}
-
-				syncLfoCounter++;
-				if (syncLfoCounter == 24) {
-					syncLfoCounter = 0;
-					for (int i = 0; i < 3; i++) {
-						if (lfoClockSpeedPending[i]) {
-							lfoClockSpeed[i] = lfoClockSpeedPending[i] - 1;
-							lfoClockSpeedPending[i] = 0;
-							lfoStepF[i] = 0;
-						}
-					}
-				}
-
-				for (int i = 0; i < 3; i++) {
-
-					lfoStepF[i] += lfoClockRates[lfoClockSpeed[i]];
-					if (lfoStepF[i] > 254) {
-						if (looping[i]) {
-							lfoStepF[i] = 0;
-							lfoNewRand[i] = 1;
-						} else {
-							lfoStepF[i] = 255;
-						}
-					}
-					lfoStep[i] = int(lfoStepF[i]);
-				}
-
-				break;
-			case Stop:
-				sync = 0;
-				break;
-			case Start:
-				syncLfoCounter = 0;
-				sync = 1;
-				lfoStepF[0] = lfoStepF[1] = lfoStepF[2] = 0;
-				break;
-			case PitchBend:
-				handleBend(MIDI.getChannel(), MIDI.getData2());
-				break;
-
-			case ProgramChange:
-
-				if (MIDI.getChannel() == masterChannel) {
-					preset = MIDI.getData1() + 1;
-					if (preset > 99) {
-						preset = 1;
-					}
-					ledNumber(preset);
-				}
-
-			default:
-				break;
-		}
-	}
+	sendControlChange(number, value);
 }
 
 void sendCC(byte number, int value) {
 	rightDot();
-	MIDI.sendControlChange(number, value >> 3, masterChannelOut);
+	sendControlChange(number, value >> 3);
 }
 
-void sendMidiButt(byte number, int value) {
-	rightDot();
-	MIDI.sendControlChange(number, value, masterChannelOut);
+void sendControlChange(byte number, byte value) {
+	if (!thru) {
+
+		Serial.write(175 + masterChannelOut);
+		Serial.write(number);
+		Serial.write(value);
+	}
 }
+
+void sendNoteOff(byte note, byte velocity, byte channel) {
+	if (!thru) {
+		Serial.write(127 + channel);
+		Serial.write(note);
+		Serial.write(1);
+	}
+}
+
+void sendNoteOn(byte note, byte velocity, byte channel) {
+
+	if (!thru) {
+		Serial.write(143 + channel);
+		Serial.write(note);
+		Serial.write(1);
+	}
+}
+
+void midiRead() {
+	while (Serial.available()) {
+		byte input = Serial.read();
+
+		if (thru)
+			Serial.write(input);
+
+		if (input > 127) {
+
+			switch (input) {
+
+				case 248:
+
+					sync = 1;
+					if ((arpMode) && (arping)) {
+						clockCount++;
+						if (clockCount >= arpRate) {
+							clockCount = 0;
+							arpTick();
+						}
+					}
+
+					syncLfoCounter++;
+					if (syncLfoCounter == 24) {
+						syncLfoCounter = 0;
+						for (int i = 0; i < 3; i++) {
+							if (lfoClockSpeedPending[i]) {
+								lfoClockSpeed[i] = lfoClockSpeedPending[i] - 1;
+								lfoClockSpeedPending[i] = 0;
+								lfoStepF[i] = 0;
+							}
+						}
+					}
+
+					for (int i = 0; i < 3; i++) {
+						lfoStepF[i] += lfoClockRates[lfoClockSpeed[i]];
+						if (lfoStepF[i] > 254) {
+							if (looping[i]) {
+								lfoStepF[i] = 0;
+								lfoNewRand[i] = 1;
+							} else {
+								lfoStepF[i] = 255;
+							}
+						}
+						lfoStep[i] = int(lfoStepF[i]);
+					}
+
+					break; // clock
+				case 250:
+					syncLfoCounter = 0;
+					sync = 1;
+					lfoStepF[0] = lfoStepF[1] = lfoStepF[2] = 0;
+					break; // start
+				case 251:
+					break; // continue
+				case 252:
+					sync = 0;
+					break; // stop
+
+				case 128 ... 143:
+					mChannel = input - 127;
+					mStatus = 2;
+					mData = 255;
+					break; // noteOff
+				case 144 ... 159:
+					mChannel = input - 143;
+					mStatus = 1;
+					mData = 255;
+					break; // noteOn
+				case 176 ... 191:
+					mChannel = input - 175;
+					mStatus = 3;
+					mData = 255;
+					break; // CC
+				case 192 ... 207:
+					mChannel = input - 191;
+					mStatus = 6;
+					mData = 0;
+					break; // program Change
+				case 208 ... 223:
+					mChannel = input - 207;
+					mStatus = 5;
+					mData = 0;
+					break; // Aftertouch
+				case 224 ... 239:
+					mChannel = input - 223;
+					mStatus = 4;
+					mData = 255;
+					break; // Pitch Bend
+
+				default:
+					mStatus = 0;
+					mData = 255;
+					break;
+			}
+		}
+
+		// status
+		else {
+			if (mData == 255) {
+				mData = input;
+			} // data byte 1
+			else {
+
+				// data byte 2
+				switch (mStatus) {
+					case 1:
+						if (input) {
+							HandleNoteOn(mChannel, mData, input);
+						} else {
+							HandleNoteOn(mChannel, mData, 0);
+						}
+						mData = 255;
+						break; // noteOn
+					case 2:
+						HandleNoteOn(mChannel, mData, 0);
+						mData = 255;
+						break; // noteOff
+					case 3:
+						HandleControlChange(mChannel, mData, input);
+						mData = 255;
+						break; // CC
+					case 4:
+						handleBend(mChannel, input);
+						mData = 255;
+						break; // bend
+					case 5:
+						lfoDepthBase[1] = input << 3;
+						setLfo(1);
+						mData = 255;
+						break; // AT
+					case 6:
+						if (mChannel == masterChannel) {
+							preset = mData + 1;
+							if (preset > 99) {
+								preset = 1;
+							}
+							ledNumber(preset);
+						}
+						mData = 255;
+						break; // PC
+				}
+			} // data
+		}
+	}
+}
+//////////////////////////////////////////////////////////////////////////////////////////////////
 
 void HandleNoteOn(byte channel, byte note, byte velocity) {
 
@@ -684,10 +767,10 @@ void HandleControlChange(byte channel, byte data1, byte data2) {
 					lfoShape[selectedLfo] = 0;
 				}
 				showLfo();
-				MIDI.sendControlChange(61, 0, masterChannelOut);
-				MIDI.sendControlChange(62, 0, masterChannelOut);
-				MIDI.sendControlChange(63, 0, masterChannelOut);
-				MIDI.sendControlChange(65, 0, masterChannelOut);
+				sendControlChange(61, 0);
+				sendControlChange(62, 0);
+				sendControlChange(63, 0);
+				sendControlChange(65, 0);
 				break; // lfo shape1
 			case 61:
 				if (data2) {
@@ -696,10 +779,10 @@ void HandleControlChange(byte channel, byte data1, byte data2) {
 					lfoShape[selectedLfo] = 0;
 				}
 				showLfo();
-				MIDI.sendControlChange(60, 0, masterChannelOut);
-				MIDI.sendControlChange(62, 0, masterChannelOut);
-				MIDI.sendControlChange(63, 0, masterChannelOut);
-				MIDI.sendControlChange(65, 0, masterChannelOut);
+				sendControlChange(60, 0);
+				sendControlChange(62, 0);
+				sendControlChange(63, 0);
+				sendControlChange(65, 0);
 				break; // lfo shape2
 			case 62:
 				if (data2) {
@@ -708,10 +791,10 @@ void HandleControlChange(byte channel, byte data1, byte data2) {
 					lfoShape[selectedLfo] = 0;
 				}
 				showLfo();
-				MIDI.sendControlChange(61, 0, masterChannelOut);
-				MIDI.sendControlChange(60, 0, masterChannelOut);
-				MIDI.sendControlChange(63, 0, masterChannelOut);
-				MIDI.sendControlChange(65, 0, masterChannelOut);
+				sendControlChange(61, 0);
+				sendControlChange(60, 0);
+				sendControlChange(63, 0);
+				sendControlChange(65, 0);
 				break; // lfo shape3
 			case 63:
 				if (data2) {
@@ -720,10 +803,10 @@ void HandleControlChange(byte channel, byte data1, byte data2) {
 					lfoShape[selectedLfo] = 0;
 				}
 				showLfo();
-				MIDI.sendControlChange(61, 0, masterChannelOut);
-				MIDI.sendControlChange(62, 0, masterChannelOut);
-				MIDI.sendControlChange(60, 0, masterChannelOut);
-				MIDI.sendControlChange(65, 0, masterChannelOut);
+				sendControlChange(61, 0);
+				sendControlChange(62, 0);
+				sendControlChange(60, 0);
+				sendControlChange(65, 0);
 				break; // lfo shape4
 			case 65:
 				if (data2) {
@@ -732,10 +815,10 @@ void HandleControlChange(byte channel, byte data1, byte data2) {
 					lfoShape[selectedLfo] = 0;
 				}
 				showLfo();
-				MIDI.sendControlChange(61, 0, masterChannelOut);
-				MIDI.sendControlChange(62, 0, masterChannelOut);
-				MIDI.sendControlChange(63, 0, masterChannelOut);
-				MIDI.sendControlChange(60, 0, masterChannelOut);
+				sendControlChange(61, 0);
+				sendControlChange(62, 0);
+				sendControlChange(63, 0);
+				sendControlChange(60, 0);
 				break; // lfo shape5
 
 			case 66:
@@ -758,19 +841,19 @@ void HandleControlChange(byte channel, byte data1, byte data2) {
 			case 68:
 				if (data2) {
 					sendLfo = true;
-					EEPROM.write(3996, 0);
+					EEPROM.update(3996, 0);
 				} else {
 					sendLfo = false;
-					EEPROM.write(3996, 1);
+					EEPROM.update(3996, 1);
 				}
 				break; // lfo send
 			case 69:
 				if (data2) {
 					sendArp = true;
-					EEPROM.write(3995, 0);
+					EEPROM.update(3995, 0);
 				} else {
 					sendArp = false;
-					EEPROM.write(3995, 1);
+					EEPROM.update(3995, 1);
 				}
 				break; // arp send
 		}
@@ -847,8 +930,8 @@ void handleBend(byte channel, int value) {
 
 void midiOut(byte note) {
 	rightDot();
-	MIDI.sendNoteOff(lastNote + 1, 127, masterChannelOut);
-	MIDI.sendNoteOn(note + 1, velocityLast, masterChannelOut);
+	sendNoteOff(lastNote + 1, 127, masterChannelOut);
+	sendNoteOn(note + 1, velocityLast, masterChannelOut);
 	lastNote = note;
 }
 
@@ -941,7 +1024,7 @@ void recieveDump() {
 	for (int i = 0; i < 4000; i++) {
 
 		if ((i != 3998) && (i != 3997)) { // don't overWrite MIDI channels!!
-			EEPROM.write(i, mem[i]);
+			EEPROM.update(i, mem[i]);
 			if (ledLast != i / 40) {
 				ledLast = i / 40;
 				ledNumber(ledLast);

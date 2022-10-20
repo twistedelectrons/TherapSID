@@ -2,10 +2,15 @@
 #include "leds.h"
 #include "display.h"
 
+void showVersion() {
+	digit(1, versionDecimal);
+	digit(0, version);
+	mydisplay.setLed(0, 7, 6, 1);
+}
+
 void leds() { ledSet(32, 1); }
 
 void showFilterAssigns() {
-
 	if (filterEnabled[0]) {
 		ledSet(1, 1);
 		ledSet(2, 1);
@@ -179,11 +184,9 @@ void ledSet(byte number, bool value) {
 
 void rightDot() {
 
-	if (!first) {
-		mydisplay.setLed(0, 7, 7, 1);
+	mydisplay.setLed(0, 7, 7, 1);
 
-		dotTimer = 50;
-	}
+	dotTimer = 50;
 }
 
 void leftDot() {

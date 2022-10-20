@@ -1,9 +1,12 @@
-#include <MIDI.h>
-
 #include "globals.h"
 #include "leds.h"
 #include "lfo.h"
 #include "arp.h"
+#include "midi.h"
+
+const bool limitPw = true;
+const int pwMin = 10;
+const int pwMax = 2050;
 
 void setLfo(byte number) {
 
@@ -451,6 +454,10 @@ void lfoTick() {
 		pw1 = 2046;
 	}
 
+	if (limitPw) {
+		pw1 = constrain(pw1, pwMin, pwMax);
+	}
+
 	sid[2] = lowByte(pw1);
 	sid[3] = highByte(pw1);
 
@@ -459,6 +466,10 @@ void lfoTick() {
 		pw2 = 0;
 	} else if (pw2 > 2046) {
 		pw2 = 2046;
+	}
+
+	if (limitPw) {
+		pw2 = constrain(pw2, pwMin, pwMax);
 	}
 
 	sid[9] = lowByte(pw2);
@@ -471,6 +482,10 @@ void lfoTick() {
 		pw3 = 2046;
 	}
 
+	if (limitPw) {
+		pw3 = constrain(pw3, pwMin, pwMax);
+	}
+
 	sid[16] = lowByte(pw3);
 	sid[17] = highByte(pw3);
 
@@ -480,7 +495,7 @@ void lfoTick() {
 		if (temp != lfoLast[i]) {
 			lfoLast[i] = temp;
 			if (sendLfo)
-				MIDI.sendControlChange(56 + i, temp, masterChannelOut);
+				sendControlChange(56 + i, temp);
 		}
 	}
 }

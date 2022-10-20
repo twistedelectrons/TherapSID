@@ -2,7 +2,8 @@
 #include "leds.h"
 #include "boot.h"
 
-byte del = 20;
+// boot animation
+byte del = 20; // sets the animation speed
 
 void boot() {
 

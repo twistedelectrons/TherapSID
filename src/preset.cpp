@@ -1,4 +1,3 @@
-#include <MIDI.h>
 #include <EEPROM.h>
 #include <TimerOne.h>
 
@@ -9,6 +8,22 @@
 #include "preset.h"
 #include "lfo.h"
 #include "midi.h"
+
+/*
+
+MEMORY MAPPING
+(0-3960) 99 PRESETS = 40 bytes
+
+3999 PRESET LAST
+
+3998 MIDI IN MASTER CHANNEL
+3997 MIDI OUT MASTER CHANNEL
+
+3996 SEND LFO
+3995 SEND ARP
+
+
+*/
 
 int writeIndex;
 
@@ -315,10 +330,6 @@ void load(byte number) {
 	bitWrite(tuneBase3, 3, bitRead(temp, 5));
 	bitWrite(tuneBase3, 4, bitRead(temp, 6));
 
-	// pa=bitRead(temp,7);
-	// if(jumble){pa=0;}
-	// paraChange();
-
 	shape1Pressed = false;
 	shape1PressedTimer = 0;
 
@@ -605,7 +616,7 @@ void load(byte number) {
 	for (int i = 0; i < 25; i++) {
 		sidLast[i] = 255 - sid[i];
 	}
-	MIDI.begin(MIDI_CHANNEL_OMNI);
+
 	Timer1.initialize(100);      //
 	Timer1.attachInterrupt(isr); // attach the service routine here
 
@@ -654,38 +665,11 @@ void load(byte number) {
 
 	sendCC(59, cutBase);
 	sendCC(33, resBase << 6);
-
-	sendMidiButt(49, bitRead(sid[4], 1));
-	sendMidiButt(50, bitRead(sid[4], 2));
-
-	sendMidiButt(51, bitRead(sid[11], 1));
-	sendMidiButt(52, bitRead(sid[11], 2));
-
-	sendMidiButt(53, bitRead(sid[18], 1));
-	sendMidiButt(54, bitRead(sid[18], 2));
-
-	sendMidiButt(37, bitRead(sid[4], 6));
-	sendMidiButt(38, bitRead(sid[4], 4));
-	sendMidiButt(39, bitRead(sid[4], 5));
-	sendMidiButt(40, bitRead(sid[4], 7));
-
-	sendMidiButt(41, bitRead(sid[11], 6));
-	sendMidiButt(42, bitRead(sid[11], 4));
-	sendMidiButt(43, bitRead(sid[11], 5));
-	sendMidiButt(44, bitRead(sid[11], 7));
-
-	sendMidiButt(45, bitRead(sid[18], 6));
-	sendMidiButt(46, bitRead(sid[18], 4));
-	sendMidiButt(47, bitRead(sid[18], 5));
-	sendMidiButt(48, bitRead(sid[18], 7));
-
-	sendMidiButt(68, sendLfo);
-	sendMidiButt(69, sendArp);
 }
 
 void writey(byte data) {
 
-	EEPROM.write(writeIndex, data);
+	EEPROM.update(writeIndex, data);
 	writeIndex++;
 }
 
@@ -701,6 +685,6 @@ int ready() {
 
 void saveChannels() {
 
-	EEPROM.write(3998, masterChannel);
-	EEPROM.write(3997, masterChannelOut);
+	EEPROM.update(3998, masterChannel);
+	EEPROM.update(3997, masterChannelOut);
 }

@@ -7,8 +7,9 @@ bool lfoNewRand[3];
 
 int loadTimer;
 
-const byte version = 1;
-const byte versionDecimal = 9;
+const byte version = 2;
+const byte versionDecimal = 0;
+
 bool fatShow = false;
 // LIMIT PW
 float bend, bend1, bend2, bend3;
@@ -108,3 +109,6 @@ byte lastNote = 0;
 int arpStepLast, arpStepBase, arpStepLfo1, arpStepLfo2, arpStepLfo3;
 int dotTimer;
 bool first = true;
+bool loadedAfterStartup; // we load the preset after 2sec (when SID is ready)
+bool thru;
+bool showPresetNumber; // when high we show preset number once

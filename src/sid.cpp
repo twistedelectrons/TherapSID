@@ -15,11 +15,9 @@ static const int32_t sidScale[] = {
 
 };
 
-void sidReset() {
+// COMS WITH SID CHIP
 
-	// sidSend(4,B00001000);
-	// sidSend(11,B00001000);
-	// sidSend(18,B00001000);
+void sidReset() {
 
 	digitalWrite(A6, LOW);
 	delay(50);
@@ -602,8 +600,6 @@ void calculatePitch() {
 				              ((sidScale[pKey[0] + tuneBase1 - 10] - sidScale[pKey[0] + tuneBase1 - 12]) * fine1);
 			}
 
-			// destiPitch1=sidScale[temp-12]+((sidScale[pKey[0]+tuneBase1-10]-sidScale[pKey[0]+tuneBase1-12])*fine1);
-
 			temp = -1 + pKey[1] + tuneBase2 + lfoTune4 + lfoTune5 + lfoTune6;
 			if (temp > 127) {
 				temp = 127;
@@ -627,8 +623,6 @@ void calculatePitch() {
 				              ((sidScale[pKey[1] + tuneBase2 - 10] - sidScale[pKey[1] + tuneBase2 - 12]) * fine2);
 			}
 
-			// destiPitch2=sidScale[temp-12]+((sidScale[pKey[1]+tuneBase2-10]-sidScale[pKey[1]+tuneBase2-12])*fine2);
-
 			temp = -1 + pKey[2] + tuneBase3 + lfoTune7 + lfoTune8 + lfoTune9;
 			if (temp > 127) {
 				temp = 127;
@@ -651,8 +645,6 @@ void calculatePitch() {
 				destiPitch3 = sidScale[temp - 12] +
 				              ((sidScale[pKey[2] + tuneBase3 - 10] - sidScale[pKey[2] + tuneBase3 - 12]) * fine3);
 			}
-
-			// destiPitch3=sidScale[temp-12]+((sidScale[pKey[2]+tuneBase3-10]-sidScale[pKey[2]+tuneBase3-12])*fine3);
 
 			sidPitch(0, pitch1);
 			sidPitch(1, pitch2);

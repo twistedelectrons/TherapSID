@@ -1,5 +1,6 @@
 #pragma once
 void sidReset();
+void init1MhzClock();
 void sidDelay();
 void sidSend(byte address, byte data);
 void sidSend1Only(byte address, byte data);
@@ -11,4 +12,3 @@ void updateFilter();
 void calculatePitch();
 void updateFatMode();
 void setFilterBit(byte channel);
-void init1MhzClock();

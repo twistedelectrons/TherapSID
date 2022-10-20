@@ -111,6 +111,7 @@ const int envMap2[] = {
 
 int env2;
 
+// interrupt service route to animate things (LFO arp etc)
 void isr() {
 
 	if (shape1Pressed) {
@@ -180,9 +181,10 @@ void isr() {
 	if (loadTimer)
 		loadTimer--;
 
-	if (arpModeHeld) {
+	if (filterModeHeld) {
 		arpModeCounter++;
-		if (arpModeCounter > 16000) {
+		if (arpModeCounter > 25000) {
+			fatChanged = true;
 			arpModeCounter = 0;
 			fatMode++;
 			if (fatMode > 3) {
@@ -205,16 +207,6 @@ void isr() {
 
 	if (saveMode) {
 		saveModeTimer++;
-		if (saveModeTimer > 2000) {
-			saveModeTimer = 0;
-			saveModeFlash = !saveModeFlash;
-			if (saveModeFlash) {
-				digit(0, 99);
-				digit(1, 99);
-			} else {
-				ledNumber(preset);
-			}
-		}
 	}
 
 	if (!sync) {
@@ -236,7 +228,7 @@ void isr() {
 				if (preset > 99) {
 					preset = 1;
 				}
-				ledNumber(preset);
+				showPresetNumber = true;
 				scrolled = true;
 			}
 		} else if ((!presetUp) && (presetDown)) {
@@ -250,7 +242,7 @@ void isr() {
 				if (preset < 1) {
 					preset = 99;
 				}
-				ledNumber(preset);
+				showPresetNumber = true;
 				scrolled = true;
 			}
 		}
@@ -328,8 +320,6 @@ void isr() {
 
 	// LFO
 	for (int i = 0; i < 3; i++) {
-
-		// lfoCounter[i]++;if(lfoCounter[i]>lfoSpeed[i]<<1){lfoCounter[i]=0;lfoStep[i]++; //old lfo counter
 
 		if (!sync) {
 			lfoCounter[i] += lfoSpeed[i];

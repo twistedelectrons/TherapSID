@@ -10,90 +10,113 @@
 #include "leds.h"
 #include "paraphonic.h"
 #include "lfo.h"
-#include "sid.h"
 
 /*
+ *
+ *
 
-no filter mode
+code to convert HEX to SYSEX
+cd /Users/a/Documents/bootloaderT&&cp -f /private/var/hex/TSID.ino.hex /Users/a/Documents/bootloaderT&&python
+tools/hex2sysex/hex2sysex.py --syx -o firmware.syx TSID.ino.hex
+
+TO DO:
+Add setup mode (hold arp mode for 2 seconds), press again to exit (same as megaFM)
+-MIDI channel learn (map input to ouput channel)
+-in setup mode use a button (square 1?) to toggle LFO MIDI CC send on/off EEPROM 3996
+-in setup mode uss a button (triangle 1?) to toggle ARP MIDI send on/off EEPROM 3995
+-add 6 voice mode using 2 chips, I suggest we hold a waveform for several seconds for 3 voice paramode, hold it longer
+for 6 (show P3, then P6 on display) -kill the voices when they are done singing by setting the freq to 0. Never tried
+this (too dumb to figure out when the ADSR is finished), but I read it's a solution against the ghost notes (leaky VCA)
+
+NEW in 2.0
+Swapped filter mode and arp mode long hold function. hold filter mode for fat change (hold arp mode for setup mode)
+Added PW limiter (never silent).. should we add option in setup to turn this on/off?
+New MIDI engine (ported from MEGAfm)
 
 
-/*/
 
+*/
+
+#include <digitalWriteFast.h>
 #include <EEPROM.h>
-#include <TimerOne.h>
+#include <LedControl.h>
 
-#include <MIDI.h>
+#include <TimerOne.h>
 
 void setup() {
 
-	for (int i = 0; i < 3; i++) {
-		filterEnabled[i] = 1;
-	}
+	Serial.begin(31250);
+
+	filterEnabled[0] = filterEnabled[1] = filterEnabled[2] = 1;
 
 	arpSpeedBase = 100;
-	delay(100);
 
-	mydisplay.shutdown(0, false); // turns on display
-	mydisplay.setIntensity(0, 1); // 15 = brightest
-
-	pinMode(A0, INPUT); // mux inputs
-	pinMode(A1, INPUT); // mux inputs
-	pinMode(A2, INPUT); // mux inputs
-	pinMode(A3, INPUT); // butt inputs
-	pinMode(A4, INPUT); // butt inputs
-	digitalWrite(A3, HIGH);
-	digitalWrite(A4, HIGH);
+	// let sid chip wake up
+	DDRD |= _BV(2); // SID1
+	DDRD |= _BV(6); // SID2
+	DDRD |= _BV(3); // LATCH
 
 	DDRB = 255; // data port
 	DDRC = 255; // address port
 
+	// get the clock going for the SID
+	init1MhzClock();
+
+	pinMode(A6, OUTPUT); // sid reset
+	sidReset();
+
+	pinMode(A0, INPUT);     // mux inputs
+	pinMode(A1, INPUT);     // mux inputs
+	pinMode(A2, INPUT);     // mux inputs
+	pinMode(A3, INPUT);     // butt inputs
+	pinMode(A4, INPUT);     // butt inputs
+	digitalWrite(A3, HIGH); // pullup
+	digitalWrite(A4, HIGH); // pullup
+
 	mux(9);
 
-	mydisplay.shutdown(0, false); // turns on display
-	mydisplay.setIntensity(0, 1); // 15 = brightest
-
+	// are we holding preset down button at startup?
 	if ((PINA & _BV(4)) == 0) {
 		sendDump();
 	} else {
-
 		mux(3);
 		if ((PINA & _BV(4)) == 0) {
 			recieveDump();
 		}
 	}
 
-	pinMode(16, INPUT); // CV switch1
-	pinMode(17, INPUT); // CV switch2
-	pinMode(18, INPUT); // CV switch3
+	pinMode(16, INPUT);
+	digitalWrite(16, HIGH); // CV switch1
+	pinMode(17, INPUT);
+	digitalWrite(17, HIGH); // CV switch2
+	pinMode(18, INPUT);
+	digitalWrite(18, HIGH); // CV switch3
 
-	digitalWrite(16, HIGH);
-	digitalWrite(17, HIGH);
-	digitalWrite(18, HIGH);
-
-	pinMode(A7, INPUT); // gate
-	digitalWrite(A7, HIGH);
+	pinMode(A7, INPUT);
+	digitalWrite(A7, HIGH); // gate
 
 	destiPitch1 = destiPitch2 = destiPitch3 = 1;
 
-	mydisplay.shutdown(0, false); // turns on display
+	// turns on display
+	mydisplay.shutdown(0, false);
 	mydisplay.setIntensity(0, 1); // 15 = brightest
 
+	showVersion();
+
 	boot();
+	delay(500);
 
 	Timer1.initialize(100);      //
 	Timer1.attachInterrupt(isr); // attach the service routine here
 
-	DDRD |= _BV(2); // SID1
-	DDRD |= _BV(6); // SID2
-	DDRD |= _BV(3); // LATCH
-
 	DDRC = B11111000;
-
 	sid[24] = B00010001; // Filter off full vol
-
 	sid[23] = B11111111;
 
 	presetLast = EEPROM.read(3999);
+	if (presetLast > 98)
+		presetLast = 1;
+	preset = presetLast;
 
 	masterChannel = EEPROM.read(3998);
 	if (masterChannel > 16) {
@@ -124,130 +147,11 @@ void setup() {
 		fat = 30;
 	}
 
-	if (presetLast > 99)
-		presetLast = 99;
-	preset = presetLast;
-
-	pinMode(A6, OUTPUT); // reset
-	digitalWrite(A6, LOW);
-	delay(100);
-	digitalWrite(A6, HIGH);
-
 	sidPitch(0, 0);
 	sidPitch(1, 0);
 	sidPitch(2, 0);
 
-	load(presetLast);
-	presetLast = preset + 1;
-	HandleNoteOn(masterChannel, 1, 0);
-
-	init1MhzClock();
-
-	MIDI.begin(MIDI_CHANNEL_OMNI);
+	setupMux();
 }
 
 byte x;
-
-void loop() {
-
-	if (fatShow) {
-		digit(0, 12);
-		digit(1, fatMode + 1);
-		fatShow = false;
-	}
-
-	readMidi();
-	if (arpCounter >= arpSpeed + 100) {
-		arpCounter = 0;
-		arpTick();
-	}
-
-	if (shape1PressedTimer > 10000) {
-		shape1Pressed = false;
-		shape1PressedTimer = 0;
-		pa = !pa;
-		paraChange();
-	}
-
-	if (first) {
-
-		if (millis() > 800) {
-			// clone 1 everywhere
-			digit(1, versionDecimal);
-			digit(0, version);
-			mydisplay.setLed(0, 7, 6, 1);
-			delay(1000);
-			first = false;
-			// for(int i=12;i<100;i++){preset=i;save();}
-		}
-	}
-
-	if ((dotTimer) && (!first)) {
-		dotTimer--;
-		if (!dotTimer) {
-			mydisplay.setLed(0, 7, 6, 0);
-			mydisplay.setLed(0, 7, 7, 0);
-		}
-	}
-	// pa mode
-
-	// if(pa!=paLast){paLast=pa;paraChange();}
-
-	if ((gate) && (!pa)) {
-		mux(15);
-		key = map(analogRead(A2), 0, 1023, 12, 72);
-	}
-
-	// CV
-	// mux(2) and mux(3) both point to cv2?!!
-
-	if ((PINC & _BV(0)) == 0) {
-		cvActive[0] = true;
-		mux(12);
-		lfo[0] = analogRead(A2) >> 2;
-	} else {
-		cvActive[0] = false;
-	}
-	if ((PINC & _BV(1)) == 0) {
-		cvActive[1] = true;
-		mux(2);
-		lfo[1] = analogRead(A2) >> 2;
-	} else {
-		cvActive[1] = false;
-	}
-	if ((PINC & _BV(2)) == 0) {
-		cvActive[2] = true;
-		mux(10);
-		lfo[2] = analogRead(A2) >> 2;
-	} else {
-		cvActive[2] = false;
-	}
-
-	// cvActive[0]=false;
-	// cvActive[1]=false;
-	// cvActive[2]=false;
-
-	if (jumble) {
-		load(1);
-		jumble = 0;
-	}
-
-	if ((!saveMode) && (presetLast != preset)) {
-		load(preset);
-		presetLast = preset;
-		EEPROM.write(3999, presetLast);
-	}
-	if (saveBounce)
-		saveBounce--;
-	if (frozen) {
-		frozen--;
-	}
-
-	readMux();
-	sidUpdate();
-
-	lfoTick();
-	sidUpdate();
-	calculatePitch();
-	sidUpdate();
-}

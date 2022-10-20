@@ -99,3 +99,6 @@ extern byte lastNote;
 extern int arpStepLast, arpStepBase, arpStepLfo1, arpStepLfo2, arpStepLfo3;
 extern int dotTimer;
 extern bool first;
+extern bool loadedAfterStartup; // we load the preset after 2sec (when SID is ready)
+extern bool thru;
+extern bool showPresetNumber; // when high we show preset number once

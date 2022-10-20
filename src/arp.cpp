@@ -7,7 +7,10 @@ void showArp() {
 	arpRound = 0;
 	arpCounter = 0;
 	arpNote = 0;
-	frozen = 500;
+
+	// don't get in the way of startup preset display
+	if (millis() > 2000)
+		frozen = 500;
 
 	switch (arpMode) {
 
