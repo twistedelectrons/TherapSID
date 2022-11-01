@@ -6,6 +6,7 @@
 static byte arpNotes[128];
 static int arpNote;
 static bool arpPendulum;
+static byte scrubNote, scrubNoteLast;
 
 void showArp() {
 	arpRound = 0;
@@ -44,8 +45,6 @@ void showArp() {
 			break;
 	}
 }
-
-byte scrubNote, scrubNoteLast;
 
 void arpSteptrigger(int number) {
 

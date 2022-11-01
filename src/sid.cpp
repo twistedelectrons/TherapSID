@@ -4,6 +4,8 @@
 
 static byte sid2[6];
 static float fine1, fine2, fine3;
+static int pitchB;
+static byte sidIndex;
 
 static const int32_t sidScale[] = {
     137,   145,   154,   163,   173,   183,   194,   205,   217,   230,   122,   259,   274,   291,   308,
@@ -106,8 +108,6 @@ void sidSend(byte address, byte data) {
 	}
 }
 
-byte sidIndex;
-
 void sidUpdate() {
 
 	sidIndex++;
@@ -171,8 +171,6 @@ void sidUpdate() {
 		}
 	}
 }
-
-int pitchB;
 
 void sidPitch(byte voice, int pitch) {
 

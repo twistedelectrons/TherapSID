@@ -24,6 +24,13 @@ static bool pedal;
 static bool thru;
 static byte velocityLast;
 
+static int dumpCounter = 0;
+static byte dump;
+static bool alternator;
+static byte flash;
+
+static byte val[] = {0, 128};
+
 static void HandleNoteOn(byte channel, byte note, byte velocity) {
 
 	note -= 12;
@@ -1003,13 +1010,6 @@ void sendDump() {
 	Serial.write(247);
 	Serial.flush();
 }
-
-int dumpCounter = 0;
-byte dump;
-bool alternator;
-byte flash;
-
-byte val[] = {0, 128};
 
 void recieveDump() {
 	byte mem[4000];
