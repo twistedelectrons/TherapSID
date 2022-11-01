@@ -18,12 +18,11 @@ bool sync;
 int arpModeCounter;
 bool cvActive[3];
 bool scrolled;
-bool gate, randomized;
-bool pa, paLast, arping;
+bool gate;
+bool pa, arping;
 bool shape1Pressed;
 int shape1PressedTimer;
 int arpRate = 24;
-int ppq = 3;
 byte slot[3];
 byte pKey[3];
 int lfoStep[3], resetDownTimer;
@@ -33,7 +32,6 @@ int presetScrollSpeed = 10000;
 int saveBounce;
 byte lfo[3];
 int fat = 15;
-byte pSlot[3];
 bool presetUp, presetDown;
 byte preset = 1;
 int presetLast = 1;
@@ -55,14 +53,13 @@ int tuneBase1, tuneBase2, tuneBase3, lfoTune1, lfoTune2, lfoTune3, lfoTune4, lfo
     lfoTune9;
 
 int destiPitch1, destiPitch2, destiPitch3;
-int pitch1, pitch2, pitch3, glideRange1, glideRange2, glideRange3;
+int pitch1, pitch2, pitch3;
 byte glide1, glide2, glide3;
 int pw1Base, pw2Base, pw3Base;
 float fineBase1, fineBase2, fineBase3, lfoFine1, lfoFine2, lfoFine3, lfoFine4, lfoFine5, lfoFine6, lfoFine7, lfoFine8,
     lfoFine9;
 byte sid[25], sidLast[25];
 byte a1, a2, a3, d1, d2, d3, s1, s2, s3, r1, r2, r3;
-bool paraMode;
 
 byte filterMode;
 byte resBase;
@@ -80,7 +77,7 @@ int lfoButtTimer;
 bool heldKeys[128];
 int arpSpeed, arpSpeedBase;
 int arpRange;
-int arpSlot, arpRound;
+int arpRound;
 byte arpCount;
 byte envState;
 int env;
