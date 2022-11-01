@@ -18,6 +18,8 @@ static const int32_t sidScale[] = {
 
 };
 
+static void sidDelay() { delayMicroseconds(4); }
+
 // COMS WITH SID CHIP
 
 void sidReset() {
@@ -51,9 +53,7 @@ void init1MhzClock() {
 	OCR2A = 7;
 }
 
-void sidDelay() { delayMicroseconds(4); }
-
-void sidSend(byte address, byte data) {
+static void sidSend1Only(byte address, byte data) {
 
 	PORTC = address << 3;
 	PORTB = data;
@@ -65,6 +65,25 @@ void sidSend(byte address, byte data) {
 	sidDelay();
 	PORTD |= _BV(6);
 	PORTD &= ~_BV(3); // digitalWrite (0, LOW);
+}
+
+static void sidSend2(byte address, byte data) {
+
+	PORTC = address << 3;
+	PORTB = data;
+	PORTD |= _BV(3);
+	sidDelay();
+	PORTD &= ~_BV(2); // digitalWrite (0, LOW);
+	                  // delay(2);
+
+	sidDelay();
+	PORTD |= _BV(2);
+	PORTD &= ~_BV(3); // digitalWrite (0, LOW);
+}
+
+void sidSend(byte address, byte data) {
+
+	sidSend1Only(address, data);
 
 	if (fatMode) {
 		if (address == 0) {
@@ -85,34 +104,6 @@ void sidSend(byte address, byte data) {
 	} else {
 		sidSend2(address, data);
 	}
-}
-
-void sidSend1Only(byte address, byte data) {
-
-	PORTC = address << 3;
-	PORTB = data;
-
-	sidDelay();
-
-	PORTD |= _BV(3);
-	PORTD &= ~_BV(6); // digitalWrite (0, LOW);
-	sidDelay();
-	PORTD |= _BV(6);
-	PORTD &= ~_BV(3); // digitalWrite (0, LOW);
-}
-
-void sidSend2(byte address, byte data) {
-
-	PORTC = address << 3;
-	PORTB = data;
-	PORTD |= _BV(3);
-	sidDelay();
-	PORTD &= ~_BV(2); // digitalWrite (0, LOW);
-	                  // delay(2);
-
-	sidDelay();
-	PORTD |= _BV(2);
-	PORTD &= ~_BV(3); // digitalWrite (0, LOW);
 }
 
 byte sidIndex;

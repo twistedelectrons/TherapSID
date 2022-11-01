@@ -6,6 +6,29 @@
 
 static int arpDivisions[] = {1, 3, 6, 8, 12, 24, 32, 48};
 
+static int scaleFine(int input) {
+
+	input = map(input, 0, 1023, -51, 51);
+	return (input);
+}
+
+static byte scale4bit(int input) { return (input >> 6); }
+
+static byte scale100(int input) {
+	input = map(input, 0, 1023, 0, 101);
+	if (input > 99)
+		input = 99;
+	return (input);
+}
+
+static byte octScale(int value) {
+
+	value = map(value, 0, 1023, 0, 25);
+	if (value > 24)
+		value = 24;
+	return (value);
+}
+
 void movedPot(byte number, int value, bool isMidi) {
 
 	if (!saveMode) {
@@ -452,27 +475,4 @@ void movedPot(byte number, int value, bool isMidi) {
 				break; // ARP RANGE
 		}
 	}
-}
-
-int scaleFine(int input) {
-
-	input = map(input, 0, 1023, -51, 51);
-	return (input);
-}
-
-byte scale4bit(int input) { return (input >> 6); }
-
-byte scale100(int input) {
-	input = map(input, 0, 1023, 0, 101);
-	if (input > 99)
-		input = 99;
-	return (input);
-}
-
-byte octScale(int value) {
-
-	value = map(value, 0, 1023, 0, 25);
-	if (value > 24)
-		value = 24;
-	return (value);
 }

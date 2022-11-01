@@ -88,6 +88,18 @@ void readMux() {
 	}
 }
 
+static void Aon() { PORTB |= _BV(0); }
+static void Aoff() { PORTB &= ~_BV(0); }
+
+static void Bon() { PORTB |= _BV(1); }
+static void Boff() { PORTB &= ~_BV(1); }
+
+static void Con() { PORTB |= _BV(2); }
+static void Coff() { PORTB &= ~_BV(2); }
+
+static void Don() { PORTB |= _BV(3); }
+static void Doff() { PORTB &= ~_BV(3); }
+
 void mux(byte number) {
 
 	switch (number) {
@@ -218,15 +230,3 @@ void mux(byte number) {
 			break;
 	}
 }
-
-void Aon() { PORTB |= _BV(0); }
-void Aoff() { PORTB &= ~_BV(0); }
-
-void Bon() { PORTB |= _BV(1); }
-void Boff() { PORTB &= ~_BV(1); }
-
-void Con() { PORTB |= _BV(2); }
-void Coff() { PORTB &= ~_BV(2); }
-
-void Don() { PORTB |= _BV(3); }
-void Doff() { PORTB &= ~_BV(3); }

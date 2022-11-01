@@ -541,5 +541,3 @@ void clearLfo() {
 	digit(0, 10);
 	digit(1, 11);
 }
-
-void checkIllegalModulation() {}

@@ -24,192 +24,7 @@ static bool pedal;
 static bool thru;
 static byte velocityLast;
 
-void sendMidiButt(byte number, int value) {
-	rightDot();
-
-	sendControlChange(number, value);
-}
-
-void sendCC(byte number, int value) {
-	rightDot();
-	sendControlChange(number, value >> 3);
-}
-
-void sendControlChange(byte number, byte value) {
-	if (!thru) {
-
-		Serial.write(175 + masterChannelOut);
-		Serial.write(number);
-		Serial.write(value);
-	}
-}
-
-void sendNoteOff(byte note, byte velocity, byte channel) {
-	if (!thru) {
-		Serial.write(127 + channel);
-		Serial.write(note);
-		Serial.write(1);
-	}
-}
-
-void sendNoteOn(byte note, byte velocity, byte channel) {
-
-	if (!thru) {
-		Serial.write(143 + channel);
-		Serial.write(note);
-		Serial.write(1);
-	}
-}
-
-void midiRead() {
-	while (Serial.available()) {
-		byte input = Serial.read();
-
-		if (thru)
-			Serial.write(input);
-
-		if (input > 127) {
-
-			switch (input) {
-
-				case 248:
-
-					sync = 1;
-					if ((arpMode) && (arping)) {
-						clockCount++;
-						if (clockCount >= arpRate) {
-							clockCount = 0;
-							arpTick();
-						}
-					}
-
-					syncLfoCounter++;
-					if (syncLfoCounter == 24) {
-						syncLfoCounter = 0;
-						for (int i = 0; i < 3; i++) {
-							if (lfoClockSpeedPending[i]) {
-								lfoClockSpeed[i] = lfoClockSpeedPending[i] - 1;
-								lfoClockSpeedPending[i] = 0;
-								lfoStepF[i] = 0;
-							}
-						}
-					}
-
-					for (int i = 0; i < 3; i++) {
-						lfoStepF[i] += lfoClockRates[lfoClockSpeed[i]];
-						if (lfoStepF[i] > 254) {
-							if (looping[i]) {
-								lfoStepF[i] = 0;
-								lfoNewRand[i] = 1;
-							} else {
-								lfoStepF[i] = 255;
-							}
-						}
-						lfoStep[i] = int(lfoStepF[i]);
-					}
-
-					break; // clock
-				case 250:
-					syncLfoCounter = 0;
-					sync = 1;
-					lfoStepF[0] = lfoStepF[1] = lfoStepF[2] = 0;
-					break; // start
-				case 251:
-					break; // continue
-				case 252:
-					sync = 0;
-					break; // stop
-
-				case 128 ... 143:
-					mChannel = input - 127;
-					mStatus = 2;
-					mData = 255;
-					break; // noteOff
-				case 144 ... 159:
-					mChannel = input - 143;
-					mStatus = 1;
-					mData = 255;
-					break; // noteOn
-				case 176 ... 191:
-					mChannel = input - 175;
-					mStatus = 3;
-					mData = 255;
-					break; // CC
-				case 192 ... 207:
-					mChannel = input - 191;
-					mStatus = 6;
-					mData = 0;
-					break; // program Change
-				case 208 ... 223:
-					mChannel = input - 207;
-					mStatus = 5;
-					mData = 0;
-					break; // Aftertouch
-				case 224 ... 239:
-					mChannel = input - 223;
-					mStatus = 4;
-					mData = 255;
-					break; // Pitch Bend
-
-				default:
-					mStatus = 0;
-					mData = 255;
-					break;
-			}
-		}
-
-		// status
-		else {
-			if (mData == 255) {
-				mData = input;
-			} // data byte 1
-			else {
-
-				// data byte 2
-				switch (mStatus) {
-					case 1:
-						if (input) {
-							HandleNoteOn(mChannel, mData, input);
-						} else {
-							HandleNoteOn(mChannel, mData, 0);
-						}
-						mData = 255;
-						break; // noteOn
-					case 2:
-						HandleNoteOn(mChannel, mData, 0);
-						mData = 255;
-						break; // noteOff
-					case 3:
-						HandleControlChange(mChannel, mData, input);
-						mData = 255;
-						break; // CC
-					case 4:
-						handleBend(mChannel, input);
-						mData = 255;
-						break; // bend
-					case 5:
-						lfoDepthBase[1] = input << 3;
-						setLfo(1);
-						mData = 255;
-						break; // AT
-					case 6:
-						if (mChannel == masterChannel) {
-							preset = mData + 1;
-							if (preset > 99) {
-								preset = 1;
-							}
-							ledNumber(preset);
-						}
-						mData = 255;
-						break; // PC
-				}
-			} // data
-		}
-	}
-}
-//////////////////////////////////////////////////////////////////////////////////////////////////
-
-void HandleNoteOn(byte channel, byte note, byte velocity) {
+static void HandleNoteOn(byte channel, byte note, byte velocity) {
 
 	note -= 12;
 
@@ -564,7 +379,34 @@ void HandleNoteOn(byte channel, byte note, byte velocity) {
 	leftDot();
 }
 
-void HandleControlChange(byte channel, byte data1, byte data2) {
+static void pedalUp() {
+	if (pa) {
+
+		if (!slot[0])
+			bitWrite(sid[4], 0, 0);
+		if (!slot[1])
+			bitWrite(sid[11], 0, 0);
+		if (!slot[2])
+			bitWrite(sid[18], 0, 0);
+
+	} else {
+		// note off
+
+		if (held < 1) {
+			held = 0;
+			envState = 4;
+			// arpRound=0;
+			// memset(heldKeys, 0, sizeof(heldKeys));
+			bitWrite(sid[4], 0, 0);
+			bitWrite(sid[11], 0, 0);
+			bitWrite(sid[18], 0, 0);
+		}
+	}
+}
+
+static void pedalDown() {}
+
+static void HandleControlChange(byte channel, byte data1, byte data2) {
 	leftDot();
 	if (channel == masterChannel) {
 		switch (data1) {
@@ -868,7 +710,7 @@ void HandleControlChange(byte channel, byte data1, byte data2) {
 	}
 }
 
-void handleBend(byte channel, int value) {
+static void handleBend(byte channel, int value) {
 	//-8192 to 8191
 	if (masterChannel == 1) {
 
@@ -935,6 +777,191 @@ void handleBend(byte channel, int value) {
 		}
 	}
 }
+
+void sendMidiButt(byte number, int value) {
+	rightDot();
+
+	sendControlChange(number, value);
+}
+
+void sendCC(byte number, int value) {
+	rightDot();
+	sendControlChange(number, value >> 3);
+}
+
+void sendControlChange(byte number, byte value) {
+	if (!thru) {
+
+		Serial.write(175 + masterChannelOut);
+		Serial.write(number);
+		Serial.write(value);
+	}
+}
+
+void sendNoteOff(byte note, byte velocity, byte channel) {
+	if (!thru) {
+		Serial.write(127 + channel);
+		Serial.write(note);
+		Serial.write(1);
+	}
+}
+
+void sendNoteOn(byte note, byte velocity, byte channel) {
+
+	if (!thru) {
+		Serial.write(143 + channel);
+		Serial.write(note);
+		Serial.write(1);
+	}
+}
+
+void midiRead() {
+	while (Serial.available()) {
+		byte input = Serial.read();
+
+		if (thru)
+			Serial.write(input);
+
+		if (input > 127) {
+
+			switch (input) {
+
+				case 248:
+
+					sync = 1;
+					if ((arpMode) && (arping)) {
+						clockCount++;
+						if (clockCount >= arpRate) {
+							clockCount = 0;
+							arpTick();
+						}
+					}
+
+					syncLfoCounter++;
+					if (syncLfoCounter == 24) {
+						syncLfoCounter = 0;
+						for (int i = 0; i < 3; i++) {
+							if (lfoClockSpeedPending[i]) {
+								lfoClockSpeed[i] = lfoClockSpeedPending[i] - 1;
+								lfoClockSpeedPending[i] = 0;
+								lfoStepF[i] = 0;
+							}
+						}
+					}
+
+					for (int i = 0; i < 3; i++) {
+						lfoStepF[i] += lfoClockRates[lfoClockSpeed[i]];
+						if (lfoStepF[i] > 254) {
+							if (looping[i]) {
+								lfoStepF[i] = 0;
+								lfoNewRand[i] = 1;
+							} else {
+								lfoStepF[i] = 255;
+							}
+						}
+						lfoStep[i] = int(lfoStepF[i]);
+					}
+
+					break; // clock
+				case 250:
+					syncLfoCounter = 0;
+					sync = 1;
+					lfoStepF[0] = lfoStepF[1] = lfoStepF[2] = 0;
+					break; // start
+				case 251:
+					break; // continue
+				case 252:
+					sync = 0;
+					break; // stop
+
+				case 128 ... 143:
+					mChannel = input - 127;
+					mStatus = 2;
+					mData = 255;
+					break; // noteOff
+				case 144 ... 159:
+					mChannel = input - 143;
+					mStatus = 1;
+					mData = 255;
+					break; // noteOn
+				case 176 ... 191:
+					mChannel = input - 175;
+					mStatus = 3;
+					mData = 255;
+					break; // CC
+				case 192 ... 207:
+					mChannel = input - 191;
+					mStatus = 6;
+					mData = 0;
+					break; // program Change
+				case 208 ... 223:
+					mChannel = input - 207;
+					mStatus = 5;
+					mData = 0;
+					break; // Aftertouch
+				case 224 ... 239:
+					mChannel = input - 223;
+					mStatus = 4;
+					mData = 255;
+					break; // Pitch Bend
+
+				default:
+					mStatus = 0;
+					mData = 255;
+					break;
+			}
+		}
+
+		// status
+		else {
+			if (mData == 255) {
+				mData = input;
+			} // data byte 1
+			else {
+
+				// data byte 2
+				switch (mStatus) {
+					case 1:
+						if (input) {
+							HandleNoteOn(mChannel, mData, input);
+						} else {
+							HandleNoteOn(mChannel, mData, 0);
+						}
+						mData = 255;
+						break; // noteOn
+					case 2:
+						HandleNoteOn(mChannel, mData, 0);
+						mData = 255;
+						break; // noteOff
+					case 3:
+						HandleControlChange(mChannel, mData, input);
+						mData = 255;
+						break; // CC
+					case 4:
+						handleBend(mChannel, input);
+						mData = 255;
+						break; // bend
+					case 5:
+						lfoDepthBase[1] = input << 3;
+						setLfo(1);
+						mData = 255;
+						break; // AT
+					case 6:
+						if (mChannel == masterChannel) {
+							preset = mData + 1;
+							if (preset > 99) {
+								preset = 1;
+							}
+							ledNumber(preset);
+						}
+						mData = 255;
+						break; // PC
+				}
+			} // data
+		}
+	}
+}
+//////////////////////////////////////////////////////////////////////////////////////////////////
 
 void midiOut(byte note) {
 	rightDot();
@@ -1046,30 +1073,3 @@ void recieveDump() {
 
 	setup();
 }
-
-void pedalUp() {
-	if (pa) {
-
-		if (!slot[0])
-			bitWrite(sid[4], 0, 0);
-		if (!slot[1])
-			bitWrite(sid[11], 0, 0);
-		if (!slot[2])
-			bitWrite(sid[18], 0, 0);
-
-	} else {
-		// note off
-
-		if (held < 1) {
-			held = 0;
-			envState = 4;
-			// arpRound=0;
-			// memset(heldKeys, 0, sizeof(heldKeys));
-			bitWrite(sid[4], 0, 0);
-			bitWrite(sid[11], 0, 0);
-			bitWrite(sid[18], 0, 0);
-		}
-	}
-}
-
-void pedalDown() {}

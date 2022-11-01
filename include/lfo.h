@@ -5,4 +5,3 @@ void lfoTick();
 void lastMovedPot(byte number);
 void chain();
 void clearLfo();
-void checkIllegalModulation();

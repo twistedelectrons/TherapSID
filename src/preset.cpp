@@ -25,7 +25,23 @@ MEMORY MAPPING
 
 */
 
-int writeIndex;
+static int writeIndex;
+
+static void writey(byte data) {
+
+	EEPROM.update(writeIndex, data);
+	writeIndex++;
+}
+
+static int ready() {
+
+	byte data = EEPROM.read(writeIndex);
+	if (jumble) {
+		data = random(200);
+	}
+	writeIndex++;
+	return ((data));
+}
 
 void save() {
 	byte temp;
@@ -665,22 +681,6 @@ void load(byte number) {
 
 	sendCC(59, cutBase);
 	sendCC(33, resBase << 6);
-}
-
-void writey(byte data) {
-
-	EEPROM.update(writeIndex, data);
-	writeIndex++;
-}
-
-int ready() {
-
-	byte data = EEPROM.read(writeIndex);
-	if (jumble) {
-		data = random(200);
-	}
-	writeIndex++;
-	return ((data));
 }
 
 void saveChannels() {
