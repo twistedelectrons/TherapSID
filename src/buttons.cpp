@@ -7,6 +7,11 @@
 #include "lfo.h"
 #include "arp.h"
 
+static bool saveEngaged;
+static byte midiSetup = 0;
+static bool arpModeHeld;
+static bool assignmentChanged;
+
 void buttChanged(byte number, bool value) {
 	if (!value) {
 		// ledNumber(number);

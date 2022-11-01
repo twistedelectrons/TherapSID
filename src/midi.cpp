@@ -9,12 +9,20 @@
 #include "lfo.h"
 #include "pots.h"
 
-byte mStatus;
-byte mData;
-byte mChannel;
+static byte mStatus;
+static byte mData;
+static byte mChannel;
 
-byte syncLfoCounter;
-float lfoClockRates[] = {2.6562, 5.3125, 7.96875, 10.625, 21.25, 31.875, 42.5, 85};
+static byte syncLfoCounter;
+static float lfoClockRates[] = {2.6562, 5.3125, 7.96875, 10.625, 21.25, 31.875, 42.5, 85};
+
+static int noteHeld1, noteHeld2, noteHeld3;
+static float lfoStepF[3];
+static byte lfoClockSpeed[3];
+static int clockCount;
+static bool pedal;
+static bool thru;
+static byte velocityLast;
 
 void sendMidiButt(byte number, int value) {
 	rightDot();

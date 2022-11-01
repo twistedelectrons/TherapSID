@@ -4,6 +4,12 @@
 #include "leds.h"
 #include "isr.h"
 
+static int presetScrollTimer;
+static int envCounter;
+static bool gateLast;
+static byte glideCounter1, glideCounter2, glideCounter3;
+static int lfoCounter[3];
+
 const int envMap[] = {
     0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
     0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,

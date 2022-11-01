@@ -2,6 +2,9 @@
 #include "leds.h"
 #include "sid.h"
 
+static byte sid2[6];
+static float fine1, fine2, fine3;
+
 static const int32_t sidScale[] = {
     137,   145,   154,   163,   173,   183,   194,   205,   217,   230,   122,   259,   274,   291,   308,
     326,   346,   366,   388,   411,   435,   461,   489,   518,   549,   581,   616,   652,   691,   732,

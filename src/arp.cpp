@@ -3,6 +3,10 @@
 #include "arp.h"
 #include "leds.h"
 
+static byte arpNotes[128];
+static int arpNote;
+static bool arpPendulum;
+
 void showArp() {
 	arpRound = 0;
 	arpCounter = 0;

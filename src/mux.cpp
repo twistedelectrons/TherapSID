@@ -6,9 +6,11 @@
 #include "pots.h"
 #include "buttons.h"
 
-byte muxChannel;
-int pot;
-bool butt;
+static byte muxChannel;
+static int pot;
+static bool butt;
+static bool buttLast[33];
+static int potLast[42];
 
 const int POT_MAX = sizeof(potLast) / sizeof(*potLast); // number of array entries
 
