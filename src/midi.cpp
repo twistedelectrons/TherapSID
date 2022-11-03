@@ -787,7 +787,6 @@ static void handleBend(byte channel, int value) {
 
 void sendMidiButt(byte number, int value) {
 	rightDot();
-
 	sendControlChange(number, value);
 }
 
@@ -798,7 +797,6 @@ void sendCC(byte number, int value) {
 
 void sendControlChange(byte number, byte value) {
 	if (!thru) {
-
 		Serial.write(175 + masterChannelOut);
 		Serial.write(number);
 		Serial.write(value);
@@ -814,7 +812,6 @@ void sendNoteOff(byte note, byte velocity, byte channel) {
 }
 
 void sendNoteOn(byte note, byte velocity, byte channel) {
-
 	if (!thru) {
 		Serial.write(143 + channel);
 		Serial.write(note);
@@ -829,11 +826,11 @@ void midiRead() {
 		if (thru)
 			Serial.write(input);
 
-		if (input > 127) {
+		if (input & 0x80) {
 
 			switch (input) {
 
-				case 248:
+				case 0xf8: // clock
 
 					sync = 1;
 					if ((arpMode) && (arping)) {
@@ -869,17 +866,17 @@ void midiRead() {
 						lfoStep[i] = int(lfoStepF[i]);
 					}
 
-					break; // clock
-				case 250:
+					break;
+				case 0xfa: // start
 					syncLfoCounter = 0;
 					sync = 1;
 					lfoStepF[0] = lfoStepF[1] = lfoStepF[2] = 0;
-					break; // start
-				case 251:
-					break; // continue
-				case 252:
+					break;
+				case 0xfb: // continue
+					break;
+				case 0xfc: // stop
 					sync = 0;
-					break; // stop
+					break;
 
 				case 128 ... 143:
 					mChannel = input - 127;
