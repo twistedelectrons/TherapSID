@@ -719,67 +719,25 @@ static void HandleControlChange(byte channel, byte data1, byte data2) {
 
 static void handleBend(byte channel, int value) {
 	//-8192 to 8191
+	float value_f = (value - 64.f) / 64.f;
+	if (value_f > 1)
+		value_f = 1;
+	if (value_f < -1)
+		value_f = -1;
+
 	if (masterChannel == 1) {
-
-		if (channel == 1) {
-			bend = value - 64;
-			bend = bend / 64;
-
-			if (bend > 1) {
-				bend = 1;
-			} else if (bend < -1) {
-				bend = -1;
-			}
-			calculatePitch();
-		}
-
-		else if (channel == 2) {
-			bend1 = value - 64;
-			bend1 = bend1 / 64;
-
-			if (bend1 > 1) {
-				bend1 = 1;
-			} else if (bend1 < -1) {
-				bend1 = -1;
-			}
-			calculatePitch();
-		}
-
-		else if (channel == 3) {
-			bend2 = value - 64;
-			bend2 = bend2 / 64;
-
-			if (bend2 > 1) {
-				bend2 = 1;
-			} else if (bend2 < -1) {
-				bend2 = -1;
-			}
-			calculatePitch();
-		}
-
-		else if (channel == 4) {
-			bend3 = value - 64;
-			bend3 = bend3 / 64;
-
-			if (bend3 > 1) {
-				bend3 = 1;
-			} else if (bend3 < -1) {
-				bend3 = -1;
-			}
-			calculatePitch();
-		}
-
+		if (channel == 1)
+			bend = value_f;
+		else if (channel == 2)
+			bend1 = value_f;
+		else if (channel == 3)
+			bend2 = value_f;
+		else if (channel == 4)
+			bend3 = value_f;
+		calculatePitch();
 	} else {
-
 		if (channel == masterChannel) {
-			bend = value - 64;
-			bend = bend / 64;
-
-			if (bend > 1) {
-				bend = 1;
-			} else if (bend < -1) {
-				bend = -1;
-			}
+			bend = value_f;
 			calculatePitch();
 		}
 	}
