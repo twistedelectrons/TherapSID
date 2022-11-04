@@ -23,7 +23,6 @@ bool pa, arping;
 bool shape1Pressed;
 int shape1PressedTimer;
 int arpRate = 24;
-byte slot[3];
 byte pKey[3];
 int lfoStep[3], resetDownTimer;
 int lfoSpeed[3], lfoSpeedBase[3];
@@ -70,7 +69,7 @@ bool jumble;
 bool lfoButtPressed;
 byte masterChannel = 1;
 byte masterChannelOut = 1;
-byte note1, note2, note3;
+byte note_val[3];
 
 int held, arpCounter, arpRangeBase;
 int lfoButtTimer;

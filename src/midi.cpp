@@ -8,6 +8,8 @@
 #include "sid.h"
 #include "lfo.h"
 #include "pots.h"
+#include "voice_allocation.hpp"
+#include "midi_pedal.hpp"
 
 static byte mStatus;
 static byte mData;
@@ -16,11 +18,9 @@ static byte mChannel;
 static byte syncLfoCounter;
 static float lfoClockRates[] = {2.6562, 5.3125, 7.96875, 10.625, 21.25, 31.875, 42.5, 85};
 
-static int noteHeld1, noteHeld2, noteHeld3;
 static float lfoStepF[3];
 static byte lfoClockSpeed[3];
 static int clockCount;
-static bool pedal;
 static bool thru;
 static byte velocityLast;
 
@@ -31,387 +31,111 @@ static byte flash;
 
 static byte val[] = {0, 128};
 
+static void HandleNoteOn(byte channel, byte note, byte velocity);
+static void HandleNoteOff(byte channel, byte note);
+
+static MidiPedalAdapter pedal_adapter(HandleNoteOn, HandleNoteOff);
+
 static void HandleNoteOn(byte channel, byte note, byte velocity) {
+	if (gate) // FIXME maybe this should be handled differently
+		return;
+
+	if (note < 12 || note >= 107)
+		return;
 
 	note -= 12;
 
-	if (note < 95) {
+	if (channel == masterChannel) {
+		if (!pa) { // Monophonic mode
+			if (!velocity) {
+				// note off
+				held--;
+				heldKeys[note] = false;
 
-		if (masterChannel == 1) {
+				mono_note_tracker.note_off(note);
+				if (mono_note_tracker.has_active_note()) {
+					if (!arpMode)
+						key = mono_note_tracker.active_note()->note;
+				} else {
+					envState = 4;
+					arpRound = 0;
+					bitWrite(sid[4], 0, 0);
+					bitWrite(sid[11], 0, 0);
+					bitWrite(sid[18], 0, 0);
+				}
+			} else {
+				// note on
+				velocityLast = velocity;
+				heldKeys[note] = true;
+				held++;
 
-			if (!gate) {
-
-				if (channel == masterChannel) {
-
-					if (!pa) {
-
-						//////////////////////////////////////////////////////////////////////////////
-						//                              MONOPHONIC                                  //
-						//////////////////////////////////////////////////////////////////////////////
-						if (!velocity) {
-
-							held--;
-
-							heldKeys[note] = 0;
-
-							// check highest key
-
-							if ((held) && (!arpMode)) {
-								for (int i = 0; i < 128; i++) {
-									if (heldKeys[i])
-										key = i;
-								}
-							}
-
-							if (!pedal) {
-								// note off
-
-								if (held < 1) {
-									held = 0;
-									envState = 4;
-									arpRound = 0;
-									// memset(heldKeys, 0, sizeof(heldKeys));
-									bitWrite(sid[4], 0, 0);
-									bitWrite(sid[11], 0, 0);
-									bitWrite(sid[18], 0, 0);
-								}
-								// ledNumber(held);
-							} else {
-							}
-
-						} else {
-							velocityLast = velocity;
-
-							// note on;
-
-							heldKeys[note] = 1;
-
-							if (retrig[0]) {
-								lfoStep[0] = lfoStepF[0] = 0;
-							}
-							if (retrig[1]) {
-								lfoStep[1] = lfoStepF[1] = 0;
-							}
-							if (retrig[2]) {
-								lfoStep[2] = lfoStepF[2] = 0;
-							}
-							held++;
-
-							if (!arpMode) {
-								key = note;
-							}
-
-							if (held == 1) {
-								envState = 1;
-								env = 0;
-								clockCount = arpRate;
-
-								if (arpMode)
-									arpReset(note);
-
-								bitWrite(sid[4], 0, 1);
-								bitWrite(sid[11], 0, 1);
-								bitWrite(sid[18], 0, 1);
-							}
-						}
-
-					} else {
-						//////////////////////////////////////////////////////////////////////////////
-						//                              PARAPHONIC                                  //
-						//////////////////////////////////////////////////////////////////////////////
-						if (!velocity) {
-							// note off
-
-							// free a slot
-
-							if (slot[0] == note) {
-								slot[0] = 0;
-								if (!pedal)
-									bitWrite(sid[4], 0, 0);
-							} else if (slot[1] == note) {
-								slot[1] = 0;
-								if (!pedal)
-									bitWrite(sid[11], 0, 0);
-							} else if (slot[2] == note) {
-								slot[2] = 0;
-								if (!pedal)
-									bitWrite(sid[18], 0, 0);
-							}
-
-						} else {
-							// note on
-
-							// look for slot
-
-							if (!slot[0]) {
-								slot[0] = note;
-								bitWrite(sid[4], 0, 1);
-								pKey[0] = note;
-							} else if (!slot[1]) {
-								slot[1] = note;
-								bitWrite(sid[11], 0, 1);
-								pKey[1] = note;
-							} else if (!slot[2]) {
-								slot[2] = note;
-								bitWrite(sid[18], 0, 1);
-								pKey[2] = note;
-							}
-
-							// overflow onto voice 3
-							else {
-								slot[2] = note;
-								bitWrite(sid[18], 0, 1);
-								pKey[2] = note;
-							}
-						}
+				for (int i = 0; i < 3; i++) {
+					if (retrig[i]) {
+						lfoStep[i] = lfoStepF[i] = 0;
 					}
+				}
 
-				} else if (channel == 2) {
-					if (!pa) {
+				if (!arpMode) {
+					key = note;
+				}
 
-						if (!velocity) {
-							noteHeld1--;
-							if (noteHeld1 < 1) {
-								noteHeld1 = 0;
-								note1 = 0;
-								bitWrite(sid[4], 0, 0);
-								// bitWrite(sid[11],0,0);
-								// bitWrite(sid[18],0,0);
-							}
-						} else {
-							noteHeld1++;
-							note1 = note;
-							if (noteHeld1 == 1) {
-								bitWrite(sid[4], 0, 1);
-								// bitWrite(sid[11],0,1);
-								// bitWrite(sid[18],0,1);
-							}
-						}
+				auto had_active_note = mono_note_tracker.has_active_note();
+				mono_note_tracker.note_on(note, velocity);
 
-						calculatePitch();
-					}
+				if (!had_active_note) {
+					envState = 1;
+					env = 0;
+					clockCount = arpRate;
 
-				} else if (channel == 3) {
+					if (arpMode)
+						arpReset(note);
 
-					if (!pa) {
-
-						if (!velocity) {
-							noteHeld2--;
-							if (noteHeld2 < 1) {
-								noteHeld2 = 0;
-								note2 = 0;
-								// bitWrite(sid[4],0,0);
-								bitWrite(sid[11], 0, 0);
-								// bitWrite(sid[18],0,0);
-							}
-						} else {
-							noteHeld2++;
-							note2 = note;
-							if (noteHeld2 == 1) {
-								// bitWrite(sid[4],0,1);
-								bitWrite(sid[11], 0, 1);
-								// bitWrite(sid[18],0,1);
-							}
-						}
-
-						calculatePitch();
-					}
-
-				} else if (channel == 4) {
-
-					if (!pa) {
-
-						if (!velocity) {
-
-							noteHeld3--;
-							if (noteHeld3 < 1) {
-								note3 = 0;
-								noteHeld3 = 0;
-								// bitWrite(sid[4],0,0);
-								// bitWrite(sid[11],0,0);
-								bitWrite(sid[18], 0, 0);
-							}
-						} else {
-
-							noteHeld3++;
-							note3 = note;
-
-							if (noteHeld3 == 1) {
-								//  bitWrite(sid[4],0,1);
-								// bitWrite(sid[11],0,1);
-								bitWrite(sid[18], 0, 1);
-							}
-						}
-
-						calculatePitch();
-					}
+					bitWrite(sid[4], 0, 1);
+					bitWrite(sid[11], 0, 1);
+					bitWrite(sid[18], 0, 1);
 				}
 			}
-		} else {
-			////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-			////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-			////////    ONLY LISTENING TO ONE CHANNEL  ////////////////////////////////////////////////
-			////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-			////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-			if (!gate) {
 
-				if (channel == masterChannel) {
+		} else {             // paraphonic mode
+			if (!velocity) { // note off
+				auto voice_idx = voice_allocator.note_off(note);
 
-					if (!pa) {
-
-						//////////////////////////////////////////////////////////////////////////////
-						//                              MONOPHONIC                                  //
-						//////////////////////////////////////////////////////////////////////////////
-						if (!velocity) {
-
-							held--;
-
-							heldKeys[note] = 0;
-
-							// check highest key
-
-							if ((held) && (!arpMode)) {
-								for (int i = 0; i < 128; i++) {
-									if (heldKeys[i])
-										key = i;
-								}
-							}
-
-							if (!pedal) {
-								// note off
-
-								if (held < 1) {
-									held = 0;
-									envState = 4;
-									arpRound = 0;
-									// memset(heldKeys, 0, sizeof(heldKeys));
-									bitWrite(sid[4], 0, 0);
-									bitWrite(sid[11], 0, 0);
-									bitWrite(sid[18], 0, 0);
-								}
-								// ledNumber(held);
-							} else {
-							}
-
-						} else {
-							velocityLast = velocity;
-
-							// note on;
-
-							heldKeys[note] = 1;
-
-							if (retrig[0]) {
-								lfoStep[0] = 0;
-							}
-							if (retrig[1]) {
-								lfoStep[1] = 0;
-							}
-							if (retrig[2]) {
-								lfoStep[2] = 0;
-							}
-							held++;
-
-							if (!arpMode) {
-								key = note;
-							}
-
-							if (held == 1) {
-								envState = 1;
-								env = 0;
-								clockCount = arpRate;
-
-								if (arpMode)
-									arpReset(note);
-
-								bitWrite(sid[4], 0, 1);
-								bitWrite(sid[11], 0, 1);
-								bitWrite(sid[18], 0, 1);
-							}
-						}
-
-					} else {
-						//////////////////////////////////////////////////////////////////////////////
-						//                              PARAPHONIC                                  //
-						//////////////////////////////////////////////////////////////////////////////
-						if (!velocity) {
-							// note off
-
-							// free a slot
-
-							if (slot[0] == note) {
-								slot[0] = 0;
-								if (!pedal)
-									bitWrite(sid[4], 0, 0);
-							} else if (slot[1] == note) {
-								slot[1] = 0;
-								if (!pedal)
-									bitWrite(sid[11], 0, 0);
-							} else if (slot[2] == note) {
-								slot[2] = 0;
-								if (!pedal)
-									bitWrite(sid[18], 0, 0);
-							}
-
-						} else {
-							// note on
-
-							// look for slot
-
-							if (!slot[0]) {
-								slot[0] = note;
-								bitWrite(sid[4], 0, 1);
-								pKey[0] = note;
-							} else if (!slot[1]) {
-								slot[1] = note;
-								bitWrite(sid[11], 0, 1);
-								pKey[1] = note;
-							} else if (!slot[2]) {
-								slot[2] = note;
-								bitWrite(sid[18], 0, 1);
-								pKey[2] = note;
-							}
-
-							// overflow onto voice 3
-							else {
-								slot[2] = note;
-								bitWrite(sid[18], 0, 1);
-								pKey[2] = note;
-							}
-						}
-					}
+				if (voice_idx.has_value()) {
+					bitWrite(sid[4 + 7 * (*voice_idx)], 0, 0);
 				}
+			} else { // note on
+				auto voice_idx = voice_allocator.note_on(note, velocity);
+
+				bitWrite(sid[4 + 7 * voice_idx], 0, 1);
+				pKey[voice_idx] = note;
 			}
 		}
+	} else if (!pa && masterChannel == 1 && (channel == 2 || channel == 3 || channel == 4)) {
+		auto voice = channel - 2;
+
+		bool had_active_note = mono_note_trackers[voice].has_active_note();
+		if (!velocity) { // note off
+			mono_note_trackers[voice].note_off(note);
+		} else {
+			mono_note_trackers[voice].note_on(note, velocity);
+		}
+
+		if (mono_note_trackers[voice].has_active_note()) {
+			note_val[voice] = mono_note_trackers[voice].active_note()->note;
+			if (!had_active_note) {
+				bitWrite(sid[4 + voice * 7], 0, 1);
+			}
+		} else {
+			note_val[voice] = 0;
+			bitWrite(sid[4 + voice * 7], 0, 0);
+		}
+
+		calculatePitch();
 	}
 	leftDot();
 }
 
-static void pedalUp() {
-	if (pa) {
-
-		if (!slot[0])
-			bitWrite(sid[4], 0, 0);
-		if (!slot[1])
-			bitWrite(sid[11], 0, 0);
-		if (!slot[2])
-			bitWrite(sid[18], 0, 0);
-
-	} else {
-		// note off
-
-		if (held < 1) {
-			held = 0;
-			envState = 4;
-			// arpRound=0;
-			// memset(heldKeys, 0, sizeof(heldKeys));
-			bitWrite(sid[4], 0, 0);
-			bitWrite(sid[11], 0, 0);
-			bitWrite(sid[18], 0, 0);
-		}
-	}
-}
-
-static void pedalDown() {}
+static void HandleNoteOff(byte channel, byte note) { HandleNoteOn(channel, note, 0); }
 
 static void HandleControlChange(byte channel, byte data1, byte data2) {
 	leftDot();
@@ -609,12 +333,7 @@ static void HandleControlChange(byte channel, byte data1, byte data2) {
 				break;
 
 			case 64:
-				pedal = data2 >> 6;
-				if (pedal) {
-					pedalDown();
-				} else {
-					pedalUp();
-				}
+				pedal_adapter.set_pedal(channel, data2 >= 64);
 				break;
 
 			case 60:
@@ -884,15 +603,11 @@ void midiRead() {
 				// data byte 2
 				switch (mStatus) {
 					case 1:
-						if (input) {
-							HandleNoteOn(mChannel, mData, input);
-						} else {
-							HandleNoteOn(mChannel, mData, 0);
-						}
+						pedal_adapter.note_on(mChannel, mData, input);
 						mData = 255;
 						break; // noteOn
 					case 2:
-						HandleNoteOn(mChannel, mData, 0);
+						pedal_adapter.note_off(mChannel, mData);
 						mData = 255;
 						break; // noteOff
 					case 3:

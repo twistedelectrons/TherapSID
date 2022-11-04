@@ -3,6 +3,7 @@
 #include "sid.h"
 #include "leds.h"
 #include "paraphonic.h"
+#include "voice_allocation.hpp"
 
 void paraChange() {
 
@@ -12,6 +13,9 @@ void paraChange() {
 		arpMode = 0;
 		arpCount = 0;
 		held = 0;
+		mono_note_tracker.clear();
+		for (int i = 0; i < 3; i++)
+			mono_note_trackers[i].clear();
 		bitWrite(sid[4], 0, 0);
 		bitWrite(sid[11], 0, 0);
 		bitWrite(sid[18], 0, 0);
@@ -54,7 +58,7 @@ void paraChange() {
 		sidSend(11, sid[11]);
 		sidSend(18, sid[18]);
 
-		slot[0] = slot[1] = slot[2] = 0;
+		voice_allocator.clear();
 		digit(0, 99);
 		digit(1, 99);
 		load(preset);
