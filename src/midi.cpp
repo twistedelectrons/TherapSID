@@ -140,298 +140,151 @@ static void HandleNoteOff(byte channel, byte note) { HandleNoteOn(channel, note,
 static void HandleControlChange(byte channel, byte data1, byte data2) {
 	leftDot();
 	if (channel == masterChannel) {
-		switch (data1) {
+		if (data1 == 59)
+			data1 = 32; // FIXME why?
 
-			case 1:
-				movedPot(12, data2 << 3, 1);
-				break;
+		if (1 <= data1 && data1 <= 36) {
+			int mapping[] = {-1, 12, 4,  6,  14, 1,  5, 15, 13, 16, 24, 26, 17, 27, 22, 25, 23, 20, 30,
+			                 21, 31, 19, 29, 18, 28, 3, 11, 12, 10, 9,  36, 2,  8,  0,  7,  41, 32};
+			movedPot(mapping[data1], data2 << 3, true);
+		} else if (37 <= data1 && data1 <= 48) {
+			int offset = data1 - 37;
+			sidShape(offset / 4, offset % 4 + 1, data2);
+		} else {
+			switch (data1) {
+				case 49: // sync1
+					bitWrite(sid[4], 1, data2);
+					ledSet(16, bitRead(sid[4], 1));
+					break;
+				case 50: // ring1
+					bitWrite(sid[4], 2, data2);
+					ledSet(17, bitRead(sid[4], 2));
+					break;
 
-			case 2:
-				movedPot(4, data2 << 3, 1);
-				break;
-			case 3:
-				movedPot(6, data2 << 3, 1);
-				break;
-			case 4:
-				movedPot(14, data2 << 3, 1);
-				break;
-			case 5:
-				movedPot(1, data2 << 3, 1);
-				break;
+				case 51: // sync2
+					bitWrite(sid[11], 1, data2);
+					ledSet(18, bitRead(sid[11], 1));
+					break;
+				case 52: // ring2
+					bitWrite(sid[11], 2, data2);
+					ledSet(19, bitRead(sid[11], 2));
+					break;
 
-			case 6:
-				movedPot(5, data2 << 3, 1);
-				break;
-			case 7:
-				movedPot(15, data2 << 3, 1);
-				break;
-			case 8:
-				movedPot(13, data2 << 3, 1);
-				break;
-			case 9:
-				movedPot(16, data2 << 3, 1);
-				break;
+				case 53: // sync3
+					bitWrite(sid[18], 1, data2);
+					ledSet(20, bitRead(sid[18], 1));
+					break;
+				case 54: // ring3
+					bitWrite(sid[18], 2, data2);
+					ledSet(21, bitRead(sid[18], 2));
+					break;
 
-			case 10:
-				movedPot(24, data2 << 3, 1);
-				break;
-			case 11:
-				movedPot(26, data2 << 3, 1);
-				break;
-			case 12:
-				movedPot(17, data2 << 3, 1);
-				break;
-			case 13:
-				movedPot(27, data2 << 3, 1);
-				break;
+				case 55:
+					filterMode = map(data2, 0, 127, 0, 4);
+					updateFilter();
+					break;
 
-			case 14:
-				movedPot(22, data2 << 3, 1);
-				break;
-			case 15:
-				movedPot(25, data2 << 3, 1);
-				break;
-			case 16:
-				movedPot(23, data2 << 3, 1);
-				break;
-			case 17:
-				movedPot(20, data2 << 3, 1);
-				break;
+				case 64:
+					pedal_adapter.set_pedal(channel, data2 >= 64);
+					break;
 
-			case 18:
-				movedPot(30, data2 << 3, 1);
-				break;
-			case 19:
-				movedPot(21, data2 << 3, 1);
-				break;
-			case 20:
-				movedPot(31, data2 << 3, 1);
-				break;
-			case 21:
-				movedPot(19, data2 << 3, 1);
-				break;
+				case 60:
+					if (data2) {
+						lfoShape[selectedLfo] = 1;
+					} else {
+						lfoShape[selectedLfo] = 0;
+					}
+					showLfo();
+					sendControlChange(61, 0);
+					sendControlChange(62, 0);
+					sendControlChange(63, 0);
+					sendControlChange(65, 0);
+					break; // lfo shape1
+				case 61:
+					if (data2) {
+						lfoShape[selectedLfo] = 2;
+					} else {
+						lfoShape[selectedLfo] = 0;
+					}
+					showLfo();
+					sendControlChange(60, 0);
+					sendControlChange(62, 0);
+					sendControlChange(63, 0);
+					sendControlChange(65, 0);
+					break; // lfo shape2
+				case 62:
+					if (data2) {
+						lfoShape[selectedLfo] = 3;
+					} else {
+						lfoShape[selectedLfo] = 0;
+					}
+					showLfo();
+					sendControlChange(61, 0);
+					sendControlChange(60, 0);
+					sendControlChange(63, 0);
+					sendControlChange(65, 0);
+					break; // lfo shape3
+				case 63:
+					if (data2) {
+						lfoShape[selectedLfo] = 4;
+					} else {
+						lfoShape[selectedLfo] = 0;
+					}
+					showLfo();
+					sendControlChange(61, 0);
+					sendControlChange(62, 0);
+					sendControlChange(60, 0);
+					sendControlChange(65, 0);
+					break; // lfo shape4
+				case 65:
+					if (data2) {
+						lfoShape[selectedLfo] = 5;
+					} else {
+						lfoShape[selectedLfo] = 0;
+					}
+					showLfo();
+					sendControlChange(61, 0);
+					sendControlChange(62, 0);
+					sendControlChange(63, 0);
+					sendControlChange(60, 0);
+					break; // lfo shape5
 
-			case 22:
-				movedPot(29, data2 << 3, 1);
-				break;
-			case 23:
-				movedPot(18, data2 << 3, 1);
-				break;
-			case 24:
-				movedPot(28, data2 << 3, 1);
-				break;
-			case 25:
-				movedPot(3, data2 << 3, 1);
-				break;
+				case 66:
+					if (data2) {
+						retrig[selectedLfo] = 1;
+					} else {
+						retrig[selectedLfo] = 0;
+					}
+					showLfo();
+					break; // lfo retrig
+				case 67:
+					if (data2) {
+						looping[selectedLfo] = 1;
+					} else {
+						looping[selectedLfo] = 0;
+					}
+					showLfo();
+					break; // lfo loop
 
-			case 26:
-				movedPot(11, data2 << 3, 1);
-				break;
-			case 27:
-				movedPot(12, data2 << 3, 1);
-				break;
-			case 28:
-				movedPot(10, data2 << 3, 1);
-				break;
-			case 29:
-				movedPot(9, data2 << 3, 1);
-				break;
-
-			case 30:
-				movedPot(36, data2 << 3, 1);
-				break;
-			case 31:
-				movedPot(2, data2 << 3, 1);
-				break;
-			case 59:
-			case 32:
-				movedPot(8, data2 << 3, 1);
-				break;
-			case 33:
-				movedPot(0, data2 << 3, 1);
-				break;
-
-			case 34:
-				movedPot(7, data2 << 3, 1);
-				break;
-			case 35:
-				movedPot(41, data2 << 3, 1);
-				break;
-			case 36:
-				movedPot(32, data2 << 3, 1);
-				break;
-
-			case 37:
-				sidShape(0, 1, data2);
-				break;
-			case 38:
-				sidShape(0, 2, data2);
-				break;
-			case 39:
-				sidShape(0, 3, data2);
-				break;
-			case 40:
-				sidShape(0, 4, data2);
-				break;
-
-			case 41:
-				sidShape(1, 1, data2);
-				break;
-			case 42:
-				sidShape(1, 2, data2);
-				break;
-			case 43:
-				sidShape(1, 3, data2);
-				break;
-			case 44:
-				sidShape(1, 4, data2);
-				break;
-
-			case 45:
-				sidShape(2, 1, data2);
-				break;
-			case 46:
-				sidShape(2, 2, data2);
-				break;
-			case 47:
-				sidShape(2, 3, data2);
-				break;
-			case 48:
-				sidShape(2, 4, data2);
-				break;
-
-			case 49:
-				bitWrite(sid[4], 1, data2);
-				ledSet(16, bitRead(sid[4], 1));
-				break; // SYNC 1
-			case 50:
-				bitWrite(sid[4], 2, data2);
-				ledSet(17, bitRead(sid[4], 2));
-				break; // RING 1
-
-			case 51:
-				bitWrite(sid[11], 1, data2);
-				ledSet(18, bitRead(sid[11], 1));
-				break; // SYNC 2
-			case 52:
-				bitWrite(sid[11], 2, data2);
-				ledSet(19, bitRead(sid[11], 2));
-				break; // RING 2
-
-			case 53:
-				bitWrite(sid[18], 1, data2);
-				ledSet(20, bitRead(sid[18], 1));
-				break; // SYNC 3
-			case 54:
-				bitWrite(sid[18], 2, data2);
-				ledSet(21, bitRead(sid[18], 2));
-				break; // RING 3
-
-			case 55:
-				filterMode = map(data2, 0, 127, 0, 4);
-				updateFilter();
-				break;
-
-			case 64:
-				pedal_adapter.set_pedal(channel, data2 >= 64);
-				break;
-
-			case 60:
-				if (data2) {
-					lfoShape[selectedLfo] = 1;
-				} else {
-					lfoShape[selectedLfo] = 0;
-				}
-				showLfo();
-				sendControlChange(61, 0);
-				sendControlChange(62, 0);
-				sendControlChange(63, 0);
-				sendControlChange(65, 0);
-				break; // lfo shape1
-			case 61:
-				if (data2) {
-					lfoShape[selectedLfo] = 2;
-				} else {
-					lfoShape[selectedLfo] = 0;
-				}
-				showLfo();
-				sendControlChange(60, 0);
-				sendControlChange(62, 0);
-				sendControlChange(63, 0);
-				sendControlChange(65, 0);
-				break; // lfo shape2
-			case 62:
-				if (data2) {
-					lfoShape[selectedLfo] = 3;
-				} else {
-					lfoShape[selectedLfo] = 0;
-				}
-				showLfo();
-				sendControlChange(61, 0);
-				sendControlChange(60, 0);
-				sendControlChange(63, 0);
-				sendControlChange(65, 0);
-				break; // lfo shape3
-			case 63:
-				if (data2) {
-					lfoShape[selectedLfo] = 4;
-				} else {
-					lfoShape[selectedLfo] = 0;
-				}
-				showLfo();
-				sendControlChange(61, 0);
-				sendControlChange(62, 0);
-				sendControlChange(60, 0);
-				sendControlChange(65, 0);
-				break; // lfo shape4
-			case 65:
-				if (data2) {
-					lfoShape[selectedLfo] = 5;
-				} else {
-					lfoShape[selectedLfo] = 0;
-				}
-				showLfo();
-				sendControlChange(61, 0);
-				sendControlChange(62, 0);
-				sendControlChange(63, 0);
-				sendControlChange(60, 0);
-				break; // lfo shape5
-
-			case 66:
-				if (data2) {
-					retrig[selectedLfo] = 1;
-				} else {
-					retrig[selectedLfo] = 0;
-				}
-				showLfo();
-				break; // lfo retrig
-			case 67:
-				if (data2) {
-					looping[selectedLfo] = 1;
-				} else {
-					looping[selectedLfo] = 0;
-				}
-				showLfo();
-				break; // lfo loop
-
-			case 68:
-				if (data2) {
-					sendLfo = true;
-					EEPROM.update(3996, 0);
-				} else {
-					sendLfo = false;
-					EEPROM.update(3996, 1);
-				}
-				break; // lfo send
-			case 69:
-				if (data2) {
-					sendArp = true;
-					EEPROM.update(3995, 0);
-				} else {
-					sendArp = false;
-					EEPROM.update(3995, 1);
-				}
-				break; // arp send
+				case 68:
+					if (data2) {
+						sendLfo = true;
+						EEPROM.update(3996, 0);
+					} else {
+						sendLfo = false;
+						EEPROM.update(3996, 1);
+					}
+					break; // lfo send
+				case 69:
+					if (data2) {
+						sendArp = true;
+						EEPROM.update(3995, 0);
+					} else {
+						sendArp = false;
+						EEPROM.update(3995, 1);
+					}
+					break; // arp send
+			}
 		}
 	}
 }
