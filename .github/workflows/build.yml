@@ -1,0 +1,28 @@
+name: build
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    name: Compile firmware
+    runs-on: ubuntu-22.04
+    steps:
+      - run: sudo sed -i -e "s/# \(deb.*universe.*\)/\1/g" /etc/apt/sources.list
+      - run: sudo apt-get update
+      - run: sudo apt-get install python2 python3 python3-pip clang-format
+      - run: pip3 install -U platformio
+      - uses: actions/checkout@v2
+      - run: make check_fmt
+      - run: make firmware.syx
+      - uses: actions/upload-artifact@v3
+        with:
+          name: firmware.syx
+          path: firmware.syx
+      - name: Pull request artifacts
+        if: ${{ github.event_name == 'pull_request' }}
+        uses: gavv/pull-request-artifacts@v1.0.0
+        with:
+          commit: ${{ github.event.pull_request.head.sha }}
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          artifacts-branch: artifacts
+          artifacts: firmware.syx
