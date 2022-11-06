@@ -1,0 +1,20 @@
+{
+  "name": "digitalWriteFast",
+  "export": {},
+  "version": "1.0.0",
+  "frameworks": [
+    "arduino"
+  ],
+  "description": "Fast pin access for AVR microcontrollers",
+  "platforms": [
+    "atmelavr"
+  ],
+  "repository": {
+    "url": "https://github.com/watterott/Arduino-Libs.git",
+    "type": "git"
+  },
+  "keywords": [
+    "io",
+    "pin"
+  ]
+}
