@@ -3,6 +3,11 @@
 #include "arp.h"
 #include "leds.h"
 
+static byte arpNotes[128];
+static int arpNote;
+static bool arpPendulum;
+static byte scrubNote, scrubNoteLast;
+
 void showArp() {
 	arpRound = 0;
 	arpCounter = 0;
@@ -40,8 +45,6 @@ void showArp() {
 			break;
 	}
 }
-
-byte scrubNote, scrubNoteLast;
 
 void arpSteptrigger(int number) {
 

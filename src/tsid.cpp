@@ -153,5 +153,3 @@ void setup() {
 
 	setupMux();
 }
-
-byte x;

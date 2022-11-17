@@ -6,9 +6,11 @@
 #include "pots.h"
 #include "buttons.h"
 
-byte muxChannel;
-int pot;
-bool butt;
+static byte muxChannel;
+static int pot;
+static bool butt;
+static bool buttLast[33];
+static int potLast[42];
 
 const int POT_MAX = sizeof(potLast) / sizeof(*potLast); // number of array entries
 
@@ -85,6 +87,18 @@ void readMux() {
 		digitalWriteFast(A2, LOW);
 	}
 }
+
+static void Aon() { PORTB |= _BV(0); }
+static void Aoff() { PORTB &= ~_BV(0); }
+
+static void Bon() { PORTB |= _BV(1); }
+static void Boff() { PORTB &= ~_BV(1); }
+
+static void Con() { PORTB |= _BV(2); }
+static void Coff() { PORTB &= ~_BV(2); }
+
+static void Don() { PORTB |= _BV(3); }
+static void Doff() { PORTB &= ~_BV(3); }
 
 void mux(byte number) {
 
@@ -216,15 +230,3 @@ void mux(byte number) {
 			break;
 	}
 }
-
-void Aon() { PORTB |= _BV(0); }
-void Aoff() { PORTB &= ~_BV(0); }
-
-void Bon() { PORTB |= _BV(1); }
-void Boff() { PORTB &= ~_BV(1); }
-
-void Con() { PORTB |= _BV(2); }
-void Coff() { PORTB &= ~_BV(2); }
-
-void Don() { PORTB |= _BV(3); }
-void Doff() { PORTB &= ~_BV(3); }

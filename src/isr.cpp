@@ -4,6 +4,13 @@
 #include "leds.h"
 #include "isr.h"
 
+static int presetScrollTimer;
+static int envCounter;
+static bool gateLast;
+static byte glideCounter1, glideCounter2, glideCounter3;
+static int lfoCounter[3];
+static int env2;
+
 const int envMap[] = {
     0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
     0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
@@ -108,8 +115,6 @@ const int envMap2[] = {
     1960, 1967, 1974, 1981, 1988, 1995, 2001, 2008, 2015, 2022, 2029, 2036, 2043, 2050, 2057, 2064, 2070, 2077, 2084,
     2091, 2098, 2105, 2112, 2119, 2126, 2133, 2139, 2146, 2153, 2160, 2167, 2174, 2181, 2188, 2195, 2202,
 };
-
-int env2;
 
 // interrupt service route to animate things (LFO arp etc)
 void isr() {

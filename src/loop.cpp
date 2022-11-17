@@ -11,6 +11,9 @@
 #include "lfo.h"
 #include "sid.h"
 
+static bool loadedAfterStartup; // we load the preset after 2sec (when SID is ready)
+static bool saveModeFlash;
+
 void loop() {
 
 	// load the first preset after all the butts and pots have been scanned

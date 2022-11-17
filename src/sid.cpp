@@ -2,6 +2,11 @@
 #include "leds.h"
 #include "sid.h"
 
+static byte sid2[6];
+static float fine1, fine2, fine3;
+static int pitchB;
+static byte sidIndex;
+
 static const int32_t sidScale[] = {
     137,   145,   154,   163,   173,   183,   194,   205,   217,   230,   122,   259,   274,   291,   308,
     326,   346,   366,   388,   411,   435,   461,   489,   518,   549,   581,   616,   652,   691,   732,
@@ -14,6 +19,8 @@ static const int32_t sidScale[] = {
     35115, 37203, 39415, 41759, 44242, 46873, 49660, 52613, 55741, 59056, 62567,
 
 };
+
+static void sidDelay() { delayMicroseconds(4); }
 
 // COMS WITH SID CHIP
 
@@ -48,9 +55,7 @@ void init1MhzClock() {
 	OCR2A = 7;
 }
 
-void sidDelay() { delayMicroseconds(4); }
-
-void sidSend(byte address, byte data) {
+static void sidSend1Only(byte address, byte data) {
 
 	PORTC = address << 3;
 	PORTB = data;
@@ -62,6 +67,25 @@ void sidSend(byte address, byte data) {
 	sidDelay();
 	PORTD |= _BV(6);
 	PORTD &= ~_BV(3); // digitalWrite (0, LOW);
+}
+
+static void sidSend2(byte address, byte data) {
+
+	PORTC = address << 3;
+	PORTB = data;
+	PORTD |= _BV(3);
+	sidDelay();
+	PORTD &= ~_BV(2); // digitalWrite (0, LOW);
+	                  // delay(2);
+
+	sidDelay();
+	PORTD |= _BV(2);
+	PORTD &= ~_BV(3); // digitalWrite (0, LOW);
+}
+
+void sidSend(byte address, byte data) {
+
+	sidSend1Only(address, data);
 
 	if (fatMode) {
 		if (address == 0) {
@@ -84,36 +108,6 @@ void sidSend(byte address, byte data) {
 	}
 }
 
-void sidSend1Only(byte address, byte data) {
-
-	PORTC = address << 3;
-	PORTB = data;
-
-	sidDelay();
-
-	PORTD |= _BV(3);
-	PORTD &= ~_BV(6); // digitalWrite (0, LOW);
-	sidDelay();
-	PORTD |= _BV(6);
-	PORTD &= ~_BV(3); // digitalWrite (0, LOW);
-}
-
-void sidSend2(byte address, byte data) {
-
-	PORTC = address << 3;
-	PORTB = data;
-	PORTD |= _BV(3);
-	sidDelay();
-	PORTD &= ~_BV(2); // digitalWrite (0, LOW);
-	                  // delay(2);
-
-	sidDelay();
-	PORTD |= _BV(2);
-	PORTD &= ~_BV(3); // digitalWrite (0, LOW);
-}
-
-byte sidIndex;
-
 void sidUpdate() {
 
 	sidIndex++;
@@ -123,12 +117,12 @@ void sidUpdate() {
 	// filter non realtime ones
 	if ((sidIndex == 6) || (sidIndex == 13) || (sidIndex == 20)) {
 		if (pa) {
+			// FIXME: do not send these when the corresponding voice is currently active.
 
-			if ((!slot[0]) && (!slot[1]) && (!slot[2]) && (sid[sidIndex] != sidLast[sidIndex])) {
+			if (/*(!slot[0]) && (!slot[1]) && (!slot[2]) && */ (sid[sidIndex] != sidLast[sidIndex])) {
 				sidLast[sidIndex] = sid[sidIndex];
 				sidSend(sidIndex, sid[sidIndex]);
 			}
-
 		} else {
 			if ((held < 1) && (sid[sidIndex] != sidLast[sidIndex])) {
 
@@ -177,8 +171,6 @@ void sidUpdate() {
 		}
 	}
 }
-
-int pitchB;
 
 void sidPitch(byte voice, int pitch) {
 
@@ -485,7 +477,7 @@ void updateFilter() {
 
 void calculatePitch() {
 
-	if ((!note1) && (!note2) && (!note3)) {
+	if ((!note_val[0]) && (!note_val[1]) && (!note_val[2])) {
 
 		// no individual channels
 
@@ -655,9 +647,9 @@ void calculatePitch() {
 		int temp;
 
 		// individual channels
-		if (note1) {
+		if (note_val[0]) {
 			// Pitch
-			temp = -1 + note1 + tuneBase1 + lfoTune1 + lfoTune2 + lfoTune3;
+			temp = -1 + note_val[0] + tuneBase1 + lfoTune1 + lfoTune2 + lfoTune3;
 			if (temp > 127) {
 				temp = 127;
 			} else if (temp - 12 < 0) {
@@ -668,23 +660,26 @@ void calculatePitch() {
 				fine1 = 1;
 
 			if (bend1 > 0) {
-				destiPitch1 = sidScale[temp - 12] +
-				              ((sidScale[note1 + tuneBase1 - 10] - sidScale[note1 + tuneBase1 - 12]) * fine1) +
-				              ((sidScale[note1 + tuneBase1 - 10] - sidScale[note1 + tuneBase1 - 12]) * bend1);
+				destiPitch1 =
+				    sidScale[temp - 12] +
+				    ((sidScale[note_val[0] + tuneBase1 - 10] - sidScale[note_val[0] + tuneBase1 - 12]) * fine1) +
+				    ((sidScale[note_val[0] + tuneBase1 - 10] - sidScale[note_val[0] + tuneBase1 - 12]) * bend1);
 			} else if (bend1 < 0) {
 
-				destiPitch1 = sidScale[temp - 12] +
-				              ((sidScale[note1 + tuneBase1 - 10] - sidScale[note1 + tuneBase1 - 12]) * fine1) -
-				              ((sidScale[note1 + tuneBase1 - 12] - sidScale[note1 + tuneBase1 - 10]) * bend1);
+				destiPitch1 =
+				    sidScale[temp - 12] +
+				    ((sidScale[note_val[0] + tuneBase1 - 10] - sidScale[note_val[0] + tuneBase1 - 12]) * fine1) -
+				    ((sidScale[note_val[0] + tuneBase1 - 12] - sidScale[note_val[0] + tuneBase1 - 10]) * bend1);
 			} else {
-				destiPitch1 = sidScale[temp - 12] +
-				              ((sidScale[note1 + tuneBase1 - 10] - sidScale[note1 + tuneBase1 - 12]) * fine1);
+				destiPitch1 =
+				    sidScale[temp - 12] +
+				    ((sidScale[note_val[0] + tuneBase1 - 10] - sidScale[note_val[0] + tuneBase1 - 12]) * fine1);
 			}
 		}
 
-		if (note2) {
+		if (note_val[1]) {
 			// Pitch
-			temp = -1 + note2 + tuneBase2 + lfoTune4 + lfoTune5 + lfoTune6;
+			temp = -1 + note_val[1] + tuneBase2 + lfoTune4 + lfoTune5 + lfoTune6;
 			if (temp > 127) {
 				temp = 127;
 			} else if (temp - 12 < 0) {
@@ -695,21 +690,24 @@ void calculatePitch() {
 				fine2 = 1;
 
 			if (bend2 > 0) {
-				destiPitch2 = sidScale[temp - 12] +
-				              ((sidScale[note2 + tuneBase2 - 10] - sidScale[note2 + tuneBase2 - 12]) * fine2) +
-				              ((sidScale[note2 + tuneBase2 - 10] - sidScale[note2 + tuneBase2 - 12]) * bend2);
+				destiPitch2 =
+				    sidScale[temp - 12] +
+				    ((sidScale[note_val[1] + tuneBase2 - 10] - sidScale[note_val[1] + tuneBase2 - 12]) * fine2) +
+				    ((sidScale[note_val[1] + tuneBase2 - 10] - sidScale[note_val[1] + tuneBase2 - 12]) * bend2);
 			} else if (bend2 < 0) {
-				destiPitch2 = sidScale[temp - 12] +
-				              ((sidScale[note2 + tuneBase2 - 10] - sidScale[note2 + tuneBase2 - 12]) * fine2) -
-				              ((sidScale[note2 + tuneBase2 - 12] - sidScale[note2 + tuneBase2 - 10]) * bend2);
+				destiPitch2 =
+				    sidScale[temp - 12] +
+				    ((sidScale[note_val[1] + tuneBase2 - 10] - sidScale[note_val[1] + tuneBase2 - 12]) * fine2) -
+				    ((sidScale[note_val[1] + tuneBase2 - 12] - sidScale[note_val[1] + tuneBase2 - 10]) * bend2);
 			} else {
-				destiPitch2 = sidScale[temp - 12] +
-				              ((sidScale[note2 + tuneBase2 - 10] - sidScale[note2 + tuneBase2 - 12]) * fine2);
+				destiPitch2 =
+				    sidScale[temp - 12] +
+				    ((sidScale[note_val[1] + tuneBase2 - 10] - sidScale[note_val[1] + tuneBase2 - 12]) * fine2);
 			}
 		}
-		if (note3) {
+		if (note_val[2]) {
 
-			temp = -1 + note3 + tuneBase3 + lfoTune7 + lfoTune8 + lfoTune9;
+			temp = -1 + note_val[2] + tuneBase3 + lfoTune7 + lfoTune8 + lfoTune9;
 			if (temp > 127) {
 				temp = 127;
 			} else if (temp - 12 < 0) {
@@ -720,16 +718,19 @@ void calculatePitch() {
 				fine3 = 1;
 
 			if (bend3 > 0) {
-				destiPitch3 = sidScale[temp - 12] +
-				              ((sidScale[note3 + tuneBase3 - 10] - sidScale[note3 + tuneBase3 - 12]) * fine3) +
-				              ((sidScale[note3 + tuneBase3 - 10] - sidScale[note3 + tuneBase3 - 12]) * bend3);
+				destiPitch3 =
+				    sidScale[temp - 12] +
+				    ((sidScale[note_val[2] + tuneBase3 - 10] - sidScale[note_val[2] + tuneBase3 - 12]) * fine3) +
+				    ((sidScale[note_val[2] + tuneBase3 - 10] - sidScale[note_val[2] + tuneBase3 - 12]) * bend3);
 			} else if (bend3 < 0) {
-				destiPitch3 = sidScale[temp - 12] +
-				              ((sidScale[note3 + tuneBase3 - 10] - sidScale[note3 + tuneBase3 - 12]) * fine3) -
-				              ((sidScale[note3 + tuneBase3 - 12] - sidScale[note3 + tuneBase3 - 10]) * bend3);
+				destiPitch3 =
+				    sidScale[temp - 12] +
+				    ((sidScale[note_val[2] + tuneBase3 - 10] - sidScale[note_val[2] + tuneBase3 - 12]) * fine3) -
+				    ((sidScale[note_val[2] + tuneBase3 - 12] - sidScale[note_val[2] + tuneBase3 - 10]) * bend3);
 			} else {
-				destiPitch3 = sidScale[temp - 12] +
-				              ((sidScale[note3 + tuneBase3 - 10] - sidScale[note3 + tuneBase3 - 12]) * fine3);
+				destiPitch3 =
+				    sidScale[temp - 12] +
+				    ((sidScale[note_val[2] + tuneBase3 - 10] - sidScale[note_val[2] + tuneBase3 - 12]) * fine3);
 			}
 		}
 

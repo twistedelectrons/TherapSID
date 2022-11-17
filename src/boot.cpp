@@ -3,7 +3,7 @@
 #include "boot.h"
 
 // boot animation
-byte del = 20; // sets the animation speed
+static byte del = 20; // sets the animation speed
 
 void boot() {
 

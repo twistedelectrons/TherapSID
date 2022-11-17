@@ -4,9 +4,24 @@
 #include "arp.h"
 #include "midi.h"
 
-const bool limitPw = true;
-const int pwMin = 10;
-const int pwMax = 2050;
+static int arpRangeLfo1, arpRangeLfo3, arpRangeLfo2;
+static int arpSpeedLfo1, arpSpeedLfo2, arpSpeedLfo3;
+static int arpStep;
+static int arpStepLast, arpStepLfo1, arpStepLfo2, arpStepLfo3;
+static int finalCut;
+static int lfoCut1, lfoCut2, lfoCut3;
+static int lfoSpeedLfo1, lfoSpeedLfo2, lfoSpeedLfo3, lfoSpeedLfo4, lfoSpeedLfo5, lfoSpeedLfo6, lfoDepthLfo1,
+    lfoDepthLfo2, lfoDepthLfo3, lfoDepthLfo4, lfoDepthLfo5, lfoDepthLfo6;
+static int pw1, pw2, pw3;
+static int pw1Lfo1, pw1Lfo2, pw1Lfo3, pw2Lfo1, pw2Lfo2, pw2Lfo3, pw3Lfo1, pw3Lfo2, pw3Lfo3;
+static byte resLfo1, resLfo2, resLfo3, res;
+static byte selectedLfoLast;
+static int lfoDepth[3];
+static byte lfoLast[3];
+
+static const bool limitPw = true;
+static const int pwMin = 10;
+static const int pwMax = 2050;
 
 void setLfo(byte number) {
 
@@ -526,5 +541,3 @@ void clearLfo() {
 	digit(0, 10);
 	digit(1, 11);
 }
-
-void checkIllegalModulation() {}
