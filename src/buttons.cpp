@@ -509,11 +509,12 @@ void buttChanged(byte number, bool value) {
 					unShowFilterAssigns();
 
 					if (!assignmentChanged) {
-						filterMode++;
-						if (filterMode > 4)
-							filterMode = 0;
+						// TODO ugh
+						filterMode = static_cast<FilterMode>(
+							(static_cast<int>(filterMode) + 1) % 5
+						);
 						updateFilter();
-						sendCC(55, map(filterMode, 0, 4, 0, 1023));
+						sendCC(55, map((int)filterMode, 0, 4, 0, 1023));
 					}
 				} else {
 					fatChanged = false;

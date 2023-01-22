@@ -2,11 +2,6 @@
 #include "leds.h"
 #include "sid.h"
 
-static byte sid2[6];
-static float fine1, fine2, fine3;
-static int pitchB;
-static byte sidIndex;
-
 static const int32_t sidScale[] = {
     137,   145,   154,   163,   173,   183,   194,   205,   217,   230,   122,   259,   274,   291,   308,
     326,   346,   366,   388,   411,   435,   461,   489,   518,   549,   581,   616,   652,   691,   732,
@@ -20,12 +15,9 @@ static const int32_t sidScale[] = {
 
 };
 
-static void sidDelay() { delayMicroseconds(4); }
-
 // COMS WITH SID CHIP
 
 void sidReset() {
-
 	digitalWrite(A6, LOW);
 	delay(50);
 	digitalWrite(A6, HIGH);
@@ -55,738 +47,324 @@ void init1MhzClock() {
 	OCR2A = 7;
 }
 
-static void sidSend1Only(byte address, byte data) {
+struct pair {
+	int first;
+	int second;
+};
 
-	PORTC = address << 3;
-	PORTB = data;
-
-	sidDelay();
-
-	PORTD |= _BV(3);
-	PORTD &= ~_BV(6); // digitalWrite (0, LOW);
-	sidDelay();
-	PORTD |= _BV(6);
-	PORTD &= ~_BV(3); // digitalWrite (0, LOW);
+static void write_mask(uint8_t& value, uint8_t mask, uint8_t new_value) {
+	value = (value & (~mask)) | (new_value & mask);
 }
 
-static void sidSend2(byte address, byte data) {
+class Sid {
+	public:
+		Sid(int chip_enable_bit) : chip_enable_bit(chip_enable_bit) {}
 
-	PORTC = address << 3;
-	PORTB = data;
-	PORTD |= _BV(3);
-	sidDelay();
-	PORTD &= ~_BV(2); // digitalWrite (0, LOW);
-	                  // delay(2);
+		/// Updates the next pair of changed registers. Call this in your main loop.
+		void send_next_update_pair() {
+			// some get sent twice just because it's easier to not special-case them.
+			pair send_order[] = { {1, 0}, {3,2}, {4,5}, {6, 13}, {8, 7}, {10,9}, {11,12}, {15,14}, {17, 16}, {18,19}, {20, 23}, {22, 21}, {24, 24} };
+			const size_t SEND_ORDER_LEN = sizeof(send_order) / sizeof(*send_order);
 
-	sidDelay();
-	PORTD |= _BV(2);
-	PORTD &= ~_BV(3); // digitalWrite (0, LOW);
-}
+			for (size_t i = 0; i < SEND_ORDER_LEN; i++) {
+				bool updated = false;
+				updated |= maybe_update_register(send_order[next_pair].first);
+				updated |= maybe_update_register(send_order[next_pair].second);
+				next_pair = (next_pair + 1) % SEND_ORDER_LEN;
 
-void sidSend(byte address, byte data) {
+				if (next_pair == 0) {
+					force_initial_update = false;
+				}
 
-	sidSend1Only(address, data);
-
-	if (fatMode) {
-		if (address == 0) {
-			sidSend2(address, sid2[0]);
-		} else if (address == 1) {
-			sidSend2(address, sid2[1]);
-		} else if (address == 7) {
-			sidSend2(address, sid2[2]);
-		} else if (address == 8) {
-			sidSend2(address, sid2[3]);
-		} else if (address == 14) {
-			sidSend2(address, sid2[4]);
-		} else if (address == 15) {
-			sidSend2(address, sid2[5]);
-		} else {
-			sidSend2(address, data);
-		}
-	} else {
-		sidSend2(address, data);
-	}
-}
-
-void sidUpdate() {
-
-	sidIndex++;
-	if (sidIndex > 23)
-		sidIndex = 0;
-
-	// filter non realtime ones
-	if ((sidIndex == 6) || (sidIndex == 13) || (sidIndex == 20)) {
-		if (pa) {
-			// FIXME: do not send these when the corresponding voice is currently active.
-
-			if (/*(!slot[0]) && (!slot[1]) && (!slot[2]) && */ (sid[sidIndex] != sidLast[sidIndex])) {
-				sidLast[sidIndex] = sid[sidIndex];
-				sidSend(sidIndex, sid[sidIndex]);
-			}
-		} else {
-			if ((held < 1) && (sid[sidIndex] != sidLast[sidIndex])) {
-
-				sidLast[sidIndex] = sid[sidIndex];
-				sidSend(sidIndex, sid[sidIndex]);
-			}
-		}
-
-	} else {
-
-		if (sidIndex == 2) {
-			sidSend(3, sid[3]);
-			sidSend(2, sid[2]);
-			sidIndex++;
-		} else if (sidIndex == 9) {
-			sidSend(10, sid[10]);
-			sidSend(9, sid[9]);
-			sidIndex++;
-		} else if (sidIndex == 16) {
-			sidSend(17, sid[17]);
-			sidSend(16, sid[16]);
-			sidIndex++;
-		}
-
-		else {
-
-			if (sid[sidIndex] != sidLast[sidIndex]) {
-
-				sidLast[sidIndex] = sid[sidIndex];
-				sidSend(sidIndex, sid[sidIndex]);
-
-				if (sidIndex == 0) {
-					sidSend(1, sid[1]);
-				} else if (sidIndex == 1) {
-					sidSend(0, sid[0]);
-				} else if (sidIndex == 7) {
-					sidSend(8, sid[8]);
-				} else if (sidIndex == 8) {
-					sidSend(7, sid[7]);
-				} else if (sidIndex == 14) {
-					sidSend(15, sid[15]);
-				} else if (sidIndex == 15) {
-					sidSend(14, sid[14]);
+				if (updated) {
+					return;
 				}
 			}
 		}
+
+		void set_freq(int voice, uint16_t value) {
+			registers[7*voice + FREQ_LO] = value & 0xFF;
+			registers[7*voice + FREQ_HI] = value >> 8;
+		}
+
+		enum Shape {
+			NOISE = 1<<7,
+			PULSE = 1<<6,
+			SAW = 1<<5,
+			TRI = 1<<4
+		};
+
+		/// `value` needs to be OR-ed together out of NOISE, PULSE, SAW and/or TRI.
+		/// Note that enabling NOISE together with any other waveform can clear the
+		/// noise shift register inside the chip.
+		void set_shape(int voice, byte value) {
+			registers[7*voice + CONTROL] &= 0x0f;
+			registers[7*voice + CONTROL] |= value;
+		}
+
+		byte shape(int voice) const {
+			return registers[7*voice + CONTROL] & 0xf0;
+		}
+
+		enum FilterMode {
+			HIGHPASS = 1<<6,
+			BANDPASS = 1<<5,
+			LOWPASS = 1<<4
+		};
+
+		void set_filter_mode(uint8_t value) {
+			write_mask(registers[FILTER_MODE_VOLUME], HIGHPASS | BANDPASS | LOWPASS, value);
+		}
+
+		uint8_t filter_mode() {
+			return registers[FILTER_MODE_VOLUME] & (HIGHPASS | BANDPASS | LOWPASS);
+		}
+
+		/// In addition to the usual 3 voices, this accepts voice==3 for the external input.
+		void set_voice_filter(int voice, bool enable) {
+			bitWrite(registers[FILTER_RESONANCE_ROUTING], voice, enable);
+		}
+
+		enum VoiceRegister {
+			FREQ_LO = 0,
+			FREQ_HI,
+			PULSEWIDTH_LO,
+			PULSEWIDTH_HI,
+			CONTROL,
+			ATTACK_DECAY,
+			SUSTAIN_RELEASE
+		};
+
+		enum Register {
+			FREQ1_LO = 0,
+			FREQ1_HI,
+			PULSEWIDTH1_LO,
+			PULSEWIDTH1_HI,
+			CONTROL1,
+			ATTACK_DECAY1,
+			SUSTAIN_RELEASE1,
+
+			FREQ2_LO,
+			FREQ2_HI,
+			PULSEWIDTH2_LO,
+			PULSEWIDTH2_HI,
+			CONTROL2,
+			ATTACK_DECAY2,
+			SUSTAIN_RELEASE2,
+
+			FREQ3_LO,
+			FREQ3_HI,
+			PULSEWIDTH3_LO,
+			PULSEWIDTH3_HI,
+			CONTROL3,
+			ATTACK_DECAY3,
+			SUSTAIN_RELEASE3,
+
+			FILTER_CUTOFF_LO,
+			FILTER_CUTOFF_HI,
+			FILTER_RESONANCE_ROUTING,
+			FILTER_MODE_VOLUME,
+
+			POTX,
+			POTY,
+			OSC3_RANDOM,
+			ENV3
+		};
+
+	private:
+		bool is_voice_playing(size_t voice) {
+			return registers[7*voice + CONTROL] & 1;
+		}
+
+		bool is_update_allowed(size_t register_index) {
+			if (register_index == SUSTAIN_RELEASE1 || register_index == SUSTAIN_RELEASE2 || register_index == SUSTAIN_RELEASE3) {
+				auto voice = register_index / 7;
+				return !is_voice_playing(voice);
+			}
+			else {
+				return true;
+			}
+		}
+
+		/// Updates a SID register if it has been changed, and if it's currently allowed to update it.
+		bool maybe_update_register(size_t index) {
+			bool has_changed = registers_sent[index] == registers[index];
+			bool is_allowed = is_update_allowed(index);
+			if ((has_changed && is_allowed) || force_initial_update) {
+				registers_sent[index] = registers[index];
+				send(index, registers[index]);
+				return true;
+			}
+			return false;
+		}
+
+		void send(size_t index, int data) {
+			PORTC = index << 3;
+			PORTB = data;
+			delayMicroseconds(4);
+
+			PORTD |= _BV(3);
+			PORTD &= ~_BV(chip_enable_bit);
+			delayMicroseconds(4);
+
+			PORTD |= _BV(chip_enable_bit);
+			PORTD &= ~_BV(3);
+			delayMicroseconds(4);
+		}
+
+		size_t next_pair = 0;
+		int chip_enable_bit;
+		bool force_initial_update = true;
+		byte registers[25];
+		byte registers_sent[25];
+};
+
+Sid sid_chips[2] = {Sid(_BV(6)), Sid(_BV(2))};
+
+
+
+void ledUpdateShape() {
+	// update leds
+	for (int voice = 0; voice < 3; voice++) {
+		ledSet(7*voice + 1, sid_chips[0].shape(voice) & Sid::PULSE);
+		ledSet(7*voice + 2, sid_chips[0].shape(voice) & Sid::TRI);
+		ledSet(7*voice + 3, sid_chips[0].shape(voice) & Sid::SAW);
+		ledSet(7*voice + 4, sid_chips[0].shape(voice) & Sid::NOISE);
+	}
+}
+
+void ledUpdateFilterMode() {
+	// FIXME: do not use sid registers for GUI purposes
+	ledSet(27, sid_chips[0].filter_mode() & Sid::LOWPASS);
+	ledSet(28, sid_chips[0].filter_mode() & Sid::BANDPASS);
+	ledSet(29, sid_chips[0].filter_mode() & Sid::HIGHPASS);
+}
+
+
+
+static uint16_t fat_pitch(uint16_t pitch, FatMode fatMode) {
+	switch (fatMode) {
+		case FatMode::UNISONO:
+			return pitch;
+		case FatMode::OCTAVE_UP:
+			if (pitch < 0xffff / 2) {
+				return pitch * 2;
+			}
+			else {
+				return pitch;
+			}
+		case FatMode::DETUNE_SLIGHT:
+			return pitch - 15;
+		case FatMode::DETUNE_MUCH:
+			return pitch - 50;
 	}
 }
 
 void sidPitch(byte voice, int pitch) {
-
-	switch (voice) {
-		case 0:
-
-			sid[0] = pitch;
-			sid[1] = pitch >> 8;
-
-			if (fatMode == 1) {
-				pitchB = pitch;
-				if (pitch < 32760) {
-					pitchB = pitch * 2;
-				}
-				sid2[0] = pitchB;
-				sid2[1] = pitchB >> 8;
-			} else if (fatMode > 1) {
-				pitchB = pitch - fat;
-
-				sid2[0] = pitchB;
-				sid2[1] = pitchB >> 8;
-			}
-
-			break;
-
-		case 1:
-			sid[7] = pitch;
-			sid[8] = pitch >> 8;
-
-			if (fatMode == 1) {
-				pitchB = pitch * 2;
-
-				sid2[2] = pitchB;
-				sid2[3] = pitchB >> 8;
-			} else if (fatMode > 1) {
-				pitchB = pitch - fat;
-
-				sid2[2] = pitchB;
-				sid2[3] = pitchB >> 8;
-			}
-
-			break;
-
-		case 2:
-			sid[14] = pitch;
-			sid[15] = pitch >> 8;
-
-			if (fatMode == 1) {
-				pitchB = pitch * 2;
-
-				sid2[4] = pitchB;
-				sid2[5] = pitchB >> 8;
-			} else if (fatMode > 1) {
-				pitchB = pitch - fat;
-
-				sid2[4] = pitchB;
-				sid2[5] = pitchB >> 8;
-			}
-
-			break;
-	}
+	sid_chips[0].set_freq(voice, pitch);
+	sid_chips[1].set_freq(voice, fat_pitch(pitch, fatMode));
 }
 
 void sidShape(byte voice, byte shape, bool value) {
+	if (shape <= 1 || shape > 4) return;
+	const byte mapping[] = { 0, Sid::PULSE, Sid::TRI, Sid::SAW, Sid::NOISE };
+	byte shape_mask = mapping[shape];
 
-	if (value) {
-		switch (voice) {
+	for (auto& chip : sid_chips) {
+		auto new_value = (chip.shape(voice) & (~shape_mask)) | (value? shape_mask : 0);
 
-			case 0:
-				switch (shape) {
-
-					case 1:
-						bitWrite(sid[4], 7, 0);
-						bitWrite(sid[4], 6, value);
-						ledSet(1, value);
-						ledSet(4, 0);
-						break;
-					case 2:
-						bitWrite(sid[4], 7, 0);
-						bitWrite(sid[4], 4, value);
-						ledSet(2, value);
-						ledSet(4, 0);
-						break;
-					case 3:
-						bitWrite(sid[4], 7, 0);
-						bitWrite(sid[4], 5, value);
-						ledSet(3, value);
-						ledSet(4, 0);
-						break;
-					case 4:
-						bitWrite(sid[4], 6, 0);
-						bitWrite(sid[4], 4, 0);
-						bitWrite(sid[4], 5, 0);
-						bitWrite(sid[4], 7, value);
-						ledSet(4, value);
-						ledSet(1, 0);
-						ledSet(2, 0);
-						ledSet(3, 0);
-						break;
-				}
-				break;
-
-			case 1:
-				switch (shape) {
-					case 1:
-						bitWrite(sid[11], 7, 0);
-						bitWrite(sid[11], 6, value);
-						ledSet(5, value);
-						ledSet(8, 0);
-						break;
-					case 2:
-						bitWrite(sid[11], 7, 0);
-						bitWrite(sid[11], 4, value);
-						ledSet(6, value);
-						ledSet(8, 0);
-						break;
-					case 3:
-						bitWrite(sid[11], 7, 0);
-						bitWrite(sid[11], 5, value);
-						ledSet(7, value);
-						ledSet(8, 0);
-						break;
-					case 4:
-						bitWrite(sid[11], 6, 0);
-						bitWrite(sid[11], 4, 0);
-						bitWrite(sid[11], 5, 0);
-						bitWrite(sid[11], 7, value);
-						ledSet(8, value);
-						ledSet(5, 0);
-						ledSet(6, 0);
-						ledSet(7, 0);
-						break;
-				}
-				break;
-
-			case 2:
-				switch (shape) {
-					case 1:
-						bitWrite(sid[18], 7, 0);
-						bitWrite(sid[18], 6, value);
-						ledSet(9, value);
-						ledSet(12, 0);
-						break;
-					case 2:
-						bitWrite(sid[18], 7, 0);
-						bitWrite(sid[18], 4, value);
-						ledSet(10, value);
-						ledSet(12, 0);
-						break;
-					case 3:
-						bitWrite(sid[18], 7, 0);
-						bitWrite(sid[18], 5, value);
-						ledSet(11, value);
-						ledSet(12, 0);
-						break;
-					case 4:
-						bitWrite(sid[18], 6, 0);
-						bitWrite(sid[18], 4, 0);
-						bitWrite(sid[18], 5, 0);
-						bitWrite(sid[18], 7, value);
-						ledSet(12, value);
-						ledSet(9, 0);
-						ledSet(10, 0);
-						ledSet(11, 0);
-						break;
-				}
-				break;
+		// Make sure that noise is not enabled together with any other waveform.
+		if (value) {
+			if (shape_mask == Sid::NOISE) {
+				// If the noise waveform has been turned on, disable the other three.
+				new_value &= ~(Sid::TRI | Sid::SAW | Sid::PULSE);
+			}
+			else {
+				// If one of the other three waveforms was enabled, make sure to disable noise.
+				new_value &= ~Sid::NOISE;
+			}
 		}
 
-	} else {
-		switch (voice) {
-
-			case 0:
-				switch (shape) {
-					case 1:
-						bitWrite(sid[4], 6, value);
-						ledSet(1, value);
-						break;
-					case 2:
-						bitWrite(sid[4], 4, value);
-						ledSet(2, value);
-						break;
-					case 3:
-						bitWrite(sid[4], 5, value);
-						ledSet(3, value);
-						break;
-					case 4:
-						bitWrite(sid[4], 7, value);
-						ledSet(4, value);
-						break;
-				}
-				break;
-
-			case 1:
-				switch (shape) {
-					case 1:
-						bitWrite(sid[11], 6, value);
-						ledSet(5, value);
-						break;
-					case 2:
-						bitWrite(sid[11], 4, value);
-						ledSet(6, value);
-						break;
-					case 3:
-						bitWrite(sid[11], 5, value);
-						ledSet(7, value);
-						break;
-					case 4:
-						bitWrite(sid[11], 7, value);
-						ledSet(8, value);
-						break;
-				}
-				break;
-
-			case 2:
-				switch (shape) {
-					case 1:
-						bitWrite(sid[18], 6, value);
-						ledSet(9, value);
-						break;
-					case 2:
-						bitWrite(sid[18], 4, value);
-						ledSet(10, value);
-						break;
-					case 3:
-						bitWrite(sid[18], 5, value);
-						ledSet(11, value);
-						break;
-					case 4:
-						bitWrite(sid[18], 7, value);
-						ledSet(12, value);
-						break;
-				}
-				break;
-		}
+		chip.set_shape(voice, new_value);
 	}
+
+	ledUpdateShape(); // FIXME
 }
 
+// FIXME parameter
 void updateFilter() {
+	// assert((unsigned) filterMode < 5); // FIXME
 
-	if (filterMode == 0) {
-		// lp
-		sid[24] = B00010000;
+	uint8_t filter_mapping[] = { Sid::LOWPASS, Sid::BANDPASS, Sid::HIGHPASS, Sid::LOWPASS | Sid::HIGHPASS, 0 };
 
+	for (auto& chip : sid_chips) {
+		chip.set_filter_mode(filter_mapping[(unsigned)filterMode]);
+		chip.set_voice_filter(3, filterMode != FilterMode::OFF);
+
+		// Disable voice->filter routing if voice is off or filter is off.
+		for (int voice = 0; voice < 3; voice++) {
+			if (chip.shape(voice) == 0 || filterMode == FilterMode::OFF) {
+				chip.set_voice_filter(voice, false);
+			}
+		}
 	}
 
-	else if (filterMode == 1) {
+	ledUpdateFilterMode();
+}
 
-		// bp
-		sid[24] = B00100000;
 
+static int calc_pitch(int note, float frac) {
+	if (note > 127) {
+		note = 127;
+	} else if (note - 13 < 0) {
+		note = 13;
 	}
 
-	else if (filterMode == 2) {
-		// hp
-		sid[24] = B01000000;
+	float fine = frac / 2 + 0.5;
+	fine *= .90;
 
+	return sidScale[note - 12 - 1] + (sidScale[note - 12 + 2] - sidScale[note - 12]) * fine;
+}
+
+
+static void updateDestiPitches(int note1, int note2, int note3) {
+	if (note1) {
+		destiPitch1 = calc_pitch(
+			note1 + tuneBase1 + lfoTune1 + lfoTune2 + lfoTune3,
+			fineBase1 + lfoFine2 + lfoFine1 + lfoFine3 + bend/0.9
+		);
 	}
 
-	else if (filterMode == 3) {
-
-		// lp+hp
-		sid[24] = B01010000;
+	if (note2) {
+		destiPitch2 = calc_pitch(
+			note2 + tuneBase2 + lfoTune4 + lfoTune5 + lfoTune6,
+			fineBase2 + lfoFine4 + lfoFine5 + lfoFine6 + bend / 0.9
+		);
 	}
-
-	if (filterMode == 4) {
-
-		// off
-		sid[24] = B00000000;
+	
+	if (note3) {
+		destiPitch3 = calc_pitch(
+			note3 + tuneBase3 + lfoTune7 + lfoTune8 + lfoTune9,
+			fineBase3 + lfoFine7 + lfoFine8 + lfoFine9 + bend / 0.9
+		);
 	}
-
-	if (filterMode != 4) {
-		bitWrite(sid[23], 0, 1);
-		bitWrite(sid[23], 1, 1);
-		bitWrite(sid[23], 2, 1);
-		bitWrite(sid[23], 3, 1);
-	} else {
-
-		bitWrite(sid[23], 0, 0);
-		bitWrite(sid[23], 1, 0);
-		bitWrite(sid[23], 2, 0);
-		bitWrite(sid[23], 3, 0);
-	}
-
-	ledSet(27, bitRead(sid[24], 4));
-	ledSet(28, bitRead(sid[24], 5));
-	ledSet(29, bitRead(sid[24], 6));
-
-	// unMute
-	sidSend(24, sid[24]);
-
-	delay(100);
-
-	bitWrite(sid[24], 0, 1);
-	bitWrite(sid[24], 1, 1);
-	bitWrite(sid[24], 2, 1);
-	bitWrite(sid[24], 3, 1);
-	sidSend(24, sid[24]);
-
-	setFilterBit(0);
-	setFilterBit(1);
-	setFilterBit(2);
 }
 
 void calculatePitch() {
 
 	if ((!note_val[0]) && (!note_val[1]) && (!note_val[2])) {
-
 		// no individual channels
-
 		if (!pa) {
-			// Pitch
-			int temp = -1 + key + tuneBase1 + lfoTune1 + lfoTune2 + lfoTune3;
-
-			if (temp > 127) {
-				temp = 127;
-			} else if (temp - 12 < 0) {
-				temp = 12;
-			}
-
-			fine1 = fineBase1 + lfoFine2 + lfoFine1 + lfoFine3;
-			if (fine1 > 1)
-				fine1 = 1;
-			fine1 *= .90;
-
-			if (bend > 0) {
-				destiPitch1 = sidScale[temp - 12] +
-				              ((sidScale[key + tuneBase1 - 10] - sidScale[key + tuneBase1 - 12]) * fine1) +
-				              ((sidScale[key + tuneBase1 - 10] - sidScale[key + tuneBase1 - 12]) * bend);
-			} else if (bend < 0) {
-
-				destiPitch1 = sidScale[temp - 12] +
-				              ((sidScale[key + tuneBase1 - 10] - sidScale[key + tuneBase1 - 12]) * fine1) -
-				              ((sidScale[key + tuneBase1 - 12] - sidScale[key + tuneBase1 - 10]) * bend);
-			} else {
-				destiPitch1 =
-				    sidScale[temp - 12] + ((sidScale[key + tuneBase1 - 10] - sidScale[key + tuneBase1 - 12]) * fine1);
-			}
-
-			temp = -1 + key + tuneBase2 + lfoTune4 + lfoTune5 + lfoTune6;
-			if (temp > 127) {
-				temp = 127;
-			} else if (temp - 12 < 0) {
-				temp = 12;
-			}
-
-			fine2 = fineBase2 + lfoFine4 + lfoFine5 + lfoFine6;
-			if (fine2 > 1)
-				fine2 = 1;
-			fine2 *= .90;
-
-			if (bend > 0) {
-				destiPitch2 = sidScale[temp - 12] +
-				              ((sidScale[key + tuneBase2 - 10] - sidScale[key + tuneBase2 - 12]) * fine2) +
-				              ((sidScale[key + tuneBase2 - 10] - sidScale[key + tuneBase2 - 12]) * bend);
-			} else if (bend < 0) {
-				destiPitch2 = sidScale[temp - 12] +
-				              ((sidScale[key + tuneBase2 - 10] - sidScale[key + tuneBase2 - 12]) * fine2) -
-				              ((sidScale[key + tuneBase2 - 12] - sidScale[key + tuneBase2 - 10]) * bend);
-			} else {
-				destiPitch2 =
-				    sidScale[temp - 12] + ((sidScale[key + tuneBase2 - 10] - sidScale[key + tuneBase2 - 12]) * fine2);
-			}
-
-			temp = -1 + key + tuneBase3 + lfoTune7 + lfoTune8 + lfoTune9;
-			if (temp > 127) {
-				temp = 127;
-			} else if (temp - 12 < 0) {
-				temp = 12;
-			}
-
-			fine3 = fineBase3 + lfoFine7 + lfoFine8 + lfoFine9;
-			if (fine3 > 1)
-				fine3 = 1;
-			fine3 *= .90;
-
-			if (bend > 0) {
-				destiPitch3 = sidScale[temp - 12] +
-				              ((sidScale[key + tuneBase3 - 10] - sidScale[key + tuneBase3 - 12]) * fine3) +
-				              ((sidScale[key + tuneBase3 - 10] - sidScale[key + tuneBase3 - 12]) * bend);
-			} else if (bend < 0) {
-				destiPitch3 = sidScale[temp - 12] +
-				              ((sidScale[key + tuneBase3 - 10] - sidScale[key + tuneBase3 - 12]) * fine3) -
-				              ((sidScale[key + tuneBase3 - 12] - sidScale[key + tuneBase3 - 10]) * bend);
-			} else {
-				destiPitch3 =
-				    sidScale[temp - 12] + ((sidScale[key + tuneBase3 - 10] - sidScale[key + tuneBase3 - 12]) * fine3);
-			}
-
-			sidPitch(0, pitch1);
-			sidPitch(1, pitch2);
-			sidPitch(2, pitch3);
+			updateDestiPitches(key, key, key);
 		} else {
-
-			// paraphonic
-
-			// Pitch
-			int temp = -1 + pKey[0] + tuneBase1 + lfoTune1 + lfoTune2 + lfoTune3;
-			if (temp > 127) {
-				temp = 127;
-			} else if (temp - 12 < 0) {
-				temp = 12;
-			}
-			fine1 = fineBase1 + lfoFine2 + lfoFine1 + lfoFine3;
-			if (fine1 > 1)
-				fine1 = 1;
-
-			if (bend > 0) {
-				destiPitch1 = sidScale[temp - 12] +
-				              ((sidScale[pKey[0] + tuneBase1 - 10] - sidScale[pKey[0] + tuneBase1 - 12]) * fine1) +
-				              ((sidScale[pKey[0] + tuneBase1 - 10] - sidScale[pKey[0] + tuneBase1 - 12]) * bend);
-			} else if (bend < 0) {
-
-				destiPitch1 = sidScale[temp - 12] +
-				              ((sidScale[pKey[0] + tuneBase1 - 10] - sidScale[pKey[0] + tuneBase1 - 12]) * fine1) -
-				              ((sidScale[pKey[0] + tuneBase1 - 12] - sidScale[pKey[0] + tuneBase1 - 10]) * bend);
-			} else {
-				destiPitch1 = sidScale[temp - 12] +
-				              ((sidScale[pKey[0] + tuneBase1 - 10] - sidScale[pKey[0] + tuneBase1 - 12]) * fine1);
-			}
-
-			temp = -1 + pKey[1] + tuneBase2 + lfoTune4 + lfoTune5 + lfoTune6;
-			if (temp > 127) {
-				temp = 127;
-			} else if (temp - 12 < 0) {
-				temp = 12;
-			}
-			fine2 = fineBase2 + lfoFine4 + lfoFine5 + lfoFine6;
-			if (fine2 > 1)
-				fine2 = 1;
-
-			if (bend > 0) {
-				destiPitch2 = sidScale[temp - 12] +
-				              ((sidScale[pKey[1] + tuneBase2 - 10] - sidScale[pKey[1] + tuneBase2 - 12]) * fine2) +
-				              ((sidScale[pKey[1] + tuneBase2 - 10] - sidScale[pKey[1] + tuneBase2 - 12]) * bend);
-			} else if (bend < 0) {
-				destiPitch2 = sidScale[temp - 12] +
-				              ((sidScale[pKey[1] + tuneBase2 - 10] - sidScale[pKey[1] + tuneBase2 - 12]) * fine2) -
-				              ((sidScale[pKey[1] + tuneBase2 - 12] - sidScale[pKey[1] + tuneBase2 - 10]) * bend);
-			} else {
-				destiPitch2 = sidScale[temp - 12] +
-				              ((sidScale[pKey[1] + tuneBase2 - 10] - sidScale[pKey[1] + tuneBase2 - 12]) * fine2);
-			}
-
-			temp = -1 + pKey[2] + tuneBase3 + lfoTune7 + lfoTune8 + lfoTune9;
-			if (temp > 127) {
-				temp = 127;
-			} else if (temp - 12 < 0) {
-				temp = 12;
-			}
-			fine3 = fineBase3 + lfoFine7 + lfoFine8 + lfoFine9;
-			if (fine3 > 1)
-				fine3 = 1;
-
-			if (bend > 0) {
-				destiPitch3 = sidScale[temp - 12] +
-				              ((sidScale[pKey[2] + tuneBase3 - 10] - sidScale[pKey[2] + tuneBase3 - 12]) * fine3) +
-				              ((sidScale[pKey[2] + tuneBase3 - 10] - sidScale[pKey[2] + tuneBase3 - 12]) * bend);
-			} else if (bend < 0) {
-				destiPitch3 = sidScale[temp - 12] +
-				              ((sidScale[pKey[2] + tuneBase3 - 10] - sidScale[pKey[2] + tuneBase3 - 12]) * fine3) -
-				              ((sidScale[pKey[2] + tuneBase3 - 12] - sidScale[pKey[2] + tuneBase3 - 10]) * bend);
-			} else {
-				destiPitch3 = sidScale[temp - 12] +
-				              ((sidScale[pKey[2] + tuneBase3 - 10] - sidScale[pKey[2] + tuneBase3 - 12]) * fine3);
-			}
-
-			sidPitch(0, pitch1);
-			sidPitch(1, pitch2);
-			sidPitch(2, pitch3);
+			updateDestiPitches(pKey[0], pKey[1], pKey[2]);
 		}
 	} else {
-
-		int temp;
-
-		// individual channels
-		if (note_val[0]) {
-			// Pitch
-			temp = -1 + note_val[0] + tuneBase1 + lfoTune1 + lfoTune2 + lfoTune3;
-			if (temp > 127) {
-				temp = 127;
-			} else if (temp - 12 < 0) {
-				temp = 12;
-			}
-			fine1 = fineBase1 + lfoFine2 + lfoFine1 + lfoFine3;
-			if (fine1 > 1)
-				fine1 = 1;
-
-			if (bend1 > 0) {
-				destiPitch1 =
-				    sidScale[temp - 12] +
-				    ((sidScale[note_val[0] + tuneBase1 - 10] - sidScale[note_val[0] + tuneBase1 - 12]) * fine1) +
-				    ((sidScale[note_val[0] + tuneBase1 - 10] - sidScale[note_val[0] + tuneBase1 - 12]) * bend1);
-			} else if (bend1 < 0) {
-
-				destiPitch1 =
-				    sidScale[temp - 12] +
-				    ((sidScale[note_val[0] + tuneBase1 - 10] - sidScale[note_val[0] + tuneBase1 - 12]) * fine1) -
-				    ((sidScale[note_val[0] + tuneBase1 - 12] - sidScale[note_val[0] + tuneBase1 - 10]) * bend1);
-			} else {
-				destiPitch1 =
-				    sidScale[temp - 12] +
-				    ((sidScale[note_val[0] + tuneBase1 - 10] - sidScale[note_val[0] + tuneBase1 - 12]) * fine1);
-			}
-		}
-
-		if (note_val[1]) {
-			// Pitch
-			temp = -1 + note_val[1] + tuneBase2 + lfoTune4 + lfoTune5 + lfoTune6;
-			if (temp > 127) {
-				temp = 127;
-			} else if (temp - 12 < 0) {
-				temp = 12;
-			}
-			fine2 = fineBase2 + lfoFine4 + lfoFine5 + lfoFine6;
-			if (fine2 > 1)
-				fine2 = 1;
-
-			if (bend2 > 0) {
-				destiPitch2 =
-				    sidScale[temp - 12] +
-				    ((sidScale[note_val[1] + tuneBase2 - 10] - sidScale[note_val[1] + tuneBase2 - 12]) * fine2) +
-				    ((sidScale[note_val[1] + tuneBase2 - 10] - sidScale[note_val[1] + tuneBase2 - 12]) * bend2);
-			} else if (bend2 < 0) {
-				destiPitch2 =
-				    sidScale[temp - 12] +
-				    ((sidScale[note_val[1] + tuneBase2 - 10] - sidScale[note_val[1] + tuneBase2 - 12]) * fine2) -
-				    ((sidScale[note_val[1] + tuneBase2 - 12] - sidScale[note_val[1] + tuneBase2 - 10]) * bend2);
-			} else {
-				destiPitch2 =
-				    sidScale[temp - 12] +
-				    ((sidScale[note_val[1] + tuneBase2 - 10] - sidScale[note_val[1] + tuneBase2 - 12]) * fine2);
-			}
-		}
-		if (note_val[2]) {
-
-			temp = -1 + note_val[2] + tuneBase3 + lfoTune7 + lfoTune8 + lfoTune9;
-			if (temp > 127) {
-				temp = 127;
-			} else if (temp - 12 < 0) {
-				temp = 12;
-			}
-			fine3 = fineBase3 + lfoFine7 + lfoFine8 + lfoFine9;
-			if (fine3 > 1)
-				fine3 = 1;
-
-			if (bend3 > 0) {
-				destiPitch3 =
-				    sidScale[temp - 12] +
-				    ((sidScale[note_val[2] + tuneBase3 - 10] - sidScale[note_val[2] + tuneBase3 - 12]) * fine3) +
-				    ((sidScale[note_val[2] + tuneBase3 - 10] - sidScale[note_val[2] + tuneBase3 - 12]) * bend3);
-			} else if (bend3 < 0) {
-				destiPitch3 =
-				    sidScale[temp - 12] +
-				    ((sidScale[note_val[2] + tuneBase3 - 10] - sidScale[note_val[2] + tuneBase3 - 12]) * fine3) -
-				    ((sidScale[note_val[2] + tuneBase3 - 12] - sidScale[note_val[2] + tuneBase3 - 10]) * bend3);
-			} else {
-				destiPitch3 =
-				    sidScale[temp - 12] +
-				    ((sidScale[note_val[2] + tuneBase3 - 10] - sidScale[note_val[2] + tuneBase3 - 12]) * fine3);
-			}
-		}
-
-		sidPitch(0, pitch1);
-		sidPitch(1, pitch2);
-		sidPitch(2, pitch3);
+		updateDestiPitches(note_val[0], note_val[1], note_val[2]);
 	}
-}
-
-void updateFatMode() {
-
-	// change fatMode
-
-	if (fatMode == 2) {
-		fat = 15;
-	} else if (fatMode == 3) {
-		fat = 50;
-	}
-	fatChanged = true;
-}
-
-void setFilterBit(byte channel) {
-
-	switch (channel) {
-		case 0:
-			if ((!bitRead(sid[4], 7)) && (!bitRead(sid[4], 6)) && (!bitRead(sid[4], 5)) && (!bitRead(sid[4], 4))) {
-				bitWrite(sid[23], 0, 0);
-			} else {
-				if (filterMode == 4) {
-					bitWrite(sid[23], 0, 0);
-				} else {
-					bitWrite(sid[23], 0, filterEnabled[channel]);
-				}
-			}
-			break;
-		case 1:
-			if ((!bitRead(sid[11], 7)) && (!bitRead(sid[11], 6)) && (!bitRead(sid[11], 5)) && (!bitRead(sid[11], 4))) {
-				bitWrite(sid[23], 1, 0);
-			} else {
-				if (filterMode == 4) {
-					bitWrite(sid[23], 1, 0);
-				} else {
-					bitWrite(sid[23], 1, filterEnabled[channel]);
-				}
-			}
-			break;
-		case 2:
-			if ((!bitRead(sid[18], 7)) && (!bitRead(sid[18], 6)) && (!bitRead(sid[18], 5)) && (!bitRead(sid[18], 4))) {
-				bitWrite(sid[23], 2, 0);
-			} else {
-				if (filterMode == 4) {
-					bitWrite(sid[23], 2, 0);
-				} else {
-					bitWrite(sid[23], 2, filterEnabled[channel]);
-				}
-			}
-			break;
-	}
+	
+	// FIXME can we move this out to loop.cpp?
+	sidPitch(0, pitch1);
+	sidPitch(1, pitch2);
+	sidPitch(2, pitch3);
 }

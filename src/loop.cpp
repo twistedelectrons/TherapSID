@@ -37,7 +37,7 @@ void loop() {
 
 	if (fatShow) {
 		digit(0, 12);
-		digit(1, fatMode + 1);
+		digit(1, (int)fatMode + 1);
 		fatShow = false;
 		unShowFilterAssigns();
 	}

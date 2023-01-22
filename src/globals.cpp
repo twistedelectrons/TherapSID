@@ -30,7 +30,6 @@ int lfoDepthBase[3];
 int presetScrollSpeed = 10000;
 int saveBounce;
 byte lfo[3];
-int fat = 15;
 bool presetUp, presetDown;
 byte preset = 1;
 int presetLast = 1;
@@ -42,7 +41,7 @@ bool looping[3];
 bool resetDown;
 byte selectedLfo;
 byte lfoShape[3];
-byte fatMode = 0;
+FatMode fatMode = FatMode::UNISONO;
 int cutBase;
 byte lfoClockSpeedPending[3];
 bool filterModeHeld;
@@ -57,10 +56,13 @@ byte glide1, glide2, glide3;
 int pw1Base, pw2Base, pw3Base;
 float fineBase1, fineBase2, fineBase3, lfoFine1, lfoFine2, lfoFine3, lfoFine4, lfoFine5, lfoFine6, lfoFine7, lfoFine8,
     lfoFine9;
-byte sid[25], sidLast[25];
 byte a1, a2, a3, d1, d2, d3, s1, s2, s3, r1, r2, r3;
 
-byte filterMode;
+
+
+FilterMode filterMode;
+
+
 byte resBase;
 byte key;
 byte arpMode;

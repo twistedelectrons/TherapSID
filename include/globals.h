@@ -24,7 +24,6 @@ extern int lfoDepthBase[3];
 extern int presetScrollSpeed;
 extern int saveBounce;
 extern byte lfo[3];
-extern int fat;
 extern bool presetUp, presetDown;
 extern byte preset;
 extern int presetLast;
@@ -36,7 +35,16 @@ extern bool looping[3];
 extern bool resetDown;
 extern byte selectedLfo;
 extern byte lfoShape[3];
-extern byte fatMode;
+
+
+enum class FatMode {
+	UNISONO,
+	OCTAVE_UP,
+	DETUNE_SLIGHT,
+	DETUNE_MUCH
+};
+extern FatMode fatMode;
+
 extern int cutBase;
 extern byte lfoClockSpeedPending[3];
 extern bool filterModeHeld;
@@ -49,9 +57,18 @@ extern byte glide1, glide2, glide3;
 extern int pw1Base, pw2Base, pw3Base;
 extern float fineBase1, fineBase2, fineBase3, lfoFine1, lfoFine2, lfoFine3, lfoFine4, lfoFine5, lfoFine6, lfoFine7,
     lfoFine8, lfoFine9;
-extern byte sid[25], sidLast[25];
 extern byte a1, a2, a3, d1, d2, d3, s1, s2, s3, r1, r2, r3;
-extern byte filterMode;
+
+
+enum class FilterMode {
+	LOWPASS,
+	BANDPASS,
+	HIGHPASS,
+	NOTCH,
+	OFF
+};
+extern FilterMode filterMode;
+
 extern byte resBase;
 extern byte key;
 extern byte arpMode;

@@ -180,7 +180,7 @@ static void HandleControlChange(byte channel, byte data1, byte data2) {
 					break;
 
 				case 55:
-					filterMode = map(data2, 0, 127, 0, 4);
+					filterMode = static_cast<FilterMode>(map(data2, 0, 127, 0, 4));
 					updateFilter();
 					break;
 

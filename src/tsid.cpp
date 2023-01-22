@@ -138,15 +138,6 @@ void setup() {
 		sendArp = true;
 	}
 
-	if (fatMode > 3) {
-		fatMode = 0;
-	}
-	if (fatMode == 2) {
-		fat = 15;
-	} else if (fatMode == 3) {
-		fat = 30;
-	}
-
 	sidPitch(0, 0);
 	sidPitch(1, 0);
 	sidPitch(2, 0);

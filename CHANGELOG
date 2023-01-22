@@ -3,3 +3,6 @@
 	  the last played note rather than the highest will be played.
 	- Changed polyphonic voice allocation: Proper round-robin allocator which prefers released
 	  voices over active ones.
+
+2022-11-20:
+	- When changing filter configuration, do notturn the volume all down to 0, wait 100ms, turn it up again.
