@@ -6,7 +6,7 @@
 
 static int presetScrollTimer;
 static int envCounter;
-static bool gateLast;
+// static bool gateLast; // FIXME
 static byte glideCounter1, glideCounter2, glideCounter3;
 static int lfoCounter[3];
 static int env2;
@@ -117,6 +117,7 @@ const int envMap2[] = {
 };
 
 // interrupt service route to animate things (LFO arp etc)
+// called at 10kHz frequency (probably slower)
 void isr() {
 
 	if (shape1Pressed) {
@@ -197,6 +198,7 @@ void isr() {
 		}
 	}
 
+	/* FIXME: redo CV/gate functionality
 	// cvGate
 	gate = (PINA & _BV(7)) == 0;
 	if (gate != gateLast) {
@@ -206,6 +208,7 @@ void isr() {
 		bitWrite(sid[18], 0, gate);
 		held = 0;
 	}
+	*/
 
 	if (saveMode) {
 		saveModeTimer++;

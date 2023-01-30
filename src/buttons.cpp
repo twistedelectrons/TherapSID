@@ -54,185 +54,75 @@ enum Button {
 	FILTER_MODE = 7
 };
 
+static void panic(){} // FIXME
+
+void shapeButtPressed(uint8_t voice, PresetVoice::Shape shape) {
+	if (voice >= 3) panic();
+	Preset my_preset; // FIXME
+
+	if (!filterModeHeld) {
+		my_preset.voice[voice].toggle_shape(shape);
+		// FIXME this needs deduplication of non-updates.
+		sendMidiButt(37 + 4*voice + 0, my_preset.voice[voice].control & PresetVoice::PULSE);
+		sendMidiButt(37 + 4*voice + 1, my_preset.voice[voice].control & PresetVoice::TRI);
+		sendMidiButt(37 + 4*voice + 2, my_preset.voice[voice].control & PresetVoice::SAW);
+		sendMidiButt(37 + 4*voice + 3, my_preset.voice[voice].control & PresetVoice::NOISE);
+
+		if (voice == 0) {
+			shape1Pressed = true;
+		}
+	}
+	else {
+		my_preset.voice[voice].filter_enabled ^= 1;
+		showFilterAssigns(); // FIXME remove
+		assignmentChanged = true;
+	}
+}
+
 void buttChanged(byte number, bool value) {
+	Preset my_preset; // FIXME
 	if (!value) {
 		// ledNumber(number);
 		//  PRESSED
 		switch (number) {
-			case RECT1:
-				if (!filterModeHeld) {
-					sidShape(0, 1, !bitRead(sid[4], 6));
-					shape1Pressed = true;
-					paraShape();
-					sendMidiButt(37, bitRead(sid[4], 6));
-				} else {
-					filterEnabled[0] = !filterEnabled[0];
-					showFilterAssigns();
-					assignmentChanged = true;
-				}
-				setFilterBit(0);
-				break;
-			case TRI1:
-				if (!filterModeHeld) {
-					sidShape(0, 2, !bitRead(sid[4], 4));
-					shape1Pressed = true;
-					paraShape();
-					sendMidiButt(38, bitRead(sid[4], 4));
-				} else {
-					filterEnabled[0] = !filterEnabled[0];
-					showFilterAssigns();
-					assignmentChanged = true;
-				}
-				setFilterBit(0);
-				break;
-			case SAW1:
-				if (!filterModeHeld) {
-					sidShape(0, 3, !bitRead(sid[4], 5));
-					shape1Pressed = true;
-					paraShape();
-					sendMidiButt(39, bitRead(sid[4], 5));
-				} else {
-					filterEnabled[0] = !filterEnabled[0];
-					showFilterAssigns();
-				assignmentChanged = true;
-				}
-				setFilterBit(0);
-				break;
-			case NOISE1:
-				if (!filterModeHeld) {
-					sidShape(0, 4, !bitRead(sid[4], 7));
-					shape1Pressed = true;
-					paraShape();
-					sendMidiButt(40, bitRead(sid[4], 7));
-				} else {
-					filterEnabled[0] = !filterEnabled[0];
-					showFilterAssigns();
-					assignmentChanged = true;
-				}
-				setFilterBit(0);
-				break;
-
-			case RECT2:
-				if (!filterModeHeld) {
-					sidShape(1, 1, !bitRead(sid[11], 6));
-					sendMidiButt(41, bitRead(sid[11], 6));
-				} else {
-					filterEnabled[1] = !filterEnabled[1];
-					showFilterAssigns();
-					assignmentChanged = true;
-				}
-				setFilterBit(1);
-				break;
-			case TRI2:
-				if (!filterModeHeld) {
-					sidShape(1, 2, !bitRead(sid[11], 4));
-					sendMidiButt(42, bitRead(sid[11], 4));
-				} else {
-					filterEnabled[1] = !filterEnabled[1];
-					showFilterAssigns();
-					assignmentChanged = true;
-				}
-				setFilterBit(1);
-				break;
-			case SAW2:
-				if (!filterModeHeld) {
-				sidShape(1, 3, !bitRead(sid[11], 5));
-					sendMidiButt(43, bitRead(sid[11], 5));
-				} else {
-					filterEnabled[1] = !filterEnabled[1];
-					showFilterAssigns();
-					assignmentChanged = true;
-				}
-				setFilterBit(1);
-				break;
-			case NOISE2:
-				if (!filterModeHeld) {
-					sidShape(1, 4, !bitRead(sid[11], 7));
-					sendMidiButt(44, bitRead(sid[11], 7));
-				} else {
-					filterEnabled[1] = !filterEnabled[1];
-					showFilterAssigns();
-					assignmentChanged = true;
-				}
-				setFilterBit(1);
-				break;
-
-			case RECT3:
-				if (!filterModeHeld) {
-					sidShape(2, 1, !bitRead(sid[18], 6));
-					sendMidiButt(45, bitRead(sid[18], 6));
-				} else {
-					filterEnabled[2] = !filterEnabled[2];
-					showFilterAssigns();
-					assignmentChanged = true;
-				}
-				setFilterBit(2);
-				break;
-			case TRI3:
-				if (!filterModeHeld) {
-					sidShape(2, 2, !bitRead(sid[18], 4));
-					sendMidiButt(46, bitRead(sid[18], 4));
-				} else {
-					filterEnabled[2] = !filterEnabled[2];
-					showFilterAssigns();
-					assignmentChanged = true;
-				}
-				setFilterBit(2);
-				break;
-			case SAW3:
-				if (!filterModeHeld) {
-					sidShape(2, 3, !bitRead(sid[18], 5));
-					sendMidiButt(47, bitRead(sid[18], 5));
-				} else {
-					filterEnabled[2] = !filterEnabled[2];
-					showFilterAssigns();
-					assignmentChanged = true;
-				}
-				setFilterBit(2);
-				break;
-			case NOISE3:
-				if (!filterModeHeld) {
-					sidShape(2, 4, !bitRead(sid[18], 7));
-				sendMidiButt(48, bitRead(sid[18], 7));
-				} else {
-					filterEnabled[2] = !filterEnabled[2];
-					showFilterAssigns();
-					assignmentChanged = true;
-				}
-				setFilterBit(2);
-				break;
+			case RECT1: shapeButtPressed(0, PresetVoice::PULSE); break;
+			case TRI1: shapeButtPressed(0, PresetVoice::TRI); break;
+			case SAW1: shapeButtPressed(0, PresetVoice::SAW); break;
+			case NOISE1: shapeButtPressed(0, PresetVoice::NOISE); break;
+			case RECT2: shapeButtPressed(1, PresetVoice::PULSE); break;
+			case TRI2: shapeButtPressed(1, PresetVoice::TRI); break;
+			case SAW2: shapeButtPressed(1, PresetVoice::SAW); break;
+			case NOISE2: shapeButtPressed(1, PresetVoice::NOISE); break;
+			case RECT3: shapeButtPressed(2, PresetVoice::PULSE); break;
+			case TRI3: shapeButtPressed(2, PresetVoice::TRI); break;
+			case SAW3: shapeButtPressed(2, PresetVoice::SAW); break;
+			case NOISE3: shapeButtPressed(2, PresetVoice::NOISE); break;
 
 			case SYNC1:
-				bitWrite(sid[4], 1, !bitRead(sid[4], 1));
-				ledSet(16, bitRead(sid[4], 1));
-				sendMidiButt(49, bitRead(sid[4], 1));
+				my_preset.voice[0].control ^= 2;
+				sendMidiButt(49, my_preset.voice[0].control & 2);
 				break;
 			case RING1:
-				bitWrite(sid[4], 2, !bitRead(sid[4], 2));
-				ledSet(17, bitRead(sid[4], 2));
-				sendMidiButt(50, bitRead(sid[4], 2));
+				my_preset.voice[0].control ^= 4;
+				sendMidiButt(50, my_preset.voice[0].control & 4);
 				break;
 
 			case SYNC2:
-				bitWrite(sid[11], 1, !bitRead(sid[11], 1));
-				ledSet(18, bitRead(sid[11], 1));
-				sendMidiButt(51, bitRead(sid[11], 1));
+				my_preset.voice[1].control ^= 2;
+				sendMidiButt(51, my_preset.voice[1].control & 2);
 				break;
 			case RING2:
-				bitWrite(sid[11], 2, !bitRead(sid[11], 2));
-				ledSet(19, bitRead(sid[11], 2));
-				sendMidiButt(52, bitRead(sid[11], 2));
+				my_preset.voice[1].control ^= 4;
+				sendMidiButt(52, my_preset.voice[1].control & 4);
 				break;
 
 			case SYNC3:
-				bitWrite(sid[18], 1, !bitRead(sid[18], 1));
-				ledSet(20, bitRead(sid[18], 1));
-				sendMidiButt(53, bitRead(sid[18], 1));
+				my_preset.voice[2].control ^= 2;
+				sendMidiButt(53, my_preset.voice[2].control & 2);
 				break;
 			case RING3:
-				bitWrite(sid[18], 2, !bitRead(sid[18], 2));
-				ledSet(21, bitRead(sid[18], 2));
-				sendMidiButt(54, bitRead(sid[18], 2));
+				my_preset.voice[2].control ^= 4;
+				sendMidiButt(54, my_preset.voice[2].control & 4);
 				break;
 
 			case LFO_CHAIN1:
@@ -318,7 +208,6 @@ void buttChanged(byte number, bool value) {
 				break;
 
 			case PRESET_UP:
-
 				if (midiSetup > 0) {
 					if ((midiSetup == 1) && (masterChannel < 16)) {
 						masterChannel++;
@@ -330,20 +219,18 @@ void buttChanged(byte number, bool value) {
 						saveChannels();
 						ledNumber(masterChannelOut);
 					}
-
 				} else {
 					if (arpModeHeld) {
 						midiSetup = 1;
 						ledNumber(masterChannel);
 					} else {
-
 						saveModeTimer = 0;
 						presetUp = true;
 						if (presetDown) {
 							if (!saveMode) {
 								saveMode = true;
 								saveBounce = 1600;
-				} else {
+							} else {
 								saveBounce = 1600;
 								save();
 							}
@@ -451,6 +338,7 @@ void buttChanged(byte number, bool value) {
 				}
 				scrolled = false;
 				break;
+
 			case PRESET_DOWN:
 				if (!midiSetup) {
 					presetDown = false;

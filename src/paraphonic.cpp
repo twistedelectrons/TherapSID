@@ -5,6 +5,7 @@
 #include "paraphonic.h"
 #include "voice_allocation.hpp"
 
+/*
 void paraChange() {
 
 	if (pa) {
@@ -80,3 +81,4 @@ void paraShape() {
 		sidShape(2, 4, bitRead(sid[4], 7));
 	}
 }
+*///FIXME Obviously

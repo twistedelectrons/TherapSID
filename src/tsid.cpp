@@ -110,8 +110,6 @@ void setup() {
 	Timer1.attachInterrupt(isr); // attach the service routine here
 
 	DDRC = B11111000;
-	sid[24] = B00010001; // Filter off full vol
-	sid[23] = B11111111;
 
 	presetLast = EEPROM.read(3999);
 	if (presetLast > 98)

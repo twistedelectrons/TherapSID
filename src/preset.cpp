@@ -3,11 +3,13 @@
 
 #include "globals.h"
 #include "leds.h"
-#include "sid.h"
+#include "sid.h" // FIXME
 #include "isr.h"
 #include "preset.h"
 #include "lfo.h"
 #include "midi.h"
+
+// FIXME deduplicate
 
 /*
 
@@ -24,6 +26,8 @@ MEMORY MAPPING
 
 
 */
+
+static Preset my_preset; // FIXME
 
 static int writeIndex;
 
@@ -47,16 +51,15 @@ void save() {
 	byte temp;
 	writeIndex = preset * 40;
 
-	bitWrite(sid[4], 0, 0);
-	bitWrite(sid[11], 0, 0);
-	bitWrite(sid[18], 0, 0);
+	bitWrite(my_preset.voice[0].reg_control, 0, 0);
+	bitWrite(my_preset.voice[1].reg_control, 0, 0);
+	bitWrite(my_preset.voice[2].reg_control, 0, 0);
 
-	writey(sid[4]);
-	writey(sid[11]);
-	writey(sid[18]);
+	writey(my_preset.voice[0].reg_control);
+	writey(my_preset.voice[1].reg_control);
+	writey(my_preset.voice[2].reg_control);
 	temp = 0;
-	bitWrite(temp, 0, bitRead(fatMode, 0));
-	bitWrite(temp, 1, bitRead(fatMode, 1));
+	temp |= ((int)fatMode) & 0x3;
 
 	writey(temp);
 	writey(fineBase1 * 255);
@@ -86,12 +89,12 @@ void save() {
 	writey(glide1);
 	writey(glide2);
 	writey(glide3);
-	writey(sid[5]);
-	writey(sid[6]);
-	writey(sid[12]);
-	writey(sid[13]);
-	writey(sid[19]); // 20
-	writey(sid[20]);
+	writey(my_preset.voice[0].reg_attack_decay);
+	writey(my_preset.voice[0].reg_sustain_release);
+	writey(my_preset.voice[1].reg_attack_decay);
+	writey(my_preset.voice[1].reg_sustain_release);
+	writey(my_preset.voice[2].reg_attack_decay); // 20
+	writey(my_preset.voice[2].reg_sustain_release);
 	int tempy = lfoSpeedBase[0];
 	tempy /= 1.3;
 	tempy = tempy >> 2;
@@ -194,9 +197,9 @@ void save() {
 	bitWrite(temp, 0, looping[0]);
 	bitWrite(temp, 1, looping[1]);
 	bitWrite(temp, 2, looping[2]);
-	bitWrite(temp, 3, bitRead(filterMode, 0));
-	bitWrite(temp, 4, bitRead(filterMode, 1));
-	bitWrite(temp, 5, bitRead(filterMode, 2));
+	bitWrite(temp, 3, bitRead((int)filterMode, 0));
+	bitWrite(temp, 4, bitRead((int)filterMode, 1));
+	bitWrite(temp, 5, bitRead((int)filterMode, 2));
 	bitWrite(temp, 6, bitRead(arpRangeBase, 0));
 	bitWrite(temp, 7, bitRead(arpRangeBase, 1));
 	writey(temp); // 37
@@ -230,94 +233,90 @@ void load(byte number) {
 
 	sidReset();
 
-	sidSend(4, sid[0]);
-	sidSend(11, sid[0]);
-	sidSend(18, sid[0]);
+	//sidSend(4, sid[0]);
+	//sidSend(11, sid[0]);
+	//sidSend(18, sid[0]); //FIXME
 
 	// held=0;arpCount=0;
 	writeIndex = number * 40;
 	byte temp;
 
-	sid[4] = ready();
-	sid[11] = ready();
-	sid[18] = ready();
+	my_preset.voice[0].reg_control = ready();
+	my_preset.voice[1].reg_control = ready();
+	my_preset.voice[2].reg_control = ready();
 	if (jumble) {
 
 		byte dice = random(0, 5);
 		if (dice == 0) {
-			sid[4] = B00000000;
+			my_preset.voice[0].reg_control = B00000000;
 		} else if (dice == 1) {
-			sid[4] = B01000000;
+			my_preset.voice[0].reg_control = B01000000;
 		} else if (dice == 2) {
-			sid[4] = B00100000;
+			my_preset.voice[0].reg_control = B00100000;
 		} else if (dice == 3) {
-			sid[4] = B00010000;
+			my_preset.voice[0].reg_control = B00010000;
 		} else if (dice == 4) {
-			sid[4] = B10000000;
+			my_preset.voice[0].reg_control = B10000000;
 		}
 
 		dice = random(0, 5);
 		if (dice == 0) {
-			sid[11] = B00000000;
+			my_preset.voice[1].reg_control = B00000000;
 		} else if (dice == 1) {
-			sid[11] = B01000000;
+			my_preset.voice[1].reg_control = B01000000;
 		} else if (dice == 2) {
-			sid[11] = B00100000;
+			my_preset.voice[1].reg_control = B00100000;
 		} else if (dice == 3) {
-			sid[11] = B00010000;
+			my_preset.voice[1].reg_control = B00010000;
 		} else if (dice == 4) {
-			sid[11] = B10000000;
+			my_preset.voice[1].reg_control = B10000000;
 		}
 
 		dice = random(0, 5);
-		if ((!dice) && (!sid[4]) && (!sid[11]))
+		if ((!dice) && (!my_preset.voice[0].reg_control) && (!my_preset.voice[1].reg_control))
 			dice++;
 		if (dice == 0) {
-			sid[18] = B00000000;
+			my_preset.voice[2].reg_control = B00000000;
 		} else if (dice == 1) {
-			sid[18] = B01000000;
+			my_preset.voice[2].reg_control = B01000000;
 		} else if (dice == 2) {
-			sid[18] = B00100000;
+			my_preset.voice[2].reg_control = B00100000;
 		} else if (dice == 3) {
-			sid[18] = B00010000;
+			my_preset.voice[2].reg_control = B00010000;
 		} else if (dice == 4) {
-			sid[18] = B10000000;
+			my_preset.voice[2].reg_control = B10000000;
 		}
 
 		dice = random(0, 5);
 		if (dice == 0) {
-			bitWrite(sid[4], 1, 1);
+			bitWrite(my_preset.voice[0].reg_control, 1, 1);
 		}
 		if (dice == 1) {
-			bitWrite(sid[4], 2, 1);
+			bitWrite(my_preset.voice[0].reg_control, 2, 1);
 		}
 		if (dice == 2) {
-			bitWrite(sid[11], 1, 1);
+			bitWrite(my_preset.voice[1].reg_control, 1, 1);
 		}
 		if (dice == 3) {
-			bitWrite(sid[11], 2, 1);
+			bitWrite(my_preset.voice[1].reg_control, 2, 1);
 		}
 		if (dice == 4) {
-			bitWrite(sid[18], 1, 1);
+			bitWrite(my_preset.voice[2].reg_control, 1, 1);
 		}
 		if (dice == 5) {
-			bitWrite(sid[18], 2, 1);
+			bitWrite(my_preset.voice[2].reg_control, 2, 1);
 		}
 	}
 
-	ledSet(16, bitRead(sid[4], 1));
-	ledSet(17, bitRead(sid[4], 2));
-	ledSet(18, bitRead(sid[11], 1));
-	ledSet(19, bitRead(sid[11], 2));
-	ledSet(20, bitRead(sid[18], 1));
-	ledSet(21, bitRead(sid[18], 2));
+	ledSet(16, bitRead(my_preset.voice[0].reg_control, 1));
+	ledSet(17, bitRead(my_preset.voice[0].reg_control, 2));
+	ledSet(18, bitRead(my_preset.voice[1].reg_control, 1));
+	ledSet(19, bitRead(my_preset.voice[1].reg_control, 2));
+	ledSet(20, bitRead(my_preset.voice[2].reg_control, 1));
+	ledSet(21, bitRead(my_preset.voice[2].reg_control, 2));
 
 	temp = ready();
-	bitWrite(fatMode, 0, bitRead(temp, 0));
-	bitWrite(fatMode, 1, bitRead(temp, 1));
-	if (fatMode > 3) {
-		fatMode = 0;
-	}
+	fatMode = uint2FatMode(temp & 0x3);
 	updateFatMode();
 
 	fineBase1 = ready();
@@ -389,65 +388,65 @@ void load(byte number) {
 		}
 	}
 
-	sid[5] = ready();
-	bitWrite(d1, 0, bitRead(sid[5], 0));
-	bitWrite(d1, 1, bitRead(sid[5], 1));
-	bitWrite(d1, 2, bitRead(sid[5], 2));
-	bitWrite(d1, 3, bitRead(sid[5], 3));
-	bitWrite(a1, 0, bitRead(sid[5], 4));
-	bitWrite(a1, 1, bitRead(sid[5], 5));
-	bitWrite(a1, 2, bitRead(sid[5], 6));
-	bitWrite(a1, 3, bitRead(sid[5], 7));
+	my_preset.voice[0].reg_attack_decay = ready();
+	bitWrite(d1, 0, bitRead(my_preset.voice[0].reg_attack_decay, 0));
+	bitWrite(d1, 1, bitRead(my_preset.voice[0].reg_attack_decay, 1));
+	bitWrite(d1, 2, bitRead(my_preset.voice[0].reg_attack_decay, 2));
+	bitWrite(d1, 3, bitRead(my_preset.voice[0].reg_attack_decay, 3));
+	bitWrite(a1, 0, bitRead(my_preset.voice[0].reg_attack_decay, 4));
+	bitWrite(a1, 1, bitRead(my_preset.voice[0].reg_attack_decay, 5));
+	bitWrite(a1, 2, bitRead(my_preset.voice[0].reg_attack_decay, 6));
+	bitWrite(a1, 3, bitRead(my_preset.voice[0].reg_attack_decay, 7));
 
-	sid[6] = ready();
-	bitWrite(r1, 0, bitRead(sid[6], 0));
-	bitWrite(r1, 1, bitRead(sid[6], 1));
-	bitWrite(r1, 2, bitRead(sid[6], 2));
-	bitWrite(r1, 3, bitRead(sid[6], 3));
-	bitWrite(s1, 0, bitRead(sid[6], 4));
-	bitWrite(s1, 1, bitRead(sid[6], 5));
-	bitWrite(s1, 2, bitRead(sid[6], 6));
-	bitWrite(s1, 3, bitRead(sid[6], 7));
+	my_preset.voice[0].reg_sustain_release = ready();
+	bitWrite(r1, 0, bitRead(my_preset.voice[0].reg_sustain_release, 0));
+	bitWrite(r1, 1, bitRead(my_preset.voice[0].reg_sustain_release, 1));
+	bitWrite(r1, 2, bitRead(my_preset.voice[0].reg_sustain_release, 2));
+	bitWrite(r1, 3, bitRead(my_preset.voice[0].reg_sustain_release, 3));
+	bitWrite(s1, 0, bitRead(my_preset.voice[0].reg_sustain_release, 4));
+	bitWrite(s1, 1, bitRead(my_preset.voice[0].reg_sustain_release, 5));
+	bitWrite(s1, 2, bitRead(my_preset.voice[0].reg_sustain_release, 6));
+	bitWrite(s1, 3, bitRead(my_preset.voice[0].reg_sustain_release, 7));
 
-	sid[12] = ready();
-	bitWrite(d2, 0, bitRead(sid[12], 0));
-	bitWrite(d2, 1, bitRead(sid[12], 1));
-	bitWrite(d2, 2, bitRead(sid[12], 2));
-	bitWrite(d2, 3, bitRead(sid[12], 3));
-	bitWrite(a2, 0, bitRead(sid[12], 4));
-	bitWrite(a2, 1, bitRead(sid[12], 5));
-	bitWrite(a2, 2, bitRead(sid[12], 6));
-	bitWrite(a2, 3, bitRead(sid[12], 7));
+	my_preset.voice[1].reg_attack_decay = ready();
+	bitWrite(d2, 0, bitRead(my_preset.voice[1].reg_attack_decay, 0));
+	bitWrite(d2, 1, bitRead(my_preset.voice[1].reg_attack_decay, 1));
+	bitWrite(d2, 2, bitRead(my_preset.voice[1].reg_attack_decay, 2));
+	bitWrite(d2, 3, bitRead(my_preset.voice[1].reg_attack_decay, 3));
+	bitWrite(a2, 0, bitRead(my_preset.voice[1].reg_attack_decay, 4));
+	bitWrite(a2, 1, bitRead(my_preset.voice[1].reg_attack_decay, 5));
+	bitWrite(a2, 2, bitRead(my_preset.voice[1].reg_attack_decay, 6));
+	bitWrite(a2, 3, bitRead(my_preset.voice[1].reg_attack_decay, 7));
 
-	sid[13] = ready();
-	bitWrite(r2, 0, bitRead(sid[13], 0));
-	bitWrite(r2, 1, bitRead(sid[13], 1));
-	bitWrite(r2, 2, bitRead(sid[13], 2));
-	bitWrite(r2, 3, bitRead(sid[13], 3));
-	bitWrite(s2, 0, bitRead(sid[13], 4));
-	bitWrite(s2, 1, bitRead(sid[13], 5));
-	bitWrite(s2, 2, bitRead(sid[13], 6));
-	bitWrite(s2, 3, bitRead(sid[13], 7));
+	my_preset.voice[1].reg_sustain_release = ready();
+	bitWrite(r2, 0, bitRead(my_preset.voice[1].reg_sustain_release, 0));
+	bitWrite(r2, 1, bitRead(my_preset.voice[1].reg_sustain_release, 1));
+	bitWrite(r2, 2, bitRead(my_preset.voice[1].reg_sustain_release, 2));
+	bitWrite(r2, 3, bitRead(my_preset.voice[1].reg_sustain_release, 3));
+	bitWrite(s2, 0, bitRead(my_preset.voice[1].reg_sustain_release, 4));
+	bitWrite(s2, 1, bitRead(my_preset.voice[1].reg_sustain_release, 5));
+	bitWrite(s2, 2, bitRead(my_preset.voice[1].reg_sustain_release, 6));
+	bitWrite(s2, 3, bitRead(my_preset.voice[1].reg_sustain_release, 7));
 
-	sid[19] = ready();
-	bitWrite(d3, 0, bitRead(sid[19], 0));
-	bitWrite(d3, 1, bitRead(sid[19], 1));
-	bitWrite(d3, 2, bitRead(sid[19], 2));
-	bitWrite(d3, 3, bitRead(sid[19], 3));
-	bitWrite(a3, 0, bitRead(sid[19], 4));
-	bitWrite(a3, 1, bitRead(sid[19], 5));
-	bitWrite(a3, 2, bitRead(sid[19], 6));
-	bitWrite(a3, 3, bitRead(sid[19], 7));
+	my_preset.voice[2].reg_attack_decay = ready();
+	bitWrite(d3, 0, bitRead(my_preset.voice[2].reg_attack_decay, 0));
+	bitWrite(d3, 1, bitRead(my_preset.voice[2].reg_attack_decay, 1));
+	bitWrite(d3, 2, bitRead(my_preset.voice[2].reg_attack_decay, 2));
+	bitWrite(d3, 3, bitRead(my_preset.voice[2].reg_attack_decay, 3));
+	bitWrite(a3, 0, bitRead(my_preset.voice[2].reg_attack_decay, 4));
+	bitWrite(a3, 1, bitRead(my_preset.voice[2].reg_attack_decay, 5));
+	bitWrite(a3, 2, bitRead(my_preset.voice[2].reg_attack_decay, 6));
+	bitWrite(a3, 3, bitRead(my_preset.voice[2].reg_attack_decay, 7));
 
-	sid[20] = ready();
-	bitWrite(r3, 0, bitRead(sid[20], 0));
-	bitWrite(r3, 1, bitRead(sid[20], 1));
-	bitWrite(r3, 2, bitRead(sid[20], 2));
-	bitWrite(r3, 3, bitRead(sid[20], 3));
-	bitWrite(s3, 0, bitRead(sid[20], 4));
-	bitWrite(s3, 1, bitRead(sid[20], 5));
-	bitWrite(s3, 2, bitRead(sid[20], 6));
-	bitWrite(s3, 3, bitRead(sid[20], 7));
+	my_preset.voice[2].reg_sustain_release = ready();
+	bitWrite(r3, 0, bitRead(my_preset.voice[2].reg_sustain_release, 0));
+	bitWrite(r3, 1, bitRead(my_preset.voice[2].reg_sustain_release, 1));
+	bitWrite(r3, 2, bitRead(my_preset.voice[2].reg_sustain_release, 2));
+	bitWrite(r3, 3, bitRead(my_preset.voice[2].reg_sustain_release, 3));
+	bitWrite(s3, 0, bitRead(my_preset.voice[2].reg_sustain_release, 4));
+	bitWrite(s3, 1, bitRead(my_preset.voice[2].reg_sustain_release, 5));
+	bitWrite(s3, 2, bitRead(my_preset.voice[2].reg_sustain_release, 6));
+	bitWrite(s3, 3, bitRead(my_preset.voice[2].reg_sustain_release, 7));
 
 	a4 = a3 << 4;
 	d4 = d3 << 4;
@@ -576,13 +575,11 @@ void load(byte number) {
 	looping[0] = bitRead(temp, 0);
 	looping[1] = bitRead(temp, 1);
 	looping[2] = bitRead(temp, 2);
-	bitWrite(filterMode, 0, bitRead(temp, 3));
-	bitWrite(filterMode, 1, bitRead(temp, 4));
-	bitWrite(filterMode, 2, bitRead(temp, 5));
+
+	filterMode = uint2FilterMode((temp >> 3) & 0x7);
 	bitWrite(arpRangeBase, 0, bitRead(temp, 6));
 	bitWrite(arpRangeBase, 1, bitRead(temp, 7));
 
-	filterMode = constrain(filterMode, 0, 4);
 
 	temp = ready();
 	bitWrite(resBase, 0, bitRead(temp, 0));
@@ -607,31 +604,27 @@ void load(byte number) {
 
 	updateFilter();
 
-	ledSet(1, bitRead(sid[4], 6));
-	ledSet(2, bitRead(sid[4], 4));
-	ledSet(3, bitRead(sid[4], 5));
-	ledSet(4, bitRead(sid[4], 7));
+	ledSet(1, bitRead(my_preset.voice[0].reg_control, 6));
+	ledSet(2, bitRead(my_preset.voice[0].reg_control, 4));
+	ledSet(3, bitRead(my_preset.voice[0].reg_control, 5));
+	ledSet(4, bitRead(my_preset.voice[0].reg_control, 7));
 
-	ledSet(5, bitRead(sid[11], 6));
-	ledSet(6, bitRead(sid[11], 4));
-	ledSet(7, bitRead(sid[11], 5));
-	ledSet(8, bitRead(sid[11], 7));
+	ledSet(5, bitRead(my_preset.voice[1].reg_control, 6));
+	ledSet(6, bitRead(my_preset.voice[1].reg_control, 4));
+	ledSet(7, bitRead(my_preset.voice[1].reg_control, 5));
+	ledSet(8, bitRead(my_preset.voice[1].reg_control, 7));
 
-	ledSet(9, bitRead(sid[18], 6));
-	ledSet(10, bitRead(sid[18], 4));
-	ledSet(11, bitRead(sid[18], 5));
-	ledSet(12, bitRead(sid[18], 7));
+	ledSet(9, bitRead(my_preset.voice[2].reg_control, 6));
+	ledSet(10, bitRead(my_preset.voice[2].reg_control, 4));
+	ledSet(11, bitRead(my_preset.voice[2].reg_control, 5));
+	ledSet(12, bitRead(my_preset.voice[2].reg_control, 7));
 
-	bitWrite(sid[4], 0, 0);
-	bitWrite(sid[11], 0, 0);
-	bitWrite(sid[18], 0, 0);
+	bitWrite(my_preset.voice[0].reg_control, 0, 0);
+	bitWrite(my_preset.voice[1].reg_control, 0, 0);
+	bitWrite(my_preset.voice[2].reg_control, 0, 0);
 
 	if (jumble)
 		arpMode = 0;
-
-	for (int i = 0; i < 25; i++) {
-		sidLast[i] = 255 - sid[i];
-	}
 
 	Timer1.initialize(100);      //
 	Timer1.attachInterrupt(isr); // attach the service routine here

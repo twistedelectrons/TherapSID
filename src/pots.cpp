@@ -30,6 +30,13 @@ static byte octScale(int value) {
 }
 
 void movedPot(byte number, int value, bool isMidi) {
+	/*int foo[] = { FIXME
+		RESONANCE, GLIDE1, DEPTH2,RELEASE3,   PW1,            ATTACK1,  TUNE1,ARP_SCRUB,CUTOFF,DEPTH2,
+		    RATE2,  RATE1, DEPTH1,SUSTAIN1, FINE1,             DECAY1,RELEASE1, FINE2, DECAY3, GLIDE3,
+		  RELEASE2, TUNE3,ATTACK2,SUSTAIN2,   PW2,             DECAY2,  TUNE2,GLIDE2,SUSTAIN3,ATTACK3,
+		      PW3,  FINE3,ARP_RANGE,UNKNOWN,UNKNOWN,          UNKNOWN,  RATE3,UNKNOWN,UNKNOWN,UNKNOWN,
+		  UNKNOWN, ARP_RATE
+	};*/
 
 	if (!saveMode) {
 
@@ -161,25 +168,18 @@ void movedPot(byte number, int value, bool isMidi) {
 
 			case 5: // ATTACK 1
 
-				if (pa) {
-					a2 = a3 = a1;
-					d2 = d3 = d1;
-					r2 = r3 = r1;
-					s2 = s3 = s1;
-					sid[12] = 255 & a2 << 4;
-					sid[12] = sid[12] | d2;
-					sid[19] = 255 & a3 << 4;
-					sid[19] = sid[19] | d3;
-				}
-
 				if (!isMidi) {
 					sendCC(6, value);
 				}
 				value = scale4bit(value);
 				ledNumber(value);
 				a1 = value;
-				sid[5] = 255 & a1 << 4;
-				sid[5] = sid[5] | d1;
+				if (pa) {
+					a2 = a3 = a1;
+					d2 = d3 = d1;
+					r2 = r3 = r1;
+					s2 = s3 = s1;
+				}
 
 				break;
 
@@ -190,8 +190,6 @@ void movedPot(byte number, int value, bool isMidi) {
 				value = scale4bit(value);
 				ledNumber(value);
 				a2 = value;
-				sid[12] = 255 & a2 << 4;
-				sid[12] = sid[12] | d2;
 				break;
 
 			case 29: // ATTACK 3
@@ -202,8 +200,6 @@ void movedPot(byte number, int value, bool isMidi) {
 				value = scale4bit(value);
 				ledNumber(value);
 				a3 = value;
-				sid[19] = 255 & a3 << 4;
-				sid[19] = sid[19] | d3;
 				break;
 
 			case 15: // DECAY 1
@@ -213,17 +209,11 @@ void movedPot(byte number, int value, bool isMidi) {
 				value = scale4bit(value);
 				ledNumber(value);
 				d1 = value;
-				sid[5] = 255 & a1 << 4;
-				sid[5] = sid[5] | d1;
 				if (pa) {
 					a2 = a3 = a1;
 					d2 = d3 = d1;
 					r2 = r3 = r1;
 					s2 = s3 = s1;
-					sid[12] = 255 & a2 << 4;
-					sid[12] = sid[12] | d2;
-					sid[19] = 255 & a3 << 4;
-					sid[19] = sid[19] | d3;
 				}
 				break;
 
@@ -234,8 +224,6 @@ void movedPot(byte number, int value, bool isMidi) {
 				value = scale4bit(value);
 				ledNumber(value);
 				d2 = value;
-				sid[12] = 255 & a2 << 4;
-				sid[12] = sid[12] | d2;
 				break;
 
 			case 18: // DECAY 3
@@ -246,8 +234,6 @@ void movedPot(byte number, int value, bool isMidi) {
 				value = scale4bit(value);
 				ledNumber(value);
 				d3 = value;
-				sid[19] = 255 & a3 << 4;
-				sid[19] = sid[19] | d3;
 				break;
 
 			case 13: // SUSTAIN 1
@@ -262,13 +248,7 @@ void movedPot(byte number, int value, bool isMidi) {
 					d2 = d3 = d1;
 					r2 = r3 = r1;
 					s2 = s3 = s1;
-					sid[13] = 255 & s2 << 4;
-					sid[13] = sid[13] | r2;
-					sid[20] = 255 & s3 << 4;
-					sid[20] = sid[20] | r3;
 				}
-				sid[6] = 255 & s1 << 4;
-				sid[6] = sid[6] | r1;
 				break;
 
 			case 23: // SUSTAIN 2
@@ -278,8 +258,6 @@ void movedPot(byte number, int value, bool isMidi) {
 				value = scale4bit(value);
 				ledNumber(value);
 				s2 = value;
-				sid[13] = 255 & s2 << 4;
-				sid[13] = sid[13] | r2;
 				break;
 
 			case 28: // SUSTAIN 3
@@ -290,8 +268,6 @@ void movedPot(byte number, int value, bool isMidi) {
 				value = scale4bit(value);
 				ledNumber(value);
 				s3 = value;
-				sid[20] = 255 & s3 << 4;
-				sid[20] = sid[20] | r3;
 				break;
 
 			case 16: // RELEASE 1
@@ -306,13 +282,7 @@ void movedPot(byte number, int value, bool isMidi) {
 					d2 = d3 = d1;
 					r2 = r3 = r1;
 					s2 = s3 = s1;
-					sid[13] = 255 & s2 << 4;
-					sid[13] = sid[13] | r2;
-					sid[20] = 255 & s3 << 4;
-					sid[20] = sid[20] | r3;
 				}
-				sid[6] = 255 & s1 << 4;
-				sid[6] = sid[6] | r1;
 				break;
 
 			case 20: // RELEASE 2
@@ -322,8 +292,6 @@ void movedPot(byte number, int value, bool isMidi) {
 				value = scale4bit(value);
 				ledNumber(value);
 				r2 = value;
-				sid[13] = 255 & s2 << 4;
-				sid[13] = sid[13] | r2;
 				break;
 
 			case 3: // RELEASE 3
@@ -335,8 +303,6 @@ void movedPot(byte number, int value, bool isMidi) {
 				value = scale4bit(value);
 				ledNumber(value);
 				r3 = value;
-				sid[20] = 255 & s3 << 4;
-				sid[20] = sid[20] | r3;
 				break;
 
 			case 11:

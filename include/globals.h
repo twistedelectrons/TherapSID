@@ -1,5 +1,52 @@
 #include <Arduino.h>
 
+struct PresetVoice {
+	enum Shape {
+		NOISE = 1<<7,
+		PULSE = 1<<6,
+		SAW = 1<<5,
+		TRI = 1<<4
+	};
+
+	byte reg_control; // register 4
+	byte reg_attack_decay; // register 5
+	byte reg_sustain_release; // register 6
+
+	uint8_t control = 0;
+	bool filter_enabled = true;
+
+	void toggle_shape(Shape shape) {
+		control ^= shape;
+
+		// Make sure that noise is not enabled together with any other waveform.
+		auto enabled = control & shape;
+		if (enabled) {
+			if (shape == NOISE) {
+				// If the noise waveform has been turned on, disable the other three.
+				control &= ~(TRI | SAW | PULSE);
+			}
+			else {
+				// If one of the other three waveforms was enabled, make sure to disable noise.
+				control &= ~NOISE;
+			}
+		}
+	}
+};
+struct Preset {
+	PresetVoice voice[3];
+
+	/*void set_leds() { // FIXME FIXME FIXME
+		ledSet(16, bitRead(voice[0].reg_control, 1));
+		ledSet(17, bitRead(voice[0].reg_control, 2));
+		ledSet(18, bitRead(voice[1].reg_control, 1));
+		ledSet(19, bitRead(voice[1].reg_control, 2));
+		ledSet(20, bitRead(voice[2].reg_control, 1));
+		ledSet(21, bitRead(voice[2].reg_control, 2));
+	}*/
+};
+
+extern Preset preset_data;
+
 extern bool sendLfo;
 extern bool sendArp;
 extern bool lfoNewRand[3];
@@ -45,6 +92,15 @@ enum class FatMode {
 };
 extern FatMode fatMode;
 
+inline FatMode uint2FatMode(uint8_t i) { // FIXME
+	if (i < 4) {
+		return static_cast<FatMode>(i);
+	}
+	else {
+		return FatMode::UNISONO;
+	}
+}
+
 extern int cutBase;
 extern byte lfoClockSpeedPending[3];
 extern bool filterModeHeld;
@@ -68,6 +124,15 @@ enum class FilterMode {
 	OFF
 };
 extern FilterMode filterMode;
+
+inline FilterMode uint2FilterMode(uint8_t i) { // FIXME
+	if (i < 5) {
+		return static_cast<FilterMode>(i);
+	}
+	else {
+		return FilterMode::OFF;
+	}
+}
 
 extern byte resBase;
 extern byte key;

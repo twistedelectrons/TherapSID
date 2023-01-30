@@ -55,169 +55,155 @@ struct pair {
 static void write_mask(uint8_t& value, uint8_t mask, uint8_t new_value) {
 	value = (value & (~mask)) | (new_value & mask);
 }
-
-class Sid {
-	public:
-		Sid(int chip_enable_bit) : chip_enable_bit(chip_enable_bit) {}
-
-		/// Updates the next pair of changed registers. Call this in your main loop.
-		void send_next_update_pair() {
-			// some get sent twice just because it's easier to not special-case them.
-			pair send_order[] = { {1, 0}, {3,2}, {4,5}, {6, 13}, {8, 7}, {10,9}, {11,12}, {15,14}, {17, 16}, {18,19}, {20, 23}, {22, 21}, {24, 24} };
-			const size_t SEND_ORDER_LEN = sizeof(send_order) / sizeof(*send_order);
-
-			for (size_t i = 0; i < SEND_ORDER_LEN; i++) {
-				bool updated = false;
-				updated |= maybe_update_register(send_order[next_pair].first);
-				updated |= maybe_update_register(send_order[next_pair].second);
-				next_pair = (next_pair + 1) % SEND_ORDER_LEN;
-
-				if (next_pair == 0) {
-					force_initial_update = false;
-				}
-
-				if (updated) {
-					return;
-				}
-			}
-		}
-
-		void set_freq(int voice, uint16_t value) {
-			registers[7*voice + FREQ_LO] = value & 0xFF;
-			registers[7*voice + FREQ_HI] = value >> 8;
-		}
-
-		enum Shape {
-			NOISE = 1<<7,
-			PULSE = 1<<6,
-			SAW = 1<<5,
-			TRI = 1<<4
-		};
-
-		/// `value` needs to be OR-ed together out of NOISE, PULSE, SAW and/or TRI.
-		/// Note that enabling NOISE together with any other waveform can clear the
-		/// noise shift register inside the chip.
-		void set_shape(int voice, byte value) {
-			registers[7*voice + CONTROL] &= 0x0f;
-			registers[7*voice + CONTROL] |= value;
-		}
-
-		byte shape(int voice) const {
-			return registers[7*voice + CONTROL] & 0xf0;
-		}
-
-		enum FilterMode {
-			HIGHPASS = 1<<6,
-			BANDPASS = 1<<5,
-			LOWPASS = 1<<4
-		};
-
-		void set_filter_mode(uint8_t value) {
-			write_mask(registers[FILTER_MODE_VOLUME], HIGHPASS | BANDPASS | LOWPASS, value);
-		}
-
-		uint8_t filter_mode() {
-			return registers[FILTER_MODE_VOLUME] & (HIGHPASS | BANDPASS | LOWPASS);
-		}
-
-		/// In addition to the usual 3 voices, this accepts voice==3 for the external input.
-		void set_voice_filter(int voice, bool enable) {
-			bitWrite(registers[FILTER_RESONANCE_ROUTING], voice, enable);
-		}
-
-		enum VoiceRegister {
-			FREQ_LO = 0,
-			FREQ_HI,
-			PULSEWIDTH_LO,
-			PULSEWIDTH_HI,
-			CONTROL,
-			ATTACK_DECAY,
-			SUSTAIN_RELEASE
-		};
-
-		enum Register {
-			FREQ1_LO = 0,
-			FREQ1_HI,
-			PULSEWIDTH1_LO,
-			PULSEWIDTH1_HI,
-			CONTROL1,
-			ATTACK_DECAY1,
-			SUSTAIN_RELEASE1,
-
-			FREQ2_LO,
-			FREQ2_HI,
-			PULSEWIDTH2_LO,
-			PULSEWIDTH2_HI,
-			CONTROL2,
-			ATTACK_DECAY2,
-			SUSTAIN_RELEASE2,
-
-			FREQ3_LO,
-			FREQ3_HI,
-			PULSEWIDTH3_LO,
-			PULSEWIDTH3_HI,
-			CONTROL3,
-			ATTACK_DECAY3,
-			SUSTAIN_RELEASE3,
-
-			FILTER_CUTOFF_LO,
-			FILTER_CUTOFF_HI,
-			FILTER_RESONANCE_ROUTING,
-			FILTER_MODE_VOLUME,
-
-			POTX,
-			POTY,
-			OSC3_RANDOM,
-			ENV3
-		};
-
-	private:
-		bool is_voice_playing(size_t voice) {
-			return registers[7*voice + CONTROL] & 1;
-		}
-
-		bool is_update_allowed(size_t register_index) {
-			if (register_index == SUSTAIN_RELEASE1 || register_index == SUSTAIN_RELEASE2 || register_index == SUSTAIN_RELEASE3) {
-				auto voice = register_index / 7;
-				return !is_voice_playing(voice);
-			}
-			else {
-				return true;
-			}
-		}
-
-		/// Updates a SID register if it has been changed, and if it's currently allowed to update it.
-		bool maybe_update_register(size_t index) {
-			bool has_changed = registers_sent[index] == registers[index];
-			bool is_allowed = is_update_allowed(index);
-			if ((has_changed && is_allowed) || force_initial_update) {
-				registers_sent[index] = registers[index];
-				send(index, registers[index]);
-				return true;
-			}
-			return false;
-		}
-
-		void send(size_t index, int data) {
-			PORTC = index << 3;
-			PORTB = data;
-			delayMicroseconds(4);
-
-			PORTD |= _BV(3);
-			PORTD &= ~_BV(chip_enable_bit);
-			delayMicroseconds(4);
-
-			PORTD |= _BV(chip_enable_bit);
-			PORTD &= ~_BV(3);
-			delayMicroseconds(4);
-		}
-
-		size_t next_pair = 0;
-		int chip_enable_bit;
-		bool force_initial_update = true;
-		byte registers[25];
-		byte registers_sent[25];
+		
+enum VoiceRegister {
+	FREQ_LO = 0,
+	FREQ_HI,
+	PULSEWIDTH_LO,
+	PULSEWIDTH_HI,
+	CONTROL,
+	ATTACK_DECAY,
+	SUSTAIN_RELEASE
 };
+
+enum Register {
+	FREQ1_LO = 0,
+	FREQ1_HI,
+	PULSEWIDTH1_LO,
+	PULSEWIDTH1_HI,
+	CONTROL1,
+	ATTACK_DECAY1,
+	SUSTAIN_RELEASE1,
+
+	FREQ2_LO,
+	FREQ2_HI,
+	PULSEWIDTH2_LO,
+	PULSEWIDTH2_HI,
+	CONTROL2,
+	ATTACK_DECAY2,
+	SUSTAIN_RELEASE2,
+
+	FREQ3_LO,
+	FREQ3_HI,
+	PULSEWIDTH3_LO,
+	PULSEWIDTH3_HI,
+	CONTROL3,
+	ATTACK_DECAY3,
+	SUSTAIN_RELEASE3,
+
+	FILTER_CUTOFF_LO,
+	FILTER_CUTOFF_HI,
+	FILTER_RESONANCE_ROUTING,
+	FILTER_MODE_VOLUME,
+
+	POTX,
+	POTY,
+	OSC3_RANDOM,
+	ENV3
+};
+
+
+Sid::Sid(int chip_enable_bit) : chip_enable_bit(chip_enable_bit) {
+	for (auto& r : registers)
+		r = 0;
+	registers[FILTER_CUTOFF_LO] = 0xFF;
+	registers[FILTER_CUTOFF_HI] = 0xFF;
+	registers[FILTER_RESONANCE_ROUTING] = 0xFF;
+	registers[FILTER_MODE_VOLUME] = 0x11; // Filter off full vol
+}
+
+/// Updates the next pair of changed registers. Call this in your main loop.
+void Sid::send_next_update_pair() {
+	// some get sent twice just because it's easier to not special-case them.
+	pair send_order[] = { {1, 0}, {3,2}, {4,5}, {6, 13}, {8, 7}, {10,9}, {11,12}, {15,14}, {17, 16}, {18,19}, {20, 23}, {22, 21}, {24, 24} };
+	const size_t SEND_ORDER_LEN = sizeof(send_order) / sizeof(*send_order);
+
+	for (size_t i = 0; i < SEND_ORDER_LEN; i++) {
+		bool updated = false;
+		updated |= maybe_update_register(send_order[next_pair].first);
+		updated |= maybe_update_register(send_order[next_pair].second);
+		next_pair = (next_pair + 1) % SEND_ORDER_LEN;
+
+		if (next_pair == 0) {
+			force_initial_update = false;
+		}
+
+		if (updated) {
+			return;
+		}
+	}
+}
+
+void Sid::set_freq(int voice, uint16_t value) {
+	registers[7*voice + FREQ_LO] = value & 0xFF;
+	registers[7*voice + FREQ_HI] = value >> 8;
+}
+
+/// `value` needs to be OR-ed together out of NOISE, PULSE, SAW and/or TRI.
+/// Note that enabling NOISE together with any other waveform can clear the
+/// noise shift register inside the chip.
+void Sid::set_shape(int voice, byte value) {
+	registers[7*voice + CONTROL] &= 0x0f;
+	registers[7*voice + CONTROL] |= value;
+}
+
+byte Sid::shape(int voice) const {
+	return registers[7*voice + CONTROL] & 0xf0;
+}
+
+void Sid::set_filter_mode(uint8_t value) {
+	write_mask(registers[FILTER_MODE_VOLUME], HIGHPASS | BANDPASS | LOWPASS, value);
+}
+
+uint8_t Sid::filter_mode() {
+	return registers[FILTER_MODE_VOLUME] & (HIGHPASS | BANDPASS | LOWPASS);
+}
+
+/// In addition to the usual 3 voices, this accepts voice==3 for the external input.
+void Sid::set_voice_filter(int voice, bool enable) {
+	bitWrite(registers[FILTER_RESONANCE_ROUTING], voice, enable);
+}
+
+bool Sid::is_voice_playing(size_t voice) {
+	return registers[7*voice + CONTROL] & 1;
+}
+
+bool Sid::is_update_allowed(size_t register_index) {
+	if (register_index == SUSTAIN_RELEASE1 || register_index == SUSTAIN_RELEASE2 || register_index == SUSTAIN_RELEASE3) {
+		auto voice = register_index / 7;
+		return !is_voice_playing(voice);
+	}
+	else {
+		return true;
+	}
+}
+
+/// Updates a SID register if it has been changed, and if it's currently allowed to update it.
+bool Sid::maybe_update_register(size_t index) {
+	bool has_changed = registers_sent[index] == registers[index];
+	bool is_allowed = is_update_allowed(index);
+	if ((has_changed && is_allowed) || force_initial_update) {
+		registers_sent[index] = registers[index];
+		send(index, registers[index]);
+		return true;
+	}
+	return false;
+}
+
+void Sid::send(size_t index, int data) {
+	PORTC = index << 3;
+	PORTB = data;
+	delayMicroseconds(4);
+
+	PORTD |= _BV(3);
+	PORTD &= ~_BV(chip_enable_bit);
+	delayMicroseconds(4);
+
+	PORTD |= _BV(chip_enable_bit);
+	PORTD &= ~_BV(3);
+	delayMicroseconds(4);
+}
+
 
 Sid sid_chips[2] = {Sid(_BV(6)), Sid(_BV(2))};
 
@@ -257,6 +243,8 @@ static uint16_t fat_pitch(uint16_t pitch, FatMode fatMode) {
 			return pitch - 15;
 		case FatMode::DETUNE_MUCH:
 			return pitch - 50;
+		default:
+			return pitch;
 	}
 }
 

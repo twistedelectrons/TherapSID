@@ -15,6 +15,8 @@ static byte mStatus;
 static byte mData;
 static byte mChannel;
 
+static Preset my_preset; // FIXME
+
 static byte syncLfoCounter;
 static float lfoClockRates[] = {2.6562, 5.3125, 7.96875, 10.625, 21.25, 31.875, 42.5, 85};
 
@@ -59,9 +61,11 @@ static void HandleNoteOn(byte channel, byte note, byte velocity) {
 				} else {
 					envState = 4;
 					arpRound = 0;
-					bitWrite(sid[4], 0, 0);
-					bitWrite(sid[11], 0, 0);
-					bitWrite(sid[18], 0, 0);
+
+					for (int voice = 0; voice < 3; voice++) {
+						sid_chips[0].set_gate(voice, false);
+						sid_chips[1].set_gate(voice, false);
+					}
 				}
 			} else {
 				// note on
@@ -90,9 +94,10 @@ static void HandleNoteOn(byte channel, byte note, byte velocity) {
 					if (arpMode)
 						arpReset(note);
 
-					bitWrite(sid[4], 0, 1);
-					bitWrite(sid[11], 0, 1);
-					bitWrite(sid[18], 0, 1);
+					for (int voice = 0; voice < 3; voice++) {
+						sid_chips[0].set_gate(voice, true);
+						sid_chips[1].set_gate(voice, true);
+					}
 				}
 			}
 
@@ -101,12 +106,14 @@ static void HandleNoteOn(byte channel, byte note, byte velocity) {
 				auto voice_idx = voice_allocator.note_off(note);
 
 				if (voice_idx.has_value()) {
-					bitWrite(sid[4 + 7 * (*voice_idx)], 0, 0);
+					sid_chips[0].set_gate(*voice_idx, false);
+					sid_chips[1].set_gate(*voice_idx, false);
 				}
 			} else { // note on
 				auto voice_idx = voice_allocator.note_on(note, velocity);
 
-				bitWrite(sid[4 + 7 * voice_idx], 0, 1);
+				sid_chips[0].set_gate(voice_idx, true);
+				sid_chips[1].set_gate(voice_idx, true);
 				pKey[voice_idx] = note;
 			}
 		}
@@ -123,11 +130,13 @@ static void HandleNoteOn(byte channel, byte note, byte velocity) {
 		if (mono_note_trackers[voice].has_active_note()) {
 			note_val[voice] = mono_note_trackers[voice].active_note()->note;
 			if (!had_active_note) {
-				bitWrite(sid[4 + voice * 7], 0, 1);
+				sid_chips[0].set_gate(voice, true);
+				sid_chips[1].set_gate(voice, true);
 			}
 		} else {
 			note_val[voice] = 0;
-			bitWrite(sid[4 + voice * 7], 0, 0);
+			sid_chips[0].set_gate(voice, false);
+			sid_chips[1].set_gate(voice, false);
 		}
 
 		calculatePitch();
@@ -153,30 +162,24 @@ static void HandleControlChange(byte channel, byte data1, byte data2) {
 		} else {
 			switch (data1) {
 				case 49: // sync1
-					bitWrite(sid[4], 1, data2);
-					ledSet(16, bitRead(sid[4], 1));
+					bitWrite(my_preset.voice[0].reg_control, 1, data2);
 					break;
 				case 50: // ring1
-					bitWrite(sid[4], 2, data2);
-					ledSet(17, bitRead(sid[4], 2));
+					bitWrite(my_preset.voice[0].reg_control, 2, data2);
 					break;
 
 				case 51: // sync2
-					bitWrite(sid[11], 1, data2);
-					ledSet(18, bitRead(sid[11], 1));
+					bitWrite(my_preset.voice[1].reg_control, 1, data2);
 					break;
 				case 52: // ring2
-					bitWrite(sid[11], 2, data2);
-					ledSet(19, bitRead(sid[11], 2));
+					bitWrite(my_preset.voice[1].reg_control, 2, data2);
 					break;
 
 				case 53: // sync3
-					bitWrite(sid[18], 1, data2);
-					ledSet(20, bitRead(sid[18], 1));
+					bitWrite(my_preset.voice[2].reg_control, 1, data2);
 					break;
 				case 54: // ring3
-					bitWrite(sid[18], 2, data2);
-					ledSet(21, bitRead(sid[18], 2));
+					bitWrite(my_preset.voice[2].reg_control, 2, data2);
 					break;
 
 				case 55:
@@ -317,7 +320,7 @@ static void handleBend(byte channel, int value) {
 
 void sendMidiButt(byte number, int value) {
 	rightDot();
-	sendControlChange(number, value);
+	sendControlChange(number, !!value);
 }
 
 void sendCC(byte number, int value) {

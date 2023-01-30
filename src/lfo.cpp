@@ -433,7 +433,6 @@ void lfoTick() {
 		arpRange = 3;
 
 	arpSpeed = (arpSpeedBase << 4) - arpSpeedLfo1 - arpSpeedLfo2 - arpSpeedLfo3;
-	arpSpeed = arpSpeed;
 	if (arpSpeed < 0)
 		arpSpeed = 0;
 
@@ -447,10 +446,10 @@ void lfoTick() {
 	if (res > 15)
 		res = 15;
 
-	bitWrite(sid[23], 4, bitRead(res, 0));
-	bitWrite(sid[23], 5, bitRead(res, 1));
-	bitWrite(sid[23], 6, bitRead(res, 2));
-	bitWrite(sid[23], 7, bitRead(res, 3));
+	// bitWrite(sid[23], 4, bitRead(res, 0)); // FIXME restore resonance LFO
+	// bitWrite(sid[23], 5, bitRead(res, 1));
+	// bitWrite(sid[23], 6, bitRead(res, 2));
+	// bitWrite(sid[23], 7, bitRead(res, 3));
 
 	finalCut = cutBase + lfoCut1 + lfoCut2 + lfoCut3;
 	if (finalCut < 0) {
@@ -459,8 +458,8 @@ void lfoTick() {
 		finalCut = 1023;
 	}
 
-	sid[21] = finalCut;
-	sid[22] = finalCut >> 3;
+	// sid[21] = finalCut; // FIXME restore cutoff LFO
+	// sid[22] = finalCut >> 3;
 
 	pw1 = pw1Base + pw1Lfo1 + pw1Lfo2 + pw1Lfo3;
 	if (pw1 < 0) {
@@ -473,8 +472,8 @@ void lfoTick() {
 		pw1 = constrain(pw1, pwMin, pwMax);
 	}
 
-	sid[2] = lowByte(pw1);
-	sid[3] = highByte(pw1);
+	// sid[2] = lowByte(pw1); // FIXME restore pulse width LFO
+	// sid[3] = highByte(pw1);
 
 	pw2 = pw2Base + pw2Lfo1 + pw2Lfo2 + pw2Lfo3;
 	if (pw2 < 0) {
@@ -487,8 +486,8 @@ void lfoTick() {
 		pw2 = constrain(pw2, pwMin, pwMax);
 	}
 
-	sid[9] = lowByte(pw2);
-	sid[10] = highByte(pw2);
+	// sid[9] = lowByte(pw2); // FIXME
+	// sid[10] = highByte(pw2);
 
 	pw3 = pw3Base + pw3Lfo1 + pw3Lfo2 + pw3Lfo3;
 	if (pw3 < 0) {
@@ -501,8 +500,8 @@ void lfoTick() {
 		pw3 = constrain(pw3, pwMin, pwMax);
 	}
 
-	sid[16] = lowByte(pw3);
-	sid[17] = highByte(pw3);
+	// sid[16] = lowByte(pw3); // FIXME
+	// sid[17] = highByte(pw3);
 
 	byte temp;
 	for (int i = 0; i < 3; i++) {
