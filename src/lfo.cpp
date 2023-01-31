@@ -24,27 +24,10 @@ static const int pwMin = 10;
 static const int pwMax = 2050;
 
 void setLfo(byte number) {
-
 	if (number != selectedLfoLast) {
 		selectedLfo = selectedLfoLast = number;
-		showLfo(); //
+		// FIXME update leds
 	}
-}
-
-void showLfo() {
-
-	ledSet(22, 0);
-	ledSet(23, 0);
-	ledSet(24, 0);
-	ledSet(25, 0);
-	ledSet(26, 0);
-
-	if (lfoShape[selectedLfo]) {
-		ledSet(21 + lfoShape[selectedLfo], 1);
-	}
-	ledSet(30, retrig[selectedLfo]);
-
-	ledSet(31, looping[selectedLfo]);
 }
 
 void lfoTick() {
@@ -516,12 +499,7 @@ void lfoTick() {
 
 void lastMovedPot(byte number) {
 	lastPot = number;
-	if (lastPot != 20) {
-
-		ledSet(13, lfoAss[0][number]);
-		ledSet(14, lfoAss[1][number]);
-		ledSet(15, lfoAss[2][number]);
-	}
+	my_preset.set_leds(lastPot, ...);
 }
 
 void chain() {

@@ -158,7 +158,8 @@ static void HandleControlChange(byte channel, byte data1, byte data2) {
 			movedPot(mapping[data1], data2 << 3, true);
 		} else if (37 <= data1 && data1 <= 48) {
 			int offset = data1 - 37;
-			sidShape(offset / 4, offset % 4 + 1, data2);
+			sidShape(offset / 4, offset % 4 + 1, data2); // FIXME remove
+			// FIXME update leds here
 		} else {
 			switch (data1) {
 				case 49: // sync1
@@ -197,7 +198,6 @@ static void HandleControlChange(byte channel, byte data1, byte data2) {
 					} else {
 						lfoShape[selectedLfo] = 0;
 					}
-					showLfo();
 					sendControlChange(61, 0);
 					sendControlChange(62, 0);
 					sendControlChange(63, 0);
@@ -209,7 +209,6 @@ static void HandleControlChange(byte channel, byte data1, byte data2) {
 					} else {
 						lfoShape[selectedLfo] = 0;
 					}
-					showLfo();
 					sendControlChange(60, 0);
 					sendControlChange(62, 0);
 					sendControlChange(63, 0);
@@ -221,7 +220,6 @@ static void HandleControlChange(byte channel, byte data1, byte data2) {
 					} else {
 						lfoShape[selectedLfo] = 0;
 					}
-					showLfo();
 					sendControlChange(61, 0);
 					sendControlChange(60, 0);
 					sendControlChange(63, 0);
@@ -233,7 +231,6 @@ static void HandleControlChange(byte channel, byte data1, byte data2) {
 					} else {
 						lfoShape[selectedLfo] = 0;
 					}
-					showLfo();
 					sendControlChange(61, 0);
 					sendControlChange(62, 0);
 					sendControlChange(60, 0);
@@ -245,7 +242,6 @@ static void HandleControlChange(byte channel, byte data1, byte data2) {
 					} else {
 						lfoShape[selectedLfo] = 0;
 					}
-					showLfo();
 					sendControlChange(61, 0);
 					sendControlChange(62, 0);
 					sendControlChange(63, 0);
@@ -258,7 +254,6 @@ static void HandleControlChange(byte channel, byte data1, byte data2) {
 					} else {
 						retrig[selectedLfo] = 0;
 					}
-					showLfo();
 					break; // lfo retrig
 				case 67:
 					if (data2) {
@@ -266,7 +261,6 @@ static void HandleControlChange(byte channel, byte data1, byte data2) {
 					} else {
 						looping[selectedLfo] = 0;
 					}
-					showLfo();
 					break; // lfo loop
 
 				case 68:
@@ -288,6 +282,7 @@ static void HandleControlChange(byte channel, byte data1, byte data2) {
 					}
 					break; // arp send
 			}
+			// FIXME update leds here
 		}
 	}
 }

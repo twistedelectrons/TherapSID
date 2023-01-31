@@ -208,26 +208,6 @@ void Sid::send(size_t index, int data) {
 Sid sid_chips[2] = {Sid(_BV(6)), Sid(_BV(2))};
 
 
-
-void ledUpdateShape() {
-	// update leds
-	for (int voice = 0; voice < 3; voice++) {
-		ledSet(7*voice + 1, sid_chips[0].shape(voice) & Sid::PULSE);
-		ledSet(7*voice + 2, sid_chips[0].shape(voice) & Sid::TRI);
-		ledSet(7*voice + 3, sid_chips[0].shape(voice) & Sid::SAW);
-		ledSet(7*voice + 4, sid_chips[0].shape(voice) & Sid::NOISE);
-	}
-}
-
-void ledUpdateFilterMode() {
-	// FIXME: do not use sid registers for GUI purposes
-	ledSet(27, sid_chips[0].filter_mode() & Sid::LOWPASS);
-	ledSet(28, sid_chips[0].filter_mode() & Sid::BANDPASS);
-	ledSet(29, sid_chips[0].filter_mode() & Sid::HIGHPASS);
-}
-
-
-
 static uint16_t fat_pitch(uint16_t pitch, FatMode fatMode) {
 	switch (fatMode) {
 		case FatMode::UNISONO:
@@ -253,6 +233,7 @@ void sidPitch(byte voice, int pitch) {
 	sid_chips[1].set_freq(voice, fat_pitch(pitch, fatMode));
 }
 
+// FIXME into preset
 void sidShape(byte voice, byte shape, bool value) {
 	if (shape <= 1 || shape > 4) return;
 	const byte mapping[] = { 0, Sid::PULSE, Sid::TRI, Sid::SAW, Sid::NOISE };
@@ -275,11 +256,9 @@ void sidShape(byte voice, byte shape, bool value) {
 
 		chip.set_shape(voice, new_value);
 	}
-
-	ledUpdateShape(); // FIXME
 }
 
-// FIXME parameter
+// FIXME into preset
 void updateFilter() {
 	// assert((unsigned) filterMode < 5); // FIXME
 
@@ -296,8 +275,6 @@ void updateFilter() {
 			}
 		}
 	}
-
-	ledUpdateFilterMode();
 }
 
 

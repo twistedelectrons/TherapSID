@@ -308,13 +308,6 @@ void load(byte number) {
 		}
 	}
 
-	ledSet(16, bitRead(my_preset.voice[0].reg_control, 1));
-	ledSet(17, bitRead(my_preset.voice[0].reg_control, 2));
-	ledSet(18, bitRead(my_preset.voice[1].reg_control, 1));
-	ledSet(19, bitRead(my_preset.voice[1].reg_control, 2));
-	ledSet(20, bitRead(my_preset.voice[2].reg_control, 1));
-	ledSet(21, bitRead(my_preset.voice[2].reg_control, 2));
-
 	temp = ready();
 	fatMode = uint2FatMode(temp & 0x3);
 	updateFatMode();
@@ -598,26 +591,9 @@ void load(byte number) {
 	if (arpSpeedBase == 0)
 		arpSpeedBase = 1;
 
-	showLfo();
-
 	lastMovedPot(lastPot);
 
 	updateFilter();
-
-	ledSet(1, bitRead(my_preset.voice[0].reg_control, 6));
-	ledSet(2, bitRead(my_preset.voice[0].reg_control, 4));
-	ledSet(3, bitRead(my_preset.voice[0].reg_control, 5));
-	ledSet(4, bitRead(my_preset.voice[0].reg_control, 7));
-
-	ledSet(5, bitRead(my_preset.voice[1].reg_control, 6));
-	ledSet(6, bitRead(my_preset.voice[1].reg_control, 4));
-	ledSet(7, bitRead(my_preset.voice[1].reg_control, 5));
-	ledSet(8, bitRead(my_preset.voice[1].reg_control, 7));
-
-	ledSet(9, bitRead(my_preset.voice[2].reg_control, 6));
-	ledSet(10, bitRead(my_preset.voice[2].reg_control, 4));
-	ledSet(11, bitRead(my_preset.voice[2].reg_control, 5));
-	ledSet(12, bitRead(my_preset.voice[2].reg_control, 7));
 
 	bitWrite(my_preset.voice[0].reg_control, 0, 0);
 	bitWrite(my_preset.voice[1].reg_control, 0, 0);
@@ -625,6 +601,8 @@ void load(byte number) {
 
 	if (jumble)
 		arpMode = 0;
+
+	my_preset.set_leds();
 
 	Timer1.initialize(100);      //
 	Timer1.attachInterrupt(isr); // attach the service routine here

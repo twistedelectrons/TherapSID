@@ -1,5 +1,41 @@
 #include <Arduino.h>
 
+// FIXME integrate into program
+enum class FilterMode {
+	LOWPASS,
+	BANDPASS,
+	HIGHPASS,
+	NOTCH,
+	OFF
+};
+extern FilterMode filterMode;
+
+inline FilterMode uint2FilterMode(uint8_t i) { // FIXME
+	if (i < 5) {
+		return static_cast<FilterMode>(i);
+	}
+	else {
+		return FilterMode::OFF;
+	}
+}
+
+enum class FatMode {
+	UNISONO,
+	OCTAVE_UP,
+	DETUNE_SLIGHT,
+	DETUNE_MUCH
+};
+extern FatMode fatMode;
+
+inline FatMode uint2FatMode(uint8_t i) { // FIXME
+	if (i < 4) {
+		return static_cast<FatMode>(i);
+	}
+	else {
+		return FatMode::UNISONO;
+	}
+}
+
 struct PresetVoice {
 	enum Shape {
 		NOISE = 1<<7,
@@ -35,13 +71,52 @@ struct PresetVoice {
 struct Preset {
 	PresetVoice voice[3];
 
-	/*void set_leds() { // FIXME FIXME FIXME
+	/*void set_leds(uint8_t lastPot, uint8_t selectedLfo) { // FIXME FIXME FIXME
+		assert(lastPot < TODO);
+		assert(selectedLfo < 3);
+
+		if (!paraphonic) {
+			for (int i=0; i<3; i++) {
+				ledSet(4*i+1, bitRead(voice[i].reg_control, 6));
+				ledSet(4*i+2, bitRead(voice[i].reg_control, 4));
+				ledSet(4*i+3, bitRead(voice[i].reg_control, 5));
+				ledSet(4*i+4, bitRead(voice[i].reg_control, 7));
+			}
+		}
+		else {
+			for (int i=0; i<3; i++) {
+				ledSet(4*i+1, bitRead(voice[0].reg_control, 6));
+				ledSet(4*i+2, bitRead(voice[0].reg_control, 4));
+				ledSet(4*i+3, bitRead(voice[0].reg_control, 5));
+				ledSet(4*i+4, bitRead(voice[0].reg_control, 7));
+			}
+		}
+
+		// FIXME this should probably depend on paraphonic
 		ledSet(16, bitRead(voice[0].reg_control, 1));
 		ledSet(17, bitRead(voice[0].reg_control, 2));
 		ledSet(18, bitRead(voice[1].reg_control, 1));
 		ledSet(19, bitRead(voice[1].reg_control, 2));
 		ledSet(20, bitRead(voice[2].reg_control, 1));
 		ledSet(21, bitRead(voice[2].reg_control, 2));
+	
+		ledSet(27, sid_chips[0].filter_mode() & Sid::LOWPASS);
+		ledSet(28, sid_chips[0].filter_mode() & Sid::BANDPASS);
+		ledSet(29, sid_chips[0].filter_mode() & Sid::HIGHPASS);
+
+
+		if (lastPot != 20) { // TODO why?
+			ledSet(13, lfoAss[0][lastPot]);
+			ledSet(14, lfoAss[1][lastPot]);
+			ledSet(15, lfoAss[2][lastPot]);
+		}
+
+
+		for (int shape = 1; shape<=5; shape++) {
+			ledSet(21 + shape, lfoShape[selectedLfo] == shape);
+		}
+		ledSet(30, retrig[selectedLfo]);
+		ledSet(31, looping[selectedLfo]);
 	}*/
 };
 
@@ -84,23 +159,6 @@ extern byte selectedLfo;
 extern byte lfoShape[3];
 
 
-enum class FatMode {
-	UNISONO,
-	OCTAVE_UP,
-	DETUNE_SLIGHT,
-	DETUNE_MUCH
-};
-extern FatMode fatMode;
-
-inline FatMode uint2FatMode(uint8_t i) { // FIXME
-	if (i < 4) {
-		return static_cast<FatMode>(i);
-	}
-	else {
-		return FatMode::UNISONO;
-	}
-}
-
 extern int cutBase;
 extern byte lfoClockSpeedPending[3];
 extern bool filterModeHeld;
@@ -114,25 +172,6 @@ extern int pw1Base, pw2Base, pw3Base;
 extern float fineBase1, fineBase2, fineBase3, lfoFine1, lfoFine2, lfoFine3, lfoFine4, lfoFine5, lfoFine6, lfoFine7,
     lfoFine8, lfoFine9;
 extern byte a1, a2, a3, d1, d2, d3, s1, s2, s3, r1, r2, r3;
-
-
-enum class FilterMode {
-	LOWPASS,
-	BANDPASS,
-	HIGHPASS,
-	NOTCH,
-	OFF
-};
-extern FilterMode filterMode;
-
-inline FilterMode uint2FilterMode(uint8_t i) { // FIXME
-	if (i < 5) {
-		return static_cast<FilterMode>(i);
-	}
-	else {
-		return FilterMode::OFF;
-	}
-}
 
 extern byte resBase;
 extern byte key;

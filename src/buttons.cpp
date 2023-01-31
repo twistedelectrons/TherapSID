@@ -153,7 +153,6 @@ void buttChanged(byte number, bool value) {
 				} else {
 					lfoShape[selectedLfo] = 0;
 				}
-				showLfo();
 				break;
 			case LFO_SAW:
 				if (lfoShape[selectedLfo] != 2) {
@@ -161,7 +160,6 @@ void buttChanged(byte number, bool value) {
 				} else {
 					lfoShape[selectedLfo] = 0;
 				}
-				showLfo();
 				break;
 			case LFO_TRI:
 				if (lfoShape[selectedLfo] != 3) {
@@ -169,7 +167,6 @@ void buttChanged(byte number, bool value) {
 				} else {
 					lfoShape[selectedLfo] = 0;
 				}
-				showLfo();
 				break;
 			case LFO_NOISE:
 				if (lfoShape[selectedLfo] != 4) {
@@ -177,7 +174,6 @@ void buttChanged(byte number, bool value) {
 				} else {
 					lfoShape[selectedLfo] = 0;
 				}
-				showLfo();
 				break;
 			case LFO_ENV3:
 				if (lfoShape[selectedLfo] != 5) {
@@ -185,7 +181,6 @@ void buttChanged(byte number, bool value) {
 				} else {
 					lfoShape[selectedLfo] = 0;
 				}
-				showLfo();
 
 				break;
 
@@ -200,11 +195,9 @@ void buttChanged(byte number, bool value) {
 
 			case RETRIG:
 				retrig[selectedLfo] = !retrig[selectedLfo];
-				showLfo();
 				break;
 			case LOOP:
 				looping[selectedLfo] = !looping[selectedLfo];
-				showLfo();
 				break;
 
 			case PRESET_UP:
@@ -285,6 +278,8 @@ void buttChanged(byte number, bool value) {
 
 				break;
 		}
+
+		my_preset.set_leds();
 	} else {
 		switch (number) {
 			case RECT1:
