@@ -89,12 +89,12 @@ void save() {
 	writey(glide1);
 	writey(glide2);
 	writey(glide3);
-	writey((a1 << 4) | d1);
-	writey((s1 << 4) | r1);
-	writey((a2 << 4) | d2);
-	writey((s2 << 4) | r2);
-	writey((a3 << 4) | d3); // 20
-	writey((s3 << 4) | r3);
+	writey((preset_data.voice[0].attack << 4) | preset_data.voice[0].decay);
+	writey((preset_data.voice[0].sustain << 4) | preset_data.voice[0].release);
+	writey((preset_data.voice[1].attack << 4) | preset_data.voice[1].decay);
+	writey((preset_data.voice[1].sustain << 4) | preset_data.voice[1].release);
+	writey((preset_data.voice[2].attack << 4) | preset_data.voice[2].decay); // 20
+	writey((preset_data.voice[2].sustain << 4) | preset_data.voice[2].release);
 
 	int tempy = lfoSpeedBase[0];
 	tempy /= 1.3;
@@ -384,33 +384,33 @@ void load(byte number) {
 
 	// FIXME loop
 	temp = ready();
-	d1 = temp & 0x0F;
-	a1 = (temp >> 4) & 0x0F;
+	preset_data.voice[0].decay = temp & 0x0F;
+	preset_data.voice[0].attack = (temp >> 4) & 0x0F;
 
 	temp = ready();
-	r1 = temp & 0x0F;
-	s1 = (temp >> 4) & 0x0F;
+	preset_data.voice[0].release = temp & 0x0F;
+	preset_data.voice[0].sustain = (temp >> 4) & 0x0F;
 
 	temp = ready();
-	d2 = temp & 0x0F;
-	a2 = (temp >> 4) & 0x0F;
+	preset_data.voice[1].decay = temp & 0x0F;
+	preset_data.voice[1].attack = (temp >> 4) & 0x0F;
 
 	temp = ready();
-	r2 = temp & 0x0F;
-	s2 = (temp >> 4) & 0x0F;
+	preset_data.voice[1].release = temp & 0x0F;
+	preset_data.voice[1].sustain = (temp >> 4) & 0x0F;
 
 	temp = ready();
-	d3 = temp & 0x0F;
-	a3 = (temp >> 4) & 0x0F;
+	preset_data.voice[2].decay = temp & 0x0F;
+	preset_data.voice[2].attack = (temp >> 4) & 0x0F;
 
 	temp = ready();
-	r3 = temp & 0x0F;
-	s3 = (temp >> 4) & 0x0F;
+	preset_data.voice[2].release = temp & 0x0F;
+	preset_data.voice[2].sustain = (temp >> 4) & 0x0F;
 
-	a4 = a3 << 4;
-	d4 = d3 << 4;
-	s4 = s3 << 4;
-	r4 = r3 << 4;
+	a4 = preset_data.voice[2].attack << 4;
+	d4 = preset_data.voice[2].decay << 4;
+	s4 = preset_data.voice[2].sustain << 4;
+	r4 = preset_data.voice[2].release << 4;
 
 	lfoSpeedBase[0] = (ready() << 2) * 1.3;
 	lfoSpeedBase[1] = (ready() << 2) * 1.3;
@@ -591,18 +591,18 @@ void load(byte number) {
 	sendCC(13, glide2 << 4);
 	sendCC(21, glide3 << 4);
 
-	sendCC(6, a1 << 6);
-	sendCC(14, a2 << 6);
-	sendCC(22, a3 << 6);
-	sendCC(7, d1 << 6);
-	sendCC(15, d2 << 6);
-	sendCC(23, d3 << 6);
-	sendCC(8, s1 << 6);
-	sendCC(16, s2 << 6);
-	sendCC(24, s3 << 6);
-	sendCC(9, r1 << 6);
-	sendCC(17, r2 << 6);
-	sendCC(25, r3 << 6);
+	sendCC(6, preset_data.voice[0].attack << 6);
+	sendCC(14, preset_data.voice[1].attack << 6);
+	sendCC(22, preset_data.voice[2].attack << 6);
+	sendCC(7, preset_data.voice[0].decay << 6);
+	sendCC(15, preset_data.voice[1].decay << 6);
+	sendCC(23, preset_data.voice[2].decay << 6);
+	sendCC(8, preset_data.voice[0].sustain << 6);
+	sendCC(16, preset_data.voice[1].sustain << 6);
+	sendCC(24, preset_data.voice[2].sustain << 6);
+	sendCC(9, preset_data.voice[0].release << 6);
+	sendCC(17, preset_data.voice[1].release << 6);
+	sendCC(25, preset_data.voice[2].release << 6);
 
 	sendCC(26, lfoSpeedBase[0] / 1.3);
 	sendCC(28, lfoSpeedBase[1] / 1.3);

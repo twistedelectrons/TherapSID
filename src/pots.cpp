@@ -173,7 +173,7 @@ void movedPot(byte number, int value, bool isMidi) {
 				}
 				value = scale4bit(value);
 				ledNumber(value);
-				a1 = value;
+				preset_data.voice[0].attack = value;
 
 				break;
 
@@ -183,7 +183,7 @@ void movedPot(byte number, int value, bool isMidi) {
 				}
 				value = scale4bit(value);
 				ledNumber(value);
-				a2 = value;
+				preset_data.voice[1].attack = value;
 				break;
 
 			case 29: // ATTACK 3
@@ -193,7 +193,7 @@ void movedPot(byte number, int value, bool isMidi) {
 				a4 = value;
 				value = scale4bit(value);
 				ledNumber(value);
-				a3 = value;
+				preset_data.voice[2].attack = value;
 				break;
 
 			case 15: // DECAY 1
@@ -202,7 +202,7 @@ void movedPot(byte number, int value, bool isMidi) {
 				}
 				value = scale4bit(value);
 				ledNumber(value);
-				d1 = value;
+				preset_data.voice[0].decay = value;
 				break;
 
 			case 25: // DECAY 2
@@ -211,7 +211,7 @@ void movedPot(byte number, int value, bool isMidi) {
 				}
 				value = scale4bit(value);
 				ledNumber(value);
-				d2 = value;
+				preset_data.voice[1].decay = value;
 				break;
 
 			case 18: // DECAY 3
@@ -221,7 +221,7 @@ void movedPot(byte number, int value, bool isMidi) {
 				d4 = value;
 				value = scale4bit(value);
 				ledNumber(value);
-				d3 = value;
+				preset_data.voice[2].decay = value;
 				break;
 
 			case 13: // SUSTAIN 1
@@ -230,7 +230,7 @@ void movedPot(byte number, int value, bool isMidi) {
 				}
 				value = scale4bit(value);
 				ledNumber(value);
-				s1 = value;
+				preset_data.voice[0].sustain = value;
 				break;
 
 			case 23: // SUSTAIN 2
@@ -239,7 +239,7 @@ void movedPot(byte number, int value, bool isMidi) {
 				}
 				value = scale4bit(value);
 				ledNumber(value);
-				s2 = value;
+				preset_data.voice[1].sustain = value;
 				break;
 
 			case 28: // SUSTAIN 3
@@ -249,7 +249,7 @@ void movedPot(byte number, int value, bool isMidi) {
 				s4 = value >> 2;
 				value = scale4bit(value);
 				ledNumber(value);
-				s3 = value;
+				preset_data.voice[2].sustain = value;
 				break;
 
 			case 16: // RELEASE 1
@@ -258,7 +258,7 @@ void movedPot(byte number, int value, bool isMidi) {
 				}
 				value = scale4bit(value);
 				ledNumber(value);
-				r1 = value;
+				preset_data.voice[0].release = value;
 				break;
 
 			case 20: // RELEASE 2
@@ -267,7 +267,7 @@ void movedPot(byte number, int value, bool isMidi) {
 				}
 				value = scale4bit(value);
 				ledNumber(value);
-				r2 = value;
+				preset_data.voice[1].release = value;
 				break;
 
 			case 3: // RELEASE 3
@@ -278,7 +278,7 @@ void movedPot(byte number, int value, bool isMidi) {
 
 				value = scale4bit(value);
 				ledNumber(value);
-				r3 = value;
+				preset_data.voice[2].release = value;
 				break;
 
 			case 11:

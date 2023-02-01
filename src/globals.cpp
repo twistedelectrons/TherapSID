@@ -55,22 +55,21 @@ int pw1Base, pw2Base, pw3Base; // PATCH
 float fineBase1, fineBase2, fineBase3; // PATCH
 float lfoFine1, lfoFine2, lfoFine3, lfoFine4, lfoFine5, lfoFine6, lfoFine7, lfoFine8,
     lfoFine9;
-byte a1, a2, a3, d1, d2, d3, s1, s2, s3, r1, r2, r3; // PATCH
 
 /* FIXME do this in main loop:
-					sid[5] = 255 & a1 << 4;
-					sid[5] = sid[5] | d1;
-					sid[12] = 255 & a2 << 4;
-					sid[12] = sid[12] | d2;
-					sid[19] = 255 & a3 << 4;
-					sid[19] = sid[19] | d3;
+					sid[5] = 255 & preset_data.voice[0].attack << 4;
+					sid[5] = sid[5] | preset_data.voice[0].decay;
+					sid[12] = 255 & preset_data.voice[1].attack << 4;
+					sid[12] = sid[12] | preset_data.voice[1].decay;
+					sid[19] = 255 & preset_data.voice[2].attack << 4;
+					sid[19] = sid[19] | preset_data.voice[2].decay;
 					
-					sid[6] = 255 & s1 << 4;
-					sid[6] = sid[6] | r1;
-					sid[13] = 255 & s2 << 4;
-					sid[13] = sid[13] | r2;
-					sid[20] = 255 & s3 << 4;
-					sid[20] = sid[20] | r3;
+					sid[6] = 255 & preset_data.voice[0].sustain << 4;
+					sid[6] = sid[6] | preset_data.voice[0].release;
+					sid[13] = 255 & preset_data.voice[1].sustain << 4;
+					sid[13] = sid[13] | preset_data.voice[1].release;
+					sid[20] = 255 & preset_data.voice[2].sustain << 4;
+					sid[20] = sid[20] | preset_data.voice[2].release;
 */
 
 

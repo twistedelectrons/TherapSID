@@ -44,6 +44,8 @@ struct PresetVoice {
 		TRI = 1<<4
 	};
 
+	byte attack = 0, decay = 0, sustain = 0, release = 0;
+
 	byte reg_control; // register 4
 
 	uint8_t control = 0;
@@ -178,7 +180,6 @@ extern byte glide1, glide2, glide3;
 extern int pw1Base, pw2Base, pw3Base;
 extern float fineBase1, fineBase2, fineBase3, lfoFine1, lfoFine2, lfoFine3, lfoFine4, lfoFine5, lfoFine6, lfoFine7,
     lfoFine8, lfoFine9;
-extern byte a1, a2, a3, d1, d2, d3, s1, s2, s3, r1, r2, r3;
 
 extern byte resBase;
 extern byte key;
