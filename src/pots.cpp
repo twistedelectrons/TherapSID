@@ -111,8 +111,7 @@ void movedPot(byte number, int value, bool isMidi) {
 				break; // TUNE3
 
 			case 14:
-				preset_data.voice[0].fine_base = value;
-				preset_data.voice[0].fine_base /= 1023;
+				preset_data.voice[0].fine_base = value / 1023.f;
 				if (preset_data.paraphonic) {
 					preset_data.voice[1].fine_base = preset_data.voice[2].fine_base = preset_data.voice[0].fine_base;
 				}
@@ -123,8 +122,7 @@ void movedPot(byte number, int value, bool isMidi) {
 				}
 				break; // FINE1
 			case 17:
-				preset_data.voice[1].fine_base = value;
-				preset_data.voice[1].fine_base /= 1023;
+				preset_data.voice[1].fine_base = value / 1023.f;
 				if (!isMidi) {
 					sendCC(12, value);
 					ledNumber(scaleFine(value));
@@ -134,8 +132,7 @@ void movedPot(byte number, int value, bool isMidi) {
 			case 31:
 				if (!isMidi) {
 					sendCC(20, value);
-					preset_data.voice[2].fine_base = value;
-					preset_data.voice[2].fine_base /= 1023;
+					preset_data.voice[2].fine_base = value / 1023.f;
 					ledNumber(scaleFine(value));
 					lastMovedPot(8);
 				}

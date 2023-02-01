@@ -96,24 +96,14 @@ void save() {
 	writey((preset_data.voice[2].attack << 4) | preset_data.voice[2].decay); // 20
 	writey((preset_data.voice[2].sustain << 4) | preset_data.voice[2].release);
 
-	int tempy = lfoSpeedBase[0];
-	tempy /= 1.3;
-	tempy = tempy >> 2;
-	writey(tempy);
-
-	tempy = lfoSpeedBase[1];
-	tempy /= 1.3;
-	tempy = tempy >> 2;
-	writey(tempy);
-
-	tempy = lfoSpeedBase[2];
-	tempy /= 1.3;
-	tempy = tempy >> 2;
-	writey(tempy);
+	writey(lfoSpeedBase[0] / 1.3 / 4);
+	writey(lfoSpeedBase[1] / 1.3 / 4);
+	writey(lfoSpeedBase[2] / 1.3 / 4);
 
 	writey(lfoDepthBase[0] >> 2);
 	writey(lfoDepthBase[1] >> 2);
 	writey(lfoDepthBase[2] >> 2); // 27
+	// FIXME loop
 	bitWrite(temp, 0, lfoAss[0][0]);
 	bitWrite(temp, 1, lfoAss[0][1]);
 	bitWrite(temp, 2, lfoAss[0][2]);
@@ -346,19 +336,13 @@ void load(byte number) {
 	preset_data.voice[1].tune_base = constrain(preset_data.voice[1].tune_base, 0, 24);
 	preset_data.voice[2].tune_base = constrain(preset_data.voice[2].tune_base, 0, 24);
 
-	preset_data.voice[0].pulsewidth_base = ready();
-	preset_data.voice[0].pulsewidth_base = preset_data.voice[0].pulsewidth_base << 3;
-	preset_data.voice[1].pulsewidth_base = ready();
-	preset_data.voice[1].pulsewidth_base = preset_data.voice[1].pulsewidth_base << 3;
-	preset_data.voice[2].pulsewidth_base = ready();
-	preset_data.voice[2].pulsewidth_base = preset_data.voice[2].pulsewidth_base << 3;
+	preset_data.voice[0].pulsewidth_base = ready() << 3;
+	preset_data.voice[1].pulsewidth_base = ready() << 3;
+	preset_data.voice[2].pulsewidth_base = ready() << 3;
 
-	preset_data.voice[0].glide = ready();
-	preset_data.voice[0].glide = constrain(preset_data.voice[0].glide, 0, 63);
-	preset_data.voice[1].glide = ready();
-	preset_data.voice[1].glide = constrain(preset_data.voice[1].glide, 0, 63);
-	preset_data.voice[2].glide = ready();
-	preset_data.voice[2].glide = constrain(preset_data.voice[2].glide, 0, 63);
+	preset_data.voice[0].glide = constrain(ready(), 0, 63);
+	preset_data.voice[1].glide = constrain(ready(), 0, 63);
+	preset_data.voice[2].glide = constrain(ready(), 0, 63);
 
 	if (jumble) {
 		if (random(20) > 15) {
@@ -420,6 +404,7 @@ void load(byte number) {
 	lfoDepthBase[1] = ready() << 2;
 	lfoDepthBase[2] = ready() << 2;
 
+	// FIXME loop!
 	temp = ready();
 	lfoAss[0][0] = bitRead(temp, 0);
 	lfoAss[0][1] = bitRead(temp, 1);
@@ -541,14 +526,8 @@ void load(byte number) {
 
 
 	temp = ready();
-	bitWrite(preset_data.resonance_base, 0, bitRead(temp, 0));
-	bitWrite(preset_data.resonance_base, 1, bitRead(temp, 1));
-	bitWrite(preset_data.resonance_base, 2, bitRead(temp, 2));
-	bitWrite(preset_data.resonance_base, 3, bitRead(temp, 3));
-	bitWrite(arpMode, 0, bitRead(temp, 4));
-	bitWrite(arpMode, 1, bitRead(temp, 5));
-	bitWrite(arpMode, 2, bitRead(temp, 6));
-	bitWrite(arpMode, 3, bitRead(temp, 7));
+	preset_data.resonance_base = temp & 0x0F;
+	arpMode = (temp >> 4) & 0x0F;
 
 	arpRound = 0;
 	arpCount = 0;
