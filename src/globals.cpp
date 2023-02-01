@@ -72,6 +72,8 @@ float lfoFine1, lfoFine2, lfoFine3, lfoFine4, lfoFine5, lfoFine6, lfoFine7, lfoF
 
 FilterMode filterMode; // PATCH
 
+Preset preset_data;
+
 
 byte key;
 byte arpMode;
