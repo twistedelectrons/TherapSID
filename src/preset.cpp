@@ -27,8 +27,6 @@ MEMORY MAPPING
 
 */
 
-static Preset my_preset; // FIXME
-
 static int writeIndex;
 
 static void writey(byte data) {
@@ -51,13 +49,13 @@ void save() {
 	byte temp;
 	writeIndex = preset * 40;
 
-	bitWrite(my_preset.voice[0].reg_control, 0, 0);
-	bitWrite(my_preset.voice[1].reg_control, 0, 0);
-	bitWrite(my_preset.voice[2].reg_control, 0, 0);
+	bitWrite(preset_data.voice[0].reg_control, 0, 0);
+	bitWrite(preset_data.voice[1].reg_control, 0, 0);
+	bitWrite(preset_data.voice[2].reg_control, 0, 0);
 
-	writey(my_preset.voice[0].reg_control);
-	writey(my_preset.voice[1].reg_control);
-	writey(my_preset.voice[2].reg_control);
+	writey(preset_data.voice[0].reg_control);
+	writey(preset_data.voice[1].reg_control);
+	writey(preset_data.voice[2].reg_control);
 	temp = 0;
 	temp |= ((int)fatMode) & 0x3;
 
@@ -232,70 +230,70 @@ void load(byte number) {
 	writeIndex = number * 40;
 	byte temp;
 
-	my_preset.voice[0].reg_control = ready();
-	my_preset.voice[1].reg_control = ready();
-	my_preset.voice[2].reg_control = ready();
+	preset_data.voice[0].reg_control = ready();
+	preset_data.voice[1].reg_control = ready();
+	preset_data.voice[2].reg_control = ready();
 	if (jumble) {
 
 		byte dice = random(0, 5);
 		if (dice == 0) {
-			my_preset.voice[0].reg_control = B00000000;
+			preset_data.voice[0].reg_control = B00000000;
 		} else if (dice == 1) {
-			my_preset.voice[0].reg_control = B01000000;
+			preset_data.voice[0].reg_control = B01000000;
 		} else if (dice == 2) {
-			my_preset.voice[0].reg_control = B00100000;
+			preset_data.voice[0].reg_control = B00100000;
 		} else if (dice == 3) {
-			my_preset.voice[0].reg_control = B00010000;
+			preset_data.voice[0].reg_control = B00010000;
 		} else if (dice == 4) {
-			my_preset.voice[0].reg_control = B10000000;
+			preset_data.voice[0].reg_control = B10000000;
 		}
 
 		dice = random(0, 5);
 		if (dice == 0) {
-			my_preset.voice[1].reg_control = B00000000;
+			preset_data.voice[1].reg_control = B00000000;
 		} else if (dice == 1) {
-			my_preset.voice[1].reg_control = B01000000;
+			preset_data.voice[1].reg_control = B01000000;
 		} else if (dice == 2) {
-			my_preset.voice[1].reg_control = B00100000;
+			preset_data.voice[1].reg_control = B00100000;
 		} else if (dice == 3) {
-			my_preset.voice[1].reg_control = B00010000;
+			preset_data.voice[1].reg_control = B00010000;
 		} else if (dice == 4) {
-			my_preset.voice[1].reg_control = B10000000;
+			preset_data.voice[1].reg_control = B10000000;
 		}
 
 		dice = random(0, 5);
-		if ((!dice) && (!my_preset.voice[0].reg_control) && (!my_preset.voice[1].reg_control))
+		if ((!dice) && (!preset_data.voice[0].reg_control) && (!preset_data.voice[1].reg_control))
 			dice++;
 		if (dice == 0) {
-			my_preset.voice[2].reg_control = B00000000;
+			preset_data.voice[2].reg_control = B00000000;
 		} else if (dice == 1) {
-			my_preset.voice[2].reg_control = B01000000;
+			preset_data.voice[2].reg_control = B01000000;
 		} else if (dice == 2) {
-			my_preset.voice[2].reg_control = B00100000;
+			preset_data.voice[2].reg_control = B00100000;
 		} else if (dice == 3) {
-			my_preset.voice[2].reg_control = B00010000;
+			preset_data.voice[2].reg_control = B00010000;
 		} else if (dice == 4) {
-			my_preset.voice[2].reg_control = B10000000;
+			preset_data.voice[2].reg_control = B10000000;
 		}
 
 		dice = random(0, 5);
 		if (dice == 0) {
-			bitWrite(my_preset.voice[0].reg_control, 1, 1);
+			bitWrite(preset_data.voice[0].reg_control, 1, 1);
 		}
 		if (dice == 1) {
-			bitWrite(my_preset.voice[0].reg_control, 2, 1);
+			bitWrite(preset_data.voice[0].reg_control, 2, 1);
 		}
 		if (dice == 2) {
-			bitWrite(my_preset.voice[1].reg_control, 1, 1);
+			bitWrite(preset_data.voice[1].reg_control, 1, 1);
 		}
 		if (dice == 3) {
-			bitWrite(my_preset.voice[1].reg_control, 2, 1);
+			bitWrite(preset_data.voice[1].reg_control, 2, 1);
 		}
 		if (dice == 4) {
-			bitWrite(my_preset.voice[2].reg_control, 1, 1);
+			bitWrite(preset_data.voice[2].reg_control, 1, 1);
 		}
 		if (dice == 5) {
-			bitWrite(my_preset.voice[2].reg_control, 2, 1);
+			bitWrite(preset_data.voice[2].reg_control, 2, 1);
 		}
 	}
 
@@ -540,14 +538,14 @@ void load(byte number) {
 
 	updateFilter();
 
-	bitWrite(my_preset.voice[0].reg_control, 0, 0);
-	bitWrite(my_preset.voice[1].reg_control, 0, 0);
-	bitWrite(my_preset.voice[2].reg_control, 0, 0);
+	bitWrite(preset_data.voice[0].reg_control, 0, 0);
+	bitWrite(preset_data.voice[1].reg_control, 0, 0);
+	bitWrite(preset_data.voice[2].reg_control, 0, 0);
 
 	if (jumble)
 		arpMode = 0;
 
-	my_preset.set_leds();
+	preset_data.set_leds();
 
 	Timer1.initialize(100);      //
 	Timer1.attachInterrupt(isr); // attach the service routine here

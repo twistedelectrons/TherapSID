@@ -15,8 +15,6 @@ static byte mStatus;
 static byte mData;
 static byte mChannel;
 
-static Preset my_preset; // FIXME
-
 static byte syncLfoCounter;
 static float lfoClockRates[] = {2.6562, 5.3125, 7.96875, 10.625, 21.25, 31.875, 42.5, 85};
 
@@ -163,24 +161,24 @@ static void HandleControlChange(byte channel, byte data1, byte data2) {
 		} else {
 			switch (data1) {
 				case 49: // sync1
-					bitWrite(my_preset.voice[0].reg_control, 1, data2);
+					bitWrite(preset_data.voice[0].reg_control, 1, data2);
 					break;
 				case 50: // ring1
-					bitWrite(my_preset.voice[0].reg_control, 2, data2);
+					bitWrite(preset_data.voice[0].reg_control, 2, data2);
 					break;
 
 				case 51: // sync2
-					bitWrite(my_preset.voice[1].reg_control, 1, data2);
+					bitWrite(preset_data.voice[1].reg_control, 1, data2);
 					break;
 				case 52: // ring2
-					bitWrite(my_preset.voice[1].reg_control, 2, data2);
+					bitWrite(preset_data.voice[1].reg_control, 2, data2);
 					break;
 
 				case 53: // sync3
-					bitWrite(my_preset.voice[2].reg_control, 1, data2);
+					bitWrite(preset_data.voice[2].reg_control, 1, data2);
 					break;
 				case 54: // ring3
-					bitWrite(my_preset.voice[2].reg_control, 2, data2);
+					bitWrite(preset_data.voice[2].reg_control, 2, data2);
 					break;
 
 				case 55:

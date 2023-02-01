@@ -19,13 +19,11 @@ void showFilterAssigns() {
 }
 
 void unShowFilterAssigns() {
-	Preset my_preset; // FIXME
-
 	for (int voice = 0; voice < 3; voice++) {
-		ledSet(4*voice + 1, my_preset.voice[voice].control & PresetVoice::PULSE);
-		ledSet(4*voice + 2, my_preset.voice[voice].control & PresetVoice::TRI);
-		ledSet(4*voice + 3, my_preset.voice[voice].control & PresetVoice::SAW);
-		ledSet(4*voice + 4, my_preset.voice[voice].control & PresetVoice::NOISE);
+		ledSet(4*voice + 1, preset_data.voice[voice].control & PresetVoice::PULSE);
+		ledSet(4*voice + 2, preset_data.voice[voice].control & PresetVoice::TRI);
+		ledSet(4*voice + 3, preset_data.voice[voice].control & PresetVoice::SAW);
+		ledSet(4*voice + 4, preset_data.voice[voice].control & PresetVoice::NOISE);
 	}
 }
 

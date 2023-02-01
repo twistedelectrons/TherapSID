@@ -58,29 +58,27 @@ static void panic(){} // FIXME
 
 void shapeButtPressed(uint8_t voice, PresetVoice::Shape shape) {
 	if (voice >= 3) panic();
-	Preset my_preset; // FIXME
 
 	if (!filterModeHeld) {
-		my_preset.voice[voice].toggle_shape(shape);
+		preset_data.voice[voice].toggle_shape(shape);
 		// FIXME this needs deduplication of non-updates.
-		sendMidiButt(37 + 4*voice + 0, my_preset.voice[voice].control & PresetVoice::PULSE);
-		sendMidiButt(37 + 4*voice + 1, my_preset.voice[voice].control & PresetVoice::TRI);
-		sendMidiButt(37 + 4*voice + 2, my_preset.voice[voice].control & PresetVoice::SAW);
-		sendMidiButt(37 + 4*voice + 3, my_preset.voice[voice].control & PresetVoice::NOISE);
+		sendMidiButt(37 + 4*voice + 0, preset_data.voice[voice].control & PresetVoice::PULSE);
+		sendMidiButt(37 + 4*voice + 1, preset_data.voice[voice].control & PresetVoice::TRI);
+		sendMidiButt(37 + 4*voice + 2, preset_data.voice[voice].control & PresetVoice::SAW);
+		sendMidiButt(37 + 4*voice + 3, preset_data.voice[voice].control & PresetVoice::NOISE);
 
 		if (voice == 0) {
 			shape1Pressed = true;
 		}
 	}
 	else {
-		my_preset.voice[voice].filter_enabled ^= 1;
+		preset_data.voice[voice].filter_enabled ^= 1;
 		showFilterAssigns(); // FIXME remove
 		assignmentChanged = true;
 	}
 }
 
 void buttChanged(byte number, bool value) {
-	Preset my_preset; // FIXME
 	if (!value) {
 		// ledNumber(number);
 		//  PRESSED
@@ -99,30 +97,30 @@ void buttChanged(byte number, bool value) {
 			case NOISE3: shapeButtPressed(2, PresetVoice::NOISE); break;
 
 			case SYNC1:
-				my_preset.voice[0].control ^= 2;
-				sendMidiButt(49, my_preset.voice[0].control & 2);
+				preset_data.voice[0].control ^= 2;
+				sendMidiButt(49, preset_data.voice[0].control & 2);
 				break;
 			case RING1:
-				my_preset.voice[0].control ^= 4;
-				sendMidiButt(50, my_preset.voice[0].control & 4);
+				preset_data.voice[0].control ^= 4;
+				sendMidiButt(50, preset_data.voice[0].control & 4);
 				break;
 
 			case SYNC2:
-				my_preset.voice[1].control ^= 2;
-				sendMidiButt(51, my_preset.voice[1].control & 2);
+				preset_data.voice[1].control ^= 2;
+				sendMidiButt(51, preset_data.voice[1].control & 2);
 				break;
 			case RING2:
-				my_preset.voice[1].control ^= 4;
-				sendMidiButt(52, my_preset.voice[1].control & 4);
+				preset_data.voice[1].control ^= 4;
+				sendMidiButt(52, preset_data.voice[1].control & 4);
 				break;
 
 			case SYNC3:
-				my_preset.voice[2].control ^= 2;
-				sendMidiButt(53, my_preset.voice[2].control & 2);
+				preset_data.voice[2].control ^= 2;
+				sendMidiButt(53, preset_data.voice[2].control & 2);
 				break;
 			case RING3:
-				my_preset.voice[2].control ^= 4;
-				sendMidiButt(54, my_preset.voice[2].control & 4);
+				preset_data.voice[2].control ^= 4;
+				sendMidiButt(54, preset_data.voice[2].control & 4);
 				break;
 
 			case LFO_CHAIN1:
@@ -279,7 +277,7 @@ void buttChanged(byte number, bool value) {
 				break;
 		}
 
-		my_preset.set_leds();
+		preset_data.set_leds();
 	} else {
 		switch (number) {
 			case RECT1:
