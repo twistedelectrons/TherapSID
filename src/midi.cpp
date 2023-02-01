@@ -48,7 +48,7 @@ static void HandleNoteOn(byte channel, byte note, byte velocity) {
 	note -= 12;
 
 	if (channel == masterChannel) {
-		if (!pa) { // Monophonic mode
+		if (!preset_data.paraphonic) { // Monophonic mode
 			if (!velocity) {
 				// note off
 				held--;
@@ -89,7 +89,7 @@ static void HandleNoteOn(byte channel, byte note, byte velocity) {
 				if (!had_active_note) {
 					envState = 1;
 					env = 0;
-					clockCount = arpRate;
+					clockCount = preset_data.arp_rate;
 
 					if (arpMode)
 						arpReset(note);
@@ -117,7 +117,7 @@ static void HandleNoteOn(byte channel, byte note, byte velocity) {
 				pKey[voice_idx] = note;
 			}
 		}
-	} else if (!pa && masterChannel == 1 && (channel == 2 || channel == 3 || channel == 4)) {
+	} else if (!preset_data.paraphonic && masterChannel == 1 && (channel == 2 || channel == 3 || channel == 4)) {
 		auto voice = channel - 2;
 
 		bool had_active_note = mono_note_trackers[voice].has_active_note();
@@ -363,7 +363,7 @@ void midiRead() {
 					sync = 1;
 					if ((arpMode) && (arping)) {
 						clockCount++;
-						if (clockCount >= arpRate) {
+						if (clockCount >= preset_data.arp_rate) {
 							clockCount = 0;
 							arpTick();
 						}

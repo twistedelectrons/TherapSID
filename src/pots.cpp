@@ -47,7 +47,7 @@ void movedPot(byte number, int value, bool isMidi) {
 
 			case 4:
 				pw1Base = value << 1;
-				if (pa) {
+				if (preset_data.paraphonic) {
 					pw2Base = pw3Base = pw1Base;
 				}
 				if (value < 1) {
@@ -84,7 +84,7 @@ void movedPot(byte number, int value, bool isMidi) {
 
 			case 6:
 				tuneBase1 = octScale(value);
-				if (pa) {
+				if (preset_data.paraphonic) {
 					tuneBase2 = tuneBase3 = tuneBase1;
 				}
 				if (!isMidi) {
@@ -113,7 +113,7 @@ void movedPot(byte number, int value, bool isMidi) {
 			case 14:
 				fineBase1 = value;
 				fineBase1 /= 1023;
-				if (pa) {
+				if (preset_data.paraphonic) {
 					fineBase2 = fineBase3 = fineBase1;
 				}
 				if (!isMidi) {
@@ -143,7 +143,7 @@ void movedPot(byte number, int value, bool isMidi) {
 
 			case 1:
 				glide1 = value >> 4;
-				if (pa) {
+				if (preset_data.paraphonic) {
 					glide2 = glide3 = glide1;
 				}
 				if (!isMidi) {
@@ -174,7 +174,7 @@ void movedPot(byte number, int value, bool isMidi) {
 				value = scale4bit(value);
 				ledNumber(value);
 				a1 = value;
-				if (pa) {
+				if (preset_data.paraphonic) {
 					a2 = a3 = a1;
 					d2 = d3 = d1;
 					r2 = r3 = r1;
@@ -209,7 +209,7 @@ void movedPot(byte number, int value, bool isMidi) {
 				value = scale4bit(value);
 				ledNumber(value);
 				d1 = value;
-				if (pa) {
+				if (preset_data.paraphonic) {
 					a2 = a3 = a1;
 					d2 = d3 = d1;
 					r2 = r3 = r1;
@@ -243,7 +243,7 @@ void movedPot(byte number, int value, bool isMidi) {
 				value = scale4bit(value);
 				ledNumber(value);
 				s1 = value;
-				if (pa) {
+				if (preset_data.paraphonic) {
 					a2 = a3 = a1;
 					d2 = d3 = d1;
 					r2 = r3 = r1;
@@ -277,7 +277,7 @@ void movedPot(byte number, int value, bool isMidi) {
 				value = scale4bit(value);
 				ledNumber(value);
 				r1 = value;
-				if (pa) {
+				if (preset_data.paraphonic) {
 					a2 = a3 = a1;
 					d2 = d3 = d1;
 					r2 = r3 = r1;
@@ -391,7 +391,7 @@ void movedPot(byte number, int value, bool isMidi) {
 					ledNumber(scale100(value));
 					lastMovedPot(15);
 				}
-				cutBase = value;
+				preset_data.cutoff = value;
 				break; // CUTOFF
 
 			case 0:
@@ -427,7 +427,7 @@ void movedPot(byte number, int value, bool isMidi) {
 					arping = true;
 				}
 
-				arpRate = arpDivisions[arpSpeedBase >> 5];
+				preset_data.arp_rate = arpDivisions[arpSpeedBase >> 5];
 
 				break; // ARP RATE
 

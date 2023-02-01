@@ -319,7 +319,7 @@ void calculatePitch() {
 
 	if ((!note_val[0]) && (!note_val[1]) && (!note_val[2])) {
 		// no individual channels
-		if (!pa) {
+		if (!preset_data.paraphonic) {
 			updateDestiPitches(key, key, key);
 		} else {
 			updateDestiPitches(pKey[0], pKey[1], pKey[2]);

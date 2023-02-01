@@ -68,8 +68,20 @@ struct PresetVoice {
 		}
 	}
 };
+
+struct PresetLfo {
+	int depth;
+	int speed;
+};
+
 struct Preset {
 	PresetVoice voice[3];
+	bool paraphonic;
+	int arp_rate = 24;
+
+	PresetLfo lfo[3];
+
+	int cutoff;
 
 	/*void set_leds(uint8_t lastPot, uint8_t selectedLfo) { // FIXME FIXME FIXME
 		assert(lastPot < TODO);
@@ -135,14 +147,12 @@ extern int arpModeCounter;
 extern bool cvActive[3];
 extern bool scrolled;
 extern bool gate;
-extern bool pa, arping;
+extern bool arping;
 extern bool shape1Pressed;
 extern int shape1PressedTimer;
-extern int arpRate;
 extern byte pKey[3];
 extern int lfoStep[3], resetDownTimer;
-extern int lfoSpeed[3], lfoSpeedBase[3];
-extern int lfoDepthBase[3];
+extern int lfoSpeed[3];
 extern int presetScrollSpeed;
 extern int saveBounce;
 extern byte lfo[3];
@@ -159,7 +169,6 @@ extern byte selectedLfo;
 extern byte lfoShape[3];
 
 
-extern int cutBase;
 extern byte lfoClockSpeedPending[3];
 extern bool filterModeHeld;
 extern bool filterEnabled[3];

@@ -51,7 +51,7 @@ void loop() {
 	if (shape1PressedTimer > 10000) {
 		shape1Pressed = false;
 		shape1PressedTimer = 0;
-		pa = !pa;
+		preset_data.paraphonic = !preset_data.paraphonic;
 		paraChange();
 	}
 
@@ -62,9 +62,9 @@ void loop() {
 			mydisplay.setLed(0, 7, 7, 0);
 		}
 	}
-	// pa mode
+	// preset_data.paraphonic mode
 
-	if ((gate) && (!pa)) {
+	if ((gate) && (!preset_data.paraphonic)) {
 		mux(15);
 		key = map(analogRead(A2), 0, 1023, 12, 72);
 	}

@@ -434,7 +434,7 @@ void lfoTick() {
 	// bitWrite(sid[23], 6, bitRead(res, 2));
 	// bitWrite(sid[23], 7, bitRead(res, 3));
 
-	finalCut = cutBase + lfoCut1 + lfoCut2 + lfoCut3;
+	finalCut = preset_data.cutoff + lfoCut1 + lfoCut2 + lfoCut3;
 	if (finalCut < 0) {
 		finalCut = 0;
 	} else if (finalCut > 1023) {

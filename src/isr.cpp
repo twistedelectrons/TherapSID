@@ -263,7 +263,7 @@ void isr() {
 	} // delete LFO stuff
 
 	// glides
-	if (((!pa) && (glide1) && (held > 1)) || ((glide1) && (pa))) {
+	if (((!preset_data.paraphonic) && (glide1) && (held > 1)) || ((glide1) && (preset_data.paraphonic))) {
 		glideCounter1++;
 		if (glideCounter1 >= glide1) {
 			glideCounter1 = 0;
@@ -283,7 +283,7 @@ void isr() {
 		pitch1 = destiPitch1;
 	}
 
-	if (((!pa) && (glide2) && (held > 1)) || ((glide2) && (pa))) {
+	if (((!preset_data.paraphonic) && (glide2) && (held > 1)) || ((glide2) && (preset_data.paraphonic))) {
 		glideCounter2++;
 		if (glideCounter2 >= glide2) {
 			glideCounter2 = 0;
@@ -303,7 +303,7 @@ void isr() {
 		pitch2 = destiPitch2;
 	}
 
-	if (((!pa) && (glide3) && (held > 1)) || ((glide3) && (pa))) {
+	if (((!preset_data.paraphonic) && (glide3) && (held > 1)) || ((glide3) && (preset_data.paraphonic))) {
 		glideCounter3++;
 		if (glideCounter3 >= glide3) {
 			glideCounter3 = 0;

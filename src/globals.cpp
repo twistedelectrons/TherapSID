@@ -19,15 +19,12 @@ int arpModeCounter;
 bool cvActive[3];
 bool scrolled;
 bool gate;
-bool pa, arping; // PATCH
+bool arping; // PATCH
 bool shape1Pressed;
 int shape1PressedTimer;
-int arpRate = 24; // PATCH
 byte pKey[3];
 int lfoStep[3], resetDownTimer;
 int lfoSpeed[3];
-int lfoSpeedBase[3]; // PATCH
-int lfoDepthBase[3]; // PATCH
 int presetScrollSpeed = 10000;
 int saveBounce;
 byte lfo[3];
@@ -43,7 +40,6 @@ bool resetDown;
 byte selectedLfo;
 byte lfoShape[3];
 FatMode fatMode = FatMode::UNISONO;
-int cutBase; // PATCH
 byte lfoClockSpeedPending[3];
 bool filterModeHeld;
 bool filterEnabled[3];

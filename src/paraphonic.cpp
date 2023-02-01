@@ -8,7 +8,7 @@
 /*
 void paraChange() {
 
-	if (pa) {
+	if (preset_data.paraphonic) {
 		updateFilter();
 
 		arpMode = 0;
@@ -67,7 +67,7 @@ void paraChange() {
 }
 
 void paraShape() {
-	if (pa) {
+	if (preset_data.paraphonic) {
 		sid[11] = sid[18] = sid[4];
 
 		sidShape(1, 1, bitRead(sid[4], 6));

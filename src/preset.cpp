@@ -81,7 +81,7 @@ void save() {
 	bitWrite(temp, 4, bitRead(tuneBase3, 2));
 	bitWrite(temp, 5, bitRead(tuneBase3, 3));
 	bitWrite(temp, 6, bitRead(tuneBase3, 4));
-	// bitWrite(temp,7,pa);
+	// bitWrite(temp,7,preset_data.paraphonic);
 	writey(temp);
 	writey(pw1Base >> 3); // 10
 	writey(pw2Base >> 3);
@@ -212,7 +212,7 @@ void save() {
 	bitWrite(temp, 6, bitRead(arpMode, 2));
 	bitWrite(temp, 7, bitRead(arpMode, 3));
 	writey(temp); //
-	writey(cutBase >> 2);
+	writey(preset_data.cutoff >> 2);
 
 	writey(arpSpeedBase); // 40
 
@@ -586,7 +586,7 @@ void load(byte number) {
 
 	arpRound = 0;
 	arpCount = 0;
-	cutBase = ready() << 2;
+	preset_data.cutoff = ready() << 2;
 	arpSpeedBase = ready();
 	if (arpSpeedBase == 0)
 		arpSpeedBase = 1;
@@ -650,7 +650,7 @@ void load(byte number) {
 	sendCC(36, arpRangeBase << 8);
 	sendCC(35, arpSpeedBase << 2);
 
-	sendCC(59, cutBase);
+	sendCC(59, preset_data.cutoff);
 	sendCC(33, resBase << 6);
 }
 

@@ -301,7 +301,7 @@ void buttChanged(byte number, bool value) {
 				arpModeHeld = false;
 				arpModeCounter = 0;
 				if (!midiSetup) {
-					if (!pa) {
+					if (!preset_data.paraphonic) {
 						arpMode++;
 						if (arpMode > 4) {
 							arpMode = 0;
