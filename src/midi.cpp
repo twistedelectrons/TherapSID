@@ -470,7 +470,7 @@ void midiRead() {
 						mData = 255;
 						break; // bend
 					case 5:
-						lfoDepthBase[1] = input << 3;
+						preset_data.lfo[1].depth = input << 3;
 						setLfo(1);
 						mData = 255;
 						break; // AT

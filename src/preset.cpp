@@ -96,13 +96,13 @@ void save() {
 	writey((preset_data.voice[2].attack << 4) | preset_data.voice[2].decay); // 20
 	writey((preset_data.voice[2].sustain << 4) | preset_data.voice[2].release);
 
-	writey(lfoSpeedBase[0] / 1.3 / 4);
-	writey(lfoSpeedBase[1] / 1.3 / 4);
-	writey(lfoSpeedBase[2] / 1.3 / 4);
+	writey(preset_data.lfo[0].speed / 1.3 / 4);
+	writey(preset_data.lfo[1].speed / 1.3 / 4);
+	writey(preset_data.lfo[2].speed / 1.3 / 4);
 
-	writey(lfoDepthBase[0] >> 2);
-	writey(lfoDepthBase[1] >> 2);
-	writey(lfoDepthBase[2] >> 2); // 27
+	writey(preset_data.lfo[0].depth >> 2);
+	writey(preset_data.lfo[1].depth >> 2);
+	writey(preset_data.lfo[2].depth >> 2); // 27
 	// FIXME loop
 	bitWrite(temp, 0, lfoAss[0][0]);
 	bitWrite(temp, 1, lfoAss[0][1]);
@@ -396,13 +396,13 @@ void load(byte number) {
 	s4 = preset_data.voice[2].sustain << 4;
 	r4 = preset_data.voice[2].release << 4;
 
-	lfoSpeedBase[0] = (ready() << 2) * 1.3;
-	lfoSpeedBase[1] = (ready() << 2) * 1.3;
-	lfoSpeedBase[2] = (ready() << 2) * 1.3;
+	preset_data.lfo[0].speed = (ready() << 2) * 1.3;
+	preset_data.lfo[1].speed = (ready() << 2) * 1.3;
+	preset_data.lfo[2].speed = (ready() << 2) * 1.3;
 
-	lfoDepthBase[0] = ready() << 2;
-	lfoDepthBase[1] = ready() << 2;
-	lfoDepthBase[2] = ready() << 2;
+	preset_data.lfo[0].depth = ready() << 2;
+	preset_data.lfo[1].depth = ready() << 2;
+	preset_data.lfo[2].depth = ready() << 2;
 
 	// FIXME loop!
 	temp = ready();
@@ -583,13 +583,13 @@ void load(byte number) {
 	sendCC(17, preset_data.voice[1].release << 6);
 	sendCC(25, preset_data.voice[2].release << 6);
 
-	sendCC(26, lfoSpeedBase[0] / 1.3);
-	sendCC(28, lfoSpeedBase[1] / 1.3);
-	sendCC(30, lfoSpeedBase[2] / 1.3);
+	sendCC(26, preset_data.lfo[0].speed / 1.3);
+	sendCC(28, preset_data.lfo[1].speed / 1.3);
+	sendCC(30, preset_data.lfo[2].speed / 1.3);
 
-	sendCC(27, lfoDepthBase[0]);
-	sendCC(29, lfoDepthBase[1]);
-	sendCC(31, lfoDepthBase[2]);
+	sendCC(27, preset_data.lfo[0].depth);
+	sendCC(29, preset_data.lfo[1].depth);
+	sendCC(31, preset_data.lfo[2].depth);
 
 	sendCC(34, arpStepBase << 2);
 	sendCC(36, arpRangeBase << 8);

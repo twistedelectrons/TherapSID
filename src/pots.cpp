@@ -290,7 +290,7 @@ void movedPot(byte number, int value, bool isMidi) {
 					lastMovedPot(9);
 				}
 				lfoClockSpeedPending[0] = 1 + (value >> 7);
-				lfoSpeedBase[0] = value * 1.3;
+				preset_data.lfo[0].speed = value * 1.3;
 				setLfo(0);
 				break; // LFO RATE 1
 
@@ -300,7 +300,7 @@ void movedPot(byte number, int value, bool isMidi) {
 					ledNumber(scale100(value));
 					lastMovedPot(10);
 				}
-				lfoDepthBase[0] = value;
+				preset_data.lfo[0].depth = value;
 				setLfo(0);
 				break; // LFO DEPTH 1
 
@@ -317,7 +317,7 @@ void movedPot(byte number, int value, bool isMidi) {
 					lastMovedPot(11);
 				}
 				lfoClockSpeedPending[1] = 1 + (value >> 7);
-				lfoSpeedBase[1] = value * 1.3;
+				preset_data.lfo[1].speed = value * 1.3;
 				setLfo(1);
 				break; // LFO RATE 2
 
@@ -327,7 +327,7 @@ void movedPot(byte number, int value, bool isMidi) {
 					ledNumber(scale100(value));
 					lastMovedPot(12);
 				}
-				lfoDepthBase[1] = value;
+				preset_data.lfo[1].depth = value;
 				setLfo(1);
 				break; // LFO DEPTH 2
 
@@ -344,7 +344,7 @@ void movedPot(byte number, int value, bool isMidi) {
 					lastMovedPot(13);
 				}
 				lfoClockSpeedPending[2] = 1 + (value >> 7);
-				lfoSpeedBase[2] = value * 1.3;
+				preset_data.lfo[2].speed = value * 1.3;
 				setLfo(2);
 				break; // LFO RATE 3
 
@@ -354,7 +354,7 @@ void movedPot(byte number, int value, bool isMidi) {
 					lastMovedPot(14);
 					ledNumber(scale100(value));
 				}
-				lfoDepthBase[2] = value;
+				preset_data.lfo[2].depth = value;
 				setLfo(2);
 				break; // LFO DEPTH 3
 

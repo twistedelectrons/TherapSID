@@ -109,17 +109,17 @@ void lfoTick() {
 		lfoDepthLfo6 = 0;
 	}
 
-	lfoDepth[0] = lfoDepthBase[0] + lfoDepthLfo1 + lfoDepthLfo2;
+	lfoDepth[0] = preset_data.lfo[0].depth + lfoDepthLfo1 + lfoDepthLfo2;
 	if (lfoDepth[0] > 1023) {
 		lfoDepth[0] = 1023;
 	}
 
-	lfoDepth[1] = lfoDepthBase[1] + lfoDepthLfo3 + lfoDepthLfo4;
+	lfoDepth[1] = preset_data.lfo[1].depth + lfoDepthLfo3 + lfoDepthLfo4;
 	if (lfoDepth[1] > 1023) {
 		lfoDepth[1] = 1023;
 	}
 
-	lfoDepth[2] = lfoDepthBase[2] + lfoDepthLfo5 + lfoDepthLfo6;
+	lfoDepth[2] = preset_data.lfo[2].depth + lfoDepthLfo5 + lfoDepthLfo6;
 	if (lfoDepth[2] > 1023) {
 		lfoDepth[2] = 1023;
 	}
@@ -419,11 +419,11 @@ void lfoTick() {
 	if (arpSpeed < 0)
 		arpSpeed = 0;
 
-	lfoSpeed[0] = lfoSpeedBase[0] + lfoSpeedLfo1 + lfoSpeedLfo2;
+	lfoSpeed[0] = preset_data.lfo[0].speed + lfoSpeedLfo1 + lfoSpeedLfo2;
 
-	lfoSpeed[1] = lfoSpeedBase[1] + lfoSpeedLfo3 + lfoSpeedLfo4;
+	lfoSpeed[1] = preset_data.lfo[1].speed + lfoSpeedLfo3 + lfoSpeedLfo4;
 
-	lfoSpeed[2] = lfoSpeedBase[2] + lfoSpeedLfo5 + lfoSpeedLfo6;
+	lfoSpeed[2] = preset_data.lfo[2].speed + lfoSpeedLfo5 + lfoSpeedLfo6;
 
 	res = preset_data.resonance_base + resLfo1 + resLfo2 + resLfo3;
 	if (res > 15)
