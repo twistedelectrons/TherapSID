@@ -45,8 +45,6 @@ struct PresetVoice {
 	};
 
 	byte reg_control; // register 4
-	byte reg_attack_decay; // register 5
-	byte reg_sustain_release; // register 6
 
 	uint8_t control = 0;
 	bool filter_enabled = true;

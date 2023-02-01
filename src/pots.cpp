@@ -174,12 +174,6 @@ void movedPot(byte number, int value, bool isMidi) {
 				value = scale4bit(value);
 				ledNumber(value);
 				a1 = value;
-				if (preset_data.paraphonic) {
-					a2 = a3 = a1;
-					d2 = d3 = d1;
-					r2 = r3 = r1;
-					s2 = s3 = s1;
-				}
 
 				break;
 
@@ -209,12 +203,6 @@ void movedPot(byte number, int value, bool isMidi) {
 				value = scale4bit(value);
 				ledNumber(value);
 				d1 = value;
-				if (preset_data.paraphonic) {
-					a2 = a3 = a1;
-					d2 = d3 = d1;
-					r2 = r3 = r1;
-					s2 = s3 = s1;
-				}
 				break;
 
 			case 25: // DECAY 2
@@ -243,12 +231,6 @@ void movedPot(byte number, int value, bool isMidi) {
 				value = scale4bit(value);
 				ledNumber(value);
 				s1 = value;
-				if (preset_data.paraphonic) {
-					a2 = a3 = a1;
-					d2 = d3 = d1;
-					r2 = r3 = r1;
-					s2 = s3 = s1;
-				}
 				break;
 
 			case 23: // SUSTAIN 2
@@ -277,12 +259,6 @@ void movedPot(byte number, int value, bool isMidi) {
 				value = scale4bit(value);
 				ledNumber(value);
 				r1 = value;
-				if (preset_data.paraphonic) {
-					a2 = a3 = a1;
-					d2 = d3 = d1;
-					r2 = r3 = r1;
-					s2 = s3 = s1;
-				}
 				break;
 
 			case 20: // RELEASE 2

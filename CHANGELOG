@@ -1,3 +1,7 @@
+2023-02-01:
+	- Changed paraphonic UI behavior: ADSR[2,3] in the preset are not changed/overridden any more
+	  when moving a knob.
+
 2022-11-03:
 	- Changed monophonic voice allocation: When releasing a note while still having others held,
 	  the last played note rather than the highest will be played.

@@ -89,12 +89,13 @@ void save() {
 	writey(glide1);
 	writey(glide2);
 	writey(glide3);
-	writey(my_preset.voice[0].reg_attack_decay);
-	writey(my_preset.voice[0].reg_sustain_release);
-	writey(my_preset.voice[1].reg_attack_decay);
-	writey(my_preset.voice[1].reg_sustain_release);
-	writey(my_preset.voice[2].reg_attack_decay); // 20
-	writey(my_preset.voice[2].reg_sustain_release);
+	writey((a1 << 4) | d1);
+	writey((s1 << 4) | r1);
+	writey((a2 << 4) | d2);
+	writey((s2 << 4) | r2);
+	writey((a3 << 4) | d3); // 20
+	writey((s3 << 4) | r3);
+
 	int tempy = lfoSpeedBase[0];
 	tempy /= 1.3;
 	tempy = tempy >> 2;
@@ -381,65 +382,30 @@ void load(byte number) {
 		}
 	}
 
-	my_preset.voice[0].reg_attack_decay = ready();
-	bitWrite(d1, 0, bitRead(my_preset.voice[0].reg_attack_decay, 0));
-	bitWrite(d1, 1, bitRead(my_preset.voice[0].reg_attack_decay, 1));
-	bitWrite(d1, 2, bitRead(my_preset.voice[0].reg_attack_decay, 2));
-	bitWrite(d1, 3, bitRead(my_preset.voice[0].reg_attack_decay, 3));
-	bitWrite(a1, 0, bitRead(my_preset.voice[0].reg_attack_decay, 4));
-	bitWrite(a1, 1, bitRead(my_preset.voice[0].reg_attack_decay, 5));
-	bitWrite(a1, 2, bitRead(my_preset.voice[0].reg_attack_decay, 6));
-	bitWrite(a1, 3, bitRead(my_preset.voice[0].reg_attack_decay, 7));
+	// FIXME loop
+	temp = ready();
+	d1 = temp & 0x0F;
+	a1 = (temp >> 4) & 0x0F;
 
-	my_preset.voice[0].reg_sustain_release = ready();
-	bitWrite(r1, 0, bitRead(my_preset.voice[0].reg_sustain_release, 0));
-	bitWrite(r1, 1, bitRead(my_preset.voice[0].reg_sustain_release, 1));
-	bitWrite(r1, 2, bitRead(my_preset.voice[0].reg_sustain_release, 2));
-	bitWrite(r1, 3, bitRead(my_preset.voice[0].reg_sustain_release, 3));
-	bitWrite(s1, 0, bitRead(my_preset.voice[0].reg_sustain_release, 4));
-	bitWrite(s1, 1, bitRead(my_preset.voice[0].reg_sustain_release, 5));
-	bitWrite(s1, 2, bitRead(my_preset.voice[0].reg_sustain_release, 6));
-	bitWrite(s1, 3, bitRead(my_preset.voice[0].reg_sustain_release, 7));
+	temp = ready();
+	r1 = temp & 0x0F;
+	s1 = (temp >> 4) & 0x0F;
 
-	my_preset.voice[1].reg_attack_decay = ready();
-	bitWrite(d2, 0, bitRead(my_preset.voice[1].reg_attack_decay, 0));
-	bitWrite(d2, 1, bitRead(my_preset.voice[1].reg_attack_decay, 1));
-	bitWrite(d2, 2, bitRead(my_preset.voice[1].reg_attack_decay, 2));
-	bitWrite(d2, 3, bitRead(my_preset.voice[1].reg_attack_decay, 3));
-	bitWrite(a2, 0, bitRead(my_preset.voice[1].reg_attack_decay, 4));
-	bitWrite(a2, 1, bitRead(my_preset.voice[1].reg_attack_decay, 5));
-	bitWrite(a2, 2, bitRead(my_preset.voice[1].reg_attack_decay, 6));
-	bitWrite(a2, 3, bitRead(my_preset.voice[1].reg_attack_decay, 7));
+	temp = ready();
+	d2 = temp & 0x0F;
+	a2 = (temp >> 4) & 0x0F;
 
-	my_preset.voice[1].reg_sustain_release = ready();
-	bitWrite(r2, 0, bitRead(my_preset.voice[1].reg_sustain_release, 0));
-	bitWrite(r2, 1, bitRead(my_preset.voice[1].reg_sustain_release, 1));
-	bitWrite(r2, 2, bitRead(my_preset.voice[1].reg_sustain_release, 2));
-	bitWrite(r2, 3, bitRead(my_preset.voice[1].reg_sustain_release, 3));
-	bitWrite(s2, 0, bitRead(my_preset.voice[1].reg_sustain_release, 4));
-	bitWrite(s2, 1, bitRead(my_preset.voice[1].reg_sustain_release, 5));
-	bitWrite(s2, 2, bitRead(my_preset.voice[1].reg_sustain_release, 6));
-	bitWrite(s2, 3, bitRead(my_preset.voice[1].reg_sustain_release, 7));
+	temp = ready();
+	r2 = temp & 0x0F;
+	s2 = (temp >> 4) & 0x0F;
 
-	my_preset.voice[2].reg_attack_decay = ready();
-	bitWrite(d3, 0, bitRead(my_preset.voice[2].reg_attack_decay, 0));
-	bitWrite(d3, 1, bitRead(my_preset.voice[2].reg_attack_decay, 1));
-	bitWrite(d3, 2, bitRead(my_preset.voice[2].reg_attack_decay, 2));
-	bitWrite(d3, 3, bitRead(my_preset.voice[2].reg_attack_decay, 3));
-	bitWrite(a3, 0, bitRead(my_preset.voice[2].reg_attack_decay, 4));
-	bitWrite(a3, 1, bitRead(my_preset.voice[2].reg_attack_decay, 5));
-	bitWrite(a3, 2, bitRead(my_preset.voice[2].reg_attack_decay, 6));
-	bitWrite(a3, 3, bitRead(my_preset.voice[2].reg_attack_decay, 7));
+	temp = ready();
+	d3 = temp & 0x0F;
+	a3 = (temp >> 4) & 0x0F;
 
-	my_preset.voice[2].reg_sustain_release = ready();
-	bitWrite(r3, 0, bitRead(my_preset.voice[2].reg_sustain_release, 0));
-	bitWrite(r3, 1, bitRead(my_preset.voice[2].reg_sustain_release, 1));
-	bitWrite(r3, 2, bitRead(my_preset.voice[2].reg_sustain_release, 2));
-	bitWrite(r3, 3, bitRead(my_preset.voice[2].reg_sustain_release, 3));
-	bitWrite(s3, 0, bitRead(my_preset.voice[2].reg_sustain_release, 4));
-	bitWrite(s3, 1, bitRead(my_preset.voice[2].reg_sustain_release, 5));
-	bitWrite(s3, 2, bitRead(my_preset.voice[2].reg_sustain_release, 6));
-	bitWrite(s3, 3, bitRead(my_preset.voice[2].reg_sustain_release, 7));
+	temp = ready();
+	r3 = temp & 0x0F;
+	s3 = (temp >> 4) & 0x0F;
 
 	a4 = a3 << 4;
 	d4 = d3 << 4;
