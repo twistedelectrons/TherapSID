@@ -295,22 +295,22 @@ static int calc_pitch(int note, float frac) {
 static void updateDestiPitches(int note1, int note2, int note3) {
 	if (note1) {
 		destiPitch1 = calc_pitch(
-			note1 + tuneBase1 + lfoTune1 + lfoTune2 + lfoTune3,
-			fineBase1 + lfoFine2 + lfoFine1 + lfoFine3 + bend/0.9
+			note1 + preset_data.voice[0].tune_base + lfoTune1 + lfoTune2 + lfoTune3,
+			preset_data.voice[0].fine_base + lfoFine2 + lfoFine1 + lfoFine3 + bend/0.9
 		);
 	}
 
 	if (note2) {
 		destiPitch2 = calc_pitch(
-			note2 + tuneBase2 + lfoTune4 + lfoTune5 + lfoTune6,
-			fineBase2 + lfoFine4 + lfoFine5 + lfoFine6 + bend / 0.9
+			note2 + preset_data.voice[1].tune_base + lfoTune4 + lfoTune5 + lfoTune6,
+			preset_data.voice[1].fine_base + lfoFine4 + lfoFine5 + lfoFine6 + bend / 0.9
 		);
 	}
 	
 	if (note3) {
 		destiPitch3 = calc_pitch(
-			note3 + tuneBase3 + lfoTune7 + lfoTune8 + lfoTune9,
-			fineBase3 + lfoFine7 + lfoFine8 + lfoFine9 + bend / 0.9
+			note3 + preset_data.voice[2].tune_base + lfoTune7 + lfoTune8 + lfoTune9,
+			preset_data.voice[2].fine_base + lfoFine7 + lfoFine8 + lfoFine9 + bend / 0.9
 		);
 	}
 }

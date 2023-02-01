@@ -263,17 +263,17 @@ void isr() {
 	} // delete LFO stuff
 
 	// glides
-	if (((!preset_data.paraphonic) && (glide1) && (held > 1)) || ((glide1) && (preset_data.paraphonic))) {
+	if (((!preset_data.paraphonic) && (preset_data.voice[0].glide) && (held > 1)) || ((preset_data.voice[0].glide) && (preset_data.paraphonic))) {
 		glideCounter1++;
-		if (glideCounter1 >= glide1) {
+		if (glideCounter1 >= preset_data.voice[0].glide) {
 			glideCounter1 = 0;
 			if (pitch1 < destiPitch1) {
-				pitch1 += ((destiPitch1 - pitch1) / glide1) + 1;
+				pitch1 += ((destiPitch1 - pitch1) / preset_data.voice[0].glide) + 1;
 				if (pitch1 > destiPitch1) {
 					pitch1 = destiPitch1;
 				}
 			} else if (pitch1 > destiPitch1) {
-				pitch1 -= ((pitch1 - destiPitch1) / glide1) + 1;
+				pitch1 -= ((pitch1 - destiPitch1) / preset_data.voice[0].glide) + 1;
 				if (pitch1 < destiPitch1) {
 					pitch1 = destiPitch1;
 				}
@@ -283,17 +283,17 @@ void isr() {
 		pitch1 = destiPitch1;
 	}
 
-	if (((!preset_data.paraphonic) && (glide2) && (held > 1)) || ((glide2) && (preset_data.paraphonic))) {
+	if (((!preset_data.paraphonic) && (preset_data.voice[1].glide) && (held > 1)) || ((preset_data.voice[1].glide) && (preset_data.paraphonic))) {
 		glideCounter2++;
-		if (glideCounter2 >= glide2) {
+		if (glideCounter2 >= preset_data.voice[1].glide) {
 			glideCounter2 = 0;
 			if (pitch2 < destiPitch2) {
-				pitch2 += ((destiPitch2 - pitch2) / glide2) + 1;
+				pitch2 += ((destiPitch2 - pitch2) / preset_data.voice[1].glide) + 1;
 				if (pitch2 > destiPitch2) {
 					pitch2 = destiPitch2;
 				}
 			} else if (pitch2 > destiPitch2) {
-				pitch2 -= ((pitch2 - destiPitch2) / glide2) + 1;
+				pitch2 -= ((pitch2 - destiPitch2) / preset_data.voice[1].glide) + 1;
 				if (pitch2 < destiPitch2) {
 					pitch2 = destiPitch2;
 				}
@@ -303,17 +303,17 @@ void isr() {
 		pitch2 = destiPitch2;
 	}
 
-	if (((!preset_data.paraphonic) && (glide3) && (held > 1)) || ((glide3) && (preset_data.paraphonic))) {
+	if (((!preset_data.paraphonic) && (preset_data.voice[2].glide) && (held > 1)) || ((preset_data.voice[2].glide) && (preset_data.paraphonic))) {
 		glideCounter3++;
-		if (glideCounter3 >= glide3) {
+		if (glideCounter3 >= preset_data.voice[2].glide) {
 			glideCounter3 = 0;
 			if (pitch3 < destiPitch3) {
-				pitch3 += ((destiPitch3 - pitch3) / glide3) + 1;
+				pitch3 += ((destiPitch3 - pitch3) / preset_data.voice[2].glide) + 1;
 				if (pitch3 > destiPitch3) {
 					pitch3 = destiPitch3;
 				}
 			} else if (pitch3 > destiPitch3) {
-				pitch3 -= ((pitch3 - destiPitch3) / glide3) + 1;
+				pitch3 -= ((pitch3 - destiPitch3) / preset_data.voice[2].glide) + 1;
 				if (pitch3 < destiPitch3) {
 					pitch3 = destiPitch3;
 				}

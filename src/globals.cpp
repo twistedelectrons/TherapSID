@@ -23,8 +23,8 @@ bool arping; // PATCH
 bool shape1Pressed;
 int shape1PressedTimer;
 byte pKey[3];
-int lfoStep[3], resetDownTimer;
-int lfoSpeed[3];
+int lfoStep[3], resetDownTimer; // PATCH
+int lfoSpeed[3]; // PATCH
 int presetScrollSpeed = 10000;
 int saveBounce;
 byte lfo[3];
@@ -32,27 +32,23 @@ bool presetUp, presetDown;
 byte preset = 1;
 int presetLast = 1;
 byte lastPot = 20;
-bool lfoAss[3][20];
-bool retrig[3];
+bool lfoAss[3][20]; // PATCH
+bool retrig[3]; // PATCH
 bool fatChanged = true;
 bool looping[3];
 bool resetDown;
 byte selectedLfo;
-byte lfoShape[3];
-FatMode fatMode = FatMode::UNISONO;
+byte lfoShape[3]; // PATCH
+FatMode fatMode = FatMode::UNISONO; // PATCH
 byte lfoClockSpeedPending[3];
 bool filterModeHeld;
-bool filterEnabled[3];
+bool filterEnabled[3]; // PATCH
 
-int tuneBase1, tuneBase2, tuneBase3; // PATCH
 int lfoTune1, lfoTune2, lfoTune3, lfoTune4, lfoTune5, lfoTune6, lfoTune7, lfoTune8,
     lfoTune9;
 
 int destiPitch1, destiPitch2, destiPitch3;
 int pitch1, pitch2, pitch3;
-byte glide1, glide2, glide3; // PATCH
-int pw1Base, pw2Base, pw3Base; // PATCH
-float fineBase1, fineBase2, fineBase3; // PATCH
 float lfoFine1, lfoFine2, lfoFine3, lfoFine4, lfoFine5, lfoFine6, lfoFine7, lfoFine8,
     lfoFine9;
 
@@ -74,10 +70,9 @@ float lfoFine1, lfoFine2, lfoFine3, lfoFine4, lfoFine5, lfoFine6, lfoFine7, lfoF
 
 
 
-FilterMode filterMode;
+FilterMode filterMode; // PATCH
 
 
-byte resBase; // PATCH
 byte key;
 byte arpMode;
 int frozen;

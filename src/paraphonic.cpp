@@ -30,10 +30,10 @@ void paraChange() {
 		lfoFine1 = lfoFine2 = lfoFine3 = lfoFine4 = lfoFine5 = lfoFine6 = lfoFine7 = lfoFine8 = lfoFine9 = 0;
 		lfoTune1 = lfoTune2 = lfoTune3 = lfoTune4 = lfoTune5 = lfoTune6 = lfoTune7 = lfoTune8 = lfoTune9 = 0;
 
-		pw2Base = pw3Base = pw1Base;
-		tuneBase2 = tuneBase3 = tuneBase1;
-		fineBase2 = fineBase3 = fineBase1;
-		glide2 = glide3 = glide1;
+		preset_data.voice[1].pulsewidth_base = preset_data.voice[2].pulsewidth_base = preset_data.voice[0].pulsewidth_base;
+		preset_data.voice[1].tune_base = preset_data.voice[2].tune_base = preset_data.voice[0].tune_base;
+		preset_data.voice[1].fine_base = preset_data.voice[2].fine_base = preset_data.voice[0].fine_base;
+		preset_data.voice[1].glide = preset_data.voice[2].glide = preset_data.voice[0].glide;
 		preset_data.voice[1].attack = preset_data.voice[2].attack = preset_data.voice[0].attack;
 		preset_data.voice[1].decay = preset_data.voice[2].decay = preset_data.voice[0].decay;
 		preset_data.voice[1].release = preset_data.voice[2].release = preset_data.voice[0].release;

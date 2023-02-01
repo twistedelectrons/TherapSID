@@ -46,9 +46,9 @@ void movedPot(byte number, int value, bool isMidi) {
 		switch (number) {
 
 			case 4:
-				pw1Base = value << 1;
-				if (preset_data.paraphonic) {
-					pw2Base = pw3Base = pw1Base;
+				preset_data.voice[0].pulsewidth_base = value << 1;
+				if (preset_data.paraphonic) { // FIXME all das hier weg
+					preset_data.voice[1].pulsewidth_base = preset_data.voice[2].pulsewidth_base = preset_data.voice[0].pulsewidth_base;
 				}
 				if (value < 1) {
 					value = 1;
@@ -60,7 +60,7 @@ void movedPot(byte number, int value, bool isMidi) {
 				}
 				break; // PW1
 			case 24:
-				pw2Base = value << 1;
+				preset_data.voice[1].pulsewidth_base = value << 1;
 				if (value < 1) {
 					value = 1;
 				}
@@ -71,7 +71,7 @@ void movedPot(byte number, int value, bool isMidi) {
 				}
 				break; // PW2
 			case 30:
-				pw3Base = value << 1;
+				preset_data.voice[2].pulsewidth_base = value << 1;
 				if (value < 1) {
 					value = 1;
 				}
@@ -83,38 +83,38 @@ void movedPot(byte number, int value, bool isMidi) {
 				break; // PW3
 
 			case 6:
-				tuneBase1 = octScale(value);
+				preset_data.voice[0].tune_base = octScale(value);
 				if (preset_data.paraphonic) {
-					tuneBase2 = tuneBase3 = tuneBase1;
+					preset_data.voice[1].tune_base = preset_data.voice[2].tune_base = preset_data.voice[0].tune_base;
 				}
 				if (!isMidi) {
 					sendCC(3, value);
-					ledNumber(tuneBase1 - 12);
+					ledNumber(preset_data.voice[0].tune_base - 12);
 					lastMovedPot(1);
 				}
 				break; // TUNE1
 			case 26:
-				tuneBase2 = octScale(value);
+				preset_data.voice[1].tune_base = octScale(value);
 				if (!isMidi) {
 					sendCC(11, value);
-					ledNumber(tuneBase2 - 12);
+					ledNumber(preset_data.voice[1].tune_base - 12);
 					lastMovedPot(4);
 				}
 				break; // TUNE2
 			case 21:
-				tuneBase3 = octScale(value);
+				preset_data.voice[2].tune_base = octScale(value);
 				if (!isMidi) {
 					sendCC(19, value);
-					ledNumber(tuneBase3 - 12);
+					ledNumber(preset_data.voice[2].tune_base - 12);
 					lastMovedPot(7);
 				}
 				break; // TUNE3
 
 			case 14:
-				fineBase1 = value;
-				fineBase1 /= 1023;
+				preset_data.voice[0].fine_base = value;
+				preset_data.voice[0].fine_base /= 1023;
 				if (preset_data.paraphonic) {
-					fineBase2 = fineBase3 = fineBase1;
+					preset_data.voice[1].fine_base = preset_data.voice[2].fine_base = preset_data.voice[0].fine_base;
 				}
 				if (!isMidi) {
 					sendCC(4, value);
@@ -123,8 +123,8 @@ void movedPot(byte number, int value, bool isMidi) {
 				}
 				break; // FINE1
 			case 17:
-				fineBase2 = value;
-				fineBase2 /= 1023;
+				preset_data.voice[1].fine_base = value;
+				preset_data.voice[1].fine_base /= 1023;
 				if (!isMidi) {
 					sendCC(12, value);
 					ledNumber(scaleFine(value));
@@ -134,35 +134,35 @@ void movedPot(byte number, int value, bool isMidi) {
 			case 31:
 				if (!isMidi) {
 					sendCC(20, value);
-					fineBase3 = value;
-					fineBase3 /= 1023;
+					preset_data.voice[2].fine_base = value;
+					preset_data.voice[2].fine_base /= 1023;
 					ledNumber(scaleFine(value));
 					lastMovedPot(8);
 				}
 				break; // FINE3
 
 			case 1:
-				glide1 = value >> 4;
+				preset_data.voice[0].glide = value >> 4;
 				if (preset_data.paraphonic) {
-					glide2 = glide3 = glide1;
+					preset_data.voice[1].glide = preset_data.voice[2].glide = preset_data.voice[0].glide;
 				}
 				if (!isMidi) {
 					sendCC(5, value);
-					ledNumber(glide1);
+					ledNumber(preset_data.voice[0].glide);
 				}
 				break; // GLIDE 1
 			case 27:
-				glide2 = value >> 4;
+				preset_data.voice[1].glide = value >> 4;
 				if (!isMidi) {
 					sendCC(13, value);
-					ledNumber(glide2);
+					ledNumber(preset_data.voice[1].glide);
 				}
 				break; // GLIDE 2
 			case 19:
-				glide3 = value >> 4;
+				preset_data.voice[2].glide = value >> 4;
 				if (!isMidi) {
 					sendCC(21, value);
-					ledNumber(glide3);
+					ledNumber(preset_data.voice[2].glide);
 				}
 				break; // GLIDE 3
 
@@ -373,10 +373,10 @@ void movedPot(byte number, int value, bool isMidi) {
 			case 0:
 				if (!isMidi) {
 					sendCC(33, value);
-					ledNumber(resBase);
+					ledNumber(preset_data.resonance_base);
 					lastMovedPot(16);
 				}
-				resBase = scale4bit(value);
+				preset_data.resonance_base = scale4bit(value);
 				break; // RESONANCE
 
 			case 7:

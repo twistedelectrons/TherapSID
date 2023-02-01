@@ -425,7 +425,7 @@ void lfoTick() {
 
 	lfoSpeed[2] = lfoSpeedBase[2] + lfoSpeedLfo5 + lfoSpeedLfo6;
 
-	res = resBase + resLfo1 + resLfo2 + resLfo3;
+	res = preset_data.resonance_base + resLfo1 + resLfo2 + resLfo3;
 	if (res > 15)
 		res = 15;
 
@@ -444,7 +444,7 @@ void lfoTick() {
 	// sid[21] = finalCut; // FIXME restore cutoff LFO
 	// sid[22] = finalCut >> 3;
 
-	pw1 = pw1Base + pw1Lfo1 + pw1Lfo2 + pw1Lfo3;
+	pw1 = preset_data.voice[0].pulsewidth_base + pw1Lfo1 + pw1Lfo2 + pw1Lfo3;
 	if (pw1 < 0) {
 		pw1 = 0;
 	} else if (pw1 > 2046) {
@@ -458,7 +458,7 @@ void lfoTick() {
 	// sid[2] = lowByte(pw1); // FIXME restore pulse width LFO
 	// sid[3] = highByte(pw1);
 
-	pw2 = pw2Base + pw2Lfo1 + pw2Lfo2 + pw2Lfo3;
+	pw2 = preset_data.voice[1].pulsewidth_base + pw2Lfo1 + pw2Lfo2 + pw2Lfo3;
 	if (pw2 < 0) {
 		pw2 = 0;
 	} else if (pw2 > 2046) {
@@ -472,7 +472,7 @@ void lfoTick() {
 	// sid[9] = lowByte(pw2); // FIXME
 	// sid[10] = highByte(pw2);
 
-	pw3 = pw3Base + pw3Lfo1 + pw3Lfo2 + pw3Lfo3;
+	pw3 = preset_data.voice[2].pulsewidth_base + pw3Lfo1 + pw3Lfo2 + pw3Lfo3;
 	if (pw3 < 0) {
 		pw3 = 0;
 	} else if (pw3 > 2046) {

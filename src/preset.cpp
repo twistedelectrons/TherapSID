@@ -62,33 +62,33 @@ void save() {
 	temp |= ((int)fatMode) & 0x3;
 
 	writey(temp);
-	writey(fineBase1 * 255);
-	writey(fineBase2 * 255);
-	writey(fineBase3 * 255);
-	bitWrite(temp, 0, bitRead(tuneBase1, 0));
-	bitWrite(temp, 1, bitRead(tuneBase1, 1));
-	bitWrite(temp, 2, bitRead(tuneBase1, 2));
-	bitWrite(temp, 3, bitRead(tuneBase1, 3));
-	bitWrite(temp, 4, bitRead(tuneBase1, 4));
-	bitWrite(temp, 5, bitRead(tuneBase2, 0));
-	bitWrite(temp, 6, bitRead(tuneBase2, 1));
-	bitWrite(temp, 7, bitRead(tuneBase2, 2));
+	writey(preset_data.voice[0].fine_base * 255);
+	writey(preset_data.voice[1].fine_base * 255);
+	writey(preset_data.voice[2].fine_base * 255);
+	bitWrite(temp, 0, bitRead(preset_data.voice[0].tune_base, 0));
+	bitWrite(temp, 1, bitRead(preset_data.voice[0].tune_base, 1));
+	bitWrite(temp, 2, bitRead(preset_data.voice[0].tune_base, 2));
+	bitWrite(temp, 3, bitRead(preset_data.voice[0].tune_base, 3));
+	bitWrite(temp, 4, bitRead(preset_data.voice[0].tune_base, 4));
+	bitWrite(temp, 5, bitRead(preset_data.voice[1].tune_base, 0));
+	bitWrite(temp, 6, bitRead(preset_data.voice[1].tune_base, 1));
+	bitWrite(temp, 7, bitRead(preset_data.voice[1].tune_base, 2));
 	writey(temp);
-	bitWrite(temp, 0, bitRead(tuneBase2, 3));
-	bitWrite(temp, 1, bitRead(tuneBase2, 4));
-	bitWrite(temp, 2, bitRead(tuneBase3, 0));
-	bitWrite(temp, 3, bitRead(tuneBase3, 1));
-	bitWrite(temp, 4, bitRead(tuneBase3, 2));
-	bitWrite(temp, 5, bitRead(tuneBase3, 3));
-	bitWrite(temp, 6, bitRead(tuneBase3, 4));
+	bitWrite(temp, 0, bitRead(preset_data.voice[1].tune_base, 3));
+	bitWrite(temp, 1, bitRead(preset_data.voice[1].tune_base, 4));
+	bitWrite(temp, 2, bitRead(preset_data.voice[2].tune_base, 0));
+	bitWrite(temp, 3, bitRead(preset_data.voice[2].tune_base, 1));
+	bitWrite(temp, 4, bitRead(preset_data.voice[2].tune_base, 2));
+	bitWrite(temp, 5, bitRead(preset_data.voice[2].tune_base, 3));
+	bitWrite(temp, 6, bitRead(preset_data.voice[2].tune_base, 4));
 	// bitWrite(temp,7,preset_data.paraphonic);
 	writey(temp);
-	writey(pw1Base >> 3); // 10
-	writey(pw2Base >> 3);
-	writey(pw3Base >> 3);
-	writey(glide1);
-	writey(glide2);
-	writey(glide3);
+	writey(preset_data.voice[0].pulsewidth_base >> 3); // 10
+	writey(preset_data.voice[1].pulsewidth_base >> 3);
+	writey(preset_data.voice[2].pulsewidth_base >> 3);
+	writey(preset_data.voice[0].glide);
+	writey(preset_data.voice[1].glide);
+	writey(preset_data.voice[2].glide);
 	writey((preset_data.voice[0].attack << 4) | preset_data.voice[0].decay);
 	writey((preset_data.voice[0].sustain << 4) | preset_data.voice[0].release);
 	writey((preset_data.voice[1].attack << 4) | preset_data.voice[1].decay);
@@ -204,10 +204,10 @@ void save() {
 	bitWrite(temp, 6, bitRead(arpRangeBase, 0));
 	bitWrite(temp, 7, bitRead(arpRangeBase, 1));
 	writey(temp); // 37
-	bitWrite(temp, 0, bitRead(resBase, 0));
-	bitWrite(temp, 1, bitRead(resBase, 1));
-	bitWrite(temp, 2, bitRead(resBase, 2));
-	bitWrite(temp, 3, bitRead(resBase, 3));
+	bitWrite(temp, 0, bitRead(preset_data.resonance_base, 0));
+	bitWrite(temp, 1, bitRead(preset_data.resonance_base, 1));
+	bitWrite(temp, 2, bitRead(preset_data.resonance_base, 2));
+	bitWrite(temp, 3, bitRead(preset_data.resonance_base, 3));
 	bitWrite(temp, 4, bitRead(arpMode, 0));
 	bitWrite(temp, 5, bitRead(arpMode, 1));
 	bitWrite(temp, 6, bitRead(arpMode, 2));
@@ -313,72 +313,72 @@ void load(byte number) {
 	fatMode = uint2FatMode(temp & 0x3);
 	updateFatMode();
 
-	fineBase1 = ready();
-	fineBase1 /= 255;
-	fineBase2 = ready();
-	fineBase2 /= 255;
-	fineBase3 = ready();
-	fineBase3 /= 255;
+	preset_data.voice[0].fine_base = ready();
+	preset_data.voice[0].fine_base /= 255;
+	preset_data.voice[1].fine_base = ready();
+	preset_data.voice[1].fine_base /= 255;
+	preset_data.voice[2].fine_base = ready();
+	preset_data.voice[2].fine_base /= 255;
 
 	temp = ready();
-	bitWrite(tuneBase1, 0, bitRead(temp, 0));
-	bitWrite(tuneBase1, 1, bitRead(temp, 1));
-	bitWrite(tuneBase1, 2, bitRead(temp, 2));
-	bitWrite(tuneBase1, 3, bitRead(temp, 3));
-	bitWrite(tuneBase1, 4, bitRead(temp, 4));
-	bitWrite(tuneBase2, 0, bitRead(temp, 5));
-	bitWrite(tuneBase2, 1, bitRead(temp, 6));
-	bitWrite(tuneBase2, 2, bitRead(temp, 7));
+	bitWrite(preset_data.voice[0].tune_base, 0, bitRead(temp, 0));
+	bitWrite(preset_data.voice[0].tune_base, 1, bitRead(temp, 1));
+	bitWrite(preset_data.voice[0].tune_base, 2, bitRead(temp, 2));
+	bitWrite(preset_data.voice[0].tune_base, 3, bitRead(temp, 3));
+	bitWrite(preset_data.voice[0].tune_base, 4, bitRead(temp, 4));
+	bitWrite(preset_data.voice[1].tune_base, 0, bitRead(temp, 5));
+	bitWrite(preset_data.voice[1].tune_base, 1, bitRead(temp, 6));
+	bitWrite(preset_data.voice[1].tune_base, 2, bitRead(temp, 7));
 
 	temp = ready();
-	bitWrite(tuneBase2, 3, bitRead(temp, 0));
-	bitWrite(tuneBase2, 4, bitRead(temp, 1));
-	bitWrite(tuneBase3, 0, bitRead(temp, 2));
-	bitWrite(tuneBase3, 1, bitRead(temp, 3));
-	bitWrite(tuneBase3, 2, bitRead(temp, 4));
-	bitWrite(tuneBase3, 3, bitRead(temp, 5));
-	bitWrite(tuneBase3, 4, bitRead(temp, 6));
+	bitWrite(preset_data.voice[1].tune_base, 3, bitRead(temp, 0));
+	bitWrite(preset_data.voice[1].tune_base, 4, bitRead(temp, 1));
+	bitWrite(preset_data.voice[2].tune_base, 0, bitRead(temp, 2));
+	bitWrite(preset_data.voice[2].tune_base, 1, bitRead(temp, 3));
+	bitWrite(preset_data.voice[2].tune_base, 2, bitRead(temp, 4));
+	bitWrite(preset_data.voice[2].tune_base, 3, bitRead(temp, 5));
+	bitWrite(preset_data.voice[2].tune_base, 4, bitRead(temp, 6));
 
 	shape1Pressed = false;
 	shape1PressedTimer = 0;
 
-	tuneBase1 = constrain(tuneBase1, 0, 24);
-	tuneBase2 = constrain(tuneBase2, 0, 24);
-	tuneBase3 = constrain(tuneBase3, 0, 24);
+	preset_data.voice[0].tune_base = constrain(preset_data.voice[0].tune_base, 0, 24);
+	preset_data.voice[1].tune_base = constrain(preset_data.voice[1].tune_base, 0, 24);
+	preset_data.voice[2].tune_base = constrain(preset_data.voice[2].tune_base, 0, 24);
 
-	pw1Base = ready();
-	pw1Base = pw1Base << 3;
-	pw2Base = ready();
-	pw2Base = pw2Base << 3;
-	pw3Base = ready();
-	pw3Base = pw3Base << 3;
+	preset_data.voice[0].pulsewidth_base = ready();
+	preset_data.voice[0].pulsewidth_base = preset_data.voice[0].pulsewidth_base << 3;
+	preset_data.voice[1].pulsewidth_base = ready();
+	preset_data.voice[1].pulsewidth_base = preset_data.voice[1].pulsewidth_base << 3;
+	preset_data.voice[2].pulsewidth_base = ready();
+	preset_data.voice[2].pulsewidth_base = preset_data.voice[2].pulsewidth_base << 3;
 
-	glide1 = ready();
-	glide1 = constrain(glide1, 0, 63);
-	glide2 = ready();
-	glide2 = constrain(glide2, 0, 63);
-	glide3 = ready();
-	glide3 = constrain(glide3, 0, 63);
+	preset_data.voice[0].glide = ready();
+	preset_data.voice[0].glide = constrain(preset_data.voice[0].glide, 0, 63);
+	preset_data.voice[1].glide = ready();
+	preset_data.voice[1].glide = constrain(preset_data.voice[1].glide, 0, 63);
+	preset_data.voice[2].glide = ready();
+	preset_data.voice[2].glide = constrain(preset_data.voice[2].glide, 0, 63);
 
 	if (jumble) {
 		if (random(20) > 15) {
-			glide1 = random(63);
+			preset_data.voice[0].glide = random(63);
 		} else {
-			glide1 = 0;
+			preset_data.voice[0].glide = 0;
 		}
 	}
 	if (jumble) {
 		if (random(20) > 15) {
-			glide2 = random(63);
+			preset_data.voice[1].glide = random(63);
 		} else {
-			glide2 = 0;
+			preset_data.voice[1].glide = 0;
 		}
 	}
 	if (jumble) {
 		if (random(20) > 15) {
-			glide3 = random(63);
+			preset_data.voice[2].glide = random(63);
 		} else {
-			glide3 = 0;
+			preset_data.voice[2].glide = 0;
 		}
 	}
 
@@ -541,10 +541,10 @@ void load(byte number) {
 
 
 	temp = ready();
-	bitWrite(resBase, 0, bitRead(temp, 0));
-	bitWrite(resBase, 1, bitRead(temp, 1));
-	bitWrite(resBase, 2, bitRead(temp, 2));
-	bitWrite(resBase, 3, bitRead(temp, 3));
+	bitWrite(preset_data.resonance_base, 0, bitRead(temp, 0));
+	bitWrite(preset_data.resonance_base, 1, bitRead(temp, 1));
+	bitWrite(preset_data.resonance_base, 2, bitRead(temp, 2));
+	bitWrite(preset_data.resonance_base, 3, bitRead(temp, 3));
 	bitWrite(arpMode, 0, bitRead(temp, 4));
 	bitWrite(arpMode, 1, bitRead(temp, 5));
 	bitWrite(arpMode, 2, bitRead(temp, 6));
@@ -575,21 +575,21 @@ void load(byte number) {
 
 	// UPDATE EDITOR
 
-	sendCC(2, pw1Base >> 1);
-	sendCC(10, pw2Base >> 1);
-	sendCC(18, pw3Base >> 1);
+	sendCC(2, preset_data.voice[0].pulsewidth_base >> 1);
+	sendCC(10, preset_data.voice[1].pulsewidth_base >> 1);
+	sendCC(18, preset_data.voice[2].pulsewidth_base >> 1);
 
-	sendCC(3, map(tuneBase1, 0, 25, 0, 1023));
-	sendCC(11, map(tuneBase2, 0, 25, 0, 1023));
-	sendCC(19, map(tuneBase3, 0, 25, 0, 1023));
+	sendCC(3, map(preset_data.voice[0].tune_base, 0, 25, 0, 1023));
+	sendCC(11, map(preset_data.voice[1].tune_base, 0, 25, 0, 1023));
+	sendCC(19, map(preset_data.voice[2].tune_base, 0, 25, 0, 1023));
 
-	sendCC(4, int(fineBase1 * 1023));
-	sendCC(12, int(fineBase2 * 1023));
-	sendCC(20, int(fineBase3 * 1023));
+	sendCC(4, int(preset_data.voice[0].fine_base * 1023));
+	sendCC(12, int(preset_data.voice[1].fine_base * 1023));
+	sendCC(20, int(preset_data.voice[2].fine_base * 1023));
 
-	sendCC(5, glide1 << 4);
-	sendCC(13, glide2 << 4);
-	sendCC(21, glide3 << 4);
+	sendCC(5, preset_data.voice[0].glide << 4);
+	sendCC(13, preset_data.voice[1].glide << 4);
+	sendCC(21, preset_data.voice[2].glide << 4);
 
 	sendCC(6, preset_data.voice[0].attack << 6);
 	sendCC(14, preset_data.voice[1].attack << 6);
@@ -617,7 +617,7 @@ void load(byte number) {
 	sendCC(35, arpSpeedBase << 2);
 
 	sendCC(59, preset_data.cutoff);
-	sendCC(33, resBase << 6);
+	sendCC(33, preset_data.resonance_base << 6);
 }
 
 void saveChannels() {
