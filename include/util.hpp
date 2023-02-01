@@ -2,6 +2,10 @@
 #include <stddef.h>
 
 void panic(int num7seg, int numvoice);
+inline void assert(bool condition) {
+	if (!condition)
+		panic(42, 0);
+}
 
 struct nullopt_t {};
 inline nullopt_t nullopt;

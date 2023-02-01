@@ -499,7 +499,7 @@ void lfoTick() {
 
 void lastMovedPot(byte number) {
 	lastPot = number;
-	preset_data.set_leds(lastPot, ...);
+	preset_data.set_leds(lastPot, selectedLfo);
 }
 
 void chain() {

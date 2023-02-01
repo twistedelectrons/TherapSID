@@ -8,6 +8,7 @@
 #include "preset.h"
 #include "lfo.h"
 #include "midi.h"
+#include "util.hpp"
 
 // FIXME deduplicate
 
@@ -26,6 +27,54 @@ MEMORY MAPPING
 
 
 */
+
+void Preset::set_leds(int lastPot, int selectedLfo) {
+	// assert(lastPot < TODO); // FIXME
+	assert(selectedLfo < 3);
+
+	if (!paraphonic) {
+		for (int i=0; i<3; i++) {
+			ledSet(4*i+1, bitRead(voice[i].reg_control, 6));
+			ledSet(4*i+2, bitRead(voice[i].reg_control, 4));
+			ledSet(4*i+3, bitRead(voice[i].reg_control, 5));
+			ledSet(4*i+4, bitRead(voice[i].reg_control, 7));
+		}
+	}
+	else {
+		for (int i=0; i<3; i++) {
+			ledSet(4*i+1, bitRead(voice[0].reg_control, 6));
+			ledSet(4*i+2, bitRead(voice[0].reg_control, 4));
+			ledSet(4*i+3, bitRead(voice[0].reg_control, 5));
+			ledSet(4*i+4, bitRead(voice[0].reg_control, 7));
+		}
+	}
+
+	// FIXME this should probably depend on paraphonic
+	ledSet(16, bitRead(voice[0].reg_control, 1));
+	ledSet(17, bitRead(voice[0].reg_control, 2));
+	ledSet(18, bitRead(voice[1].reg_control, 1));
+	ledSet(19, bitRead(voice[1].reg_control, 2));
+	ledSet(20, bitRead(voice[2].reg_control, 1));
+	ledSet(21, bitRead(voice[2].reg_control, 2));
+
+	ledSet(27, sid_chips[0].filter_mode() & Sid::LOWPASS);
+	ledSet(28, sid_chips[0].filter_mode() & Sid::BANDPASS);
+	ledSet(29, sid_chips[0].filter_mode() & Sid::HIGHPASS);
+
+
+	if (lastPot != 20) { // TODO why?
+		ledSet(13, lfoAss[0][lastPot]);
+		ledSet(14, lfoAss[1][lastPot]);
+		ledSet(15, lfoAss[2][lastPot]);
+	}
+
+
+	for (int shape = 1; shape<=5; shape++) {
+		ledSet(21 + shape, lfoShape[selectedLfo] == shape);
+	}
+	ledSet(30, retrig[selectedLfo]);
+	ledSet(31, looping[selectedLfo]);
+}
 
 static int writeIndex;
 
@@ -545,7 +594,7 @@ void load(byte number) {
 	if (jumble)
 		arpMode = 0;
 
-	preset_data.set_leds();
+	preset_data.set_leds(lastPot, selectedLfo);
 
 	Timer1.initialize(100);      //
 	Timer1.attachInterrupt(isr); // attach the service routine here

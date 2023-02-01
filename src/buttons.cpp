@@ -277,7 +277,7 @@ void buttChanged(byte number, bool value) {
 				break;
 		}
 
-		preset_data.set_leds();
+		preset_data.set_leds(lastPot, selectedLfo);
 	} else {
 		switch (number) {
 			case RECT1:
