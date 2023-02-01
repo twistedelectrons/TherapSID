@@ -52,7 +52,6 @@ void loop() {
 		shape1Pressed = false;
 		shape1PressedTimer = 0;
 		preset_data.paraphonic = !preset_data.paraphonic;
-		paraChange();
 	}
 
 	if (dotTimer) {
@@ -112,7 +111,7 @@ void loop() {
 
 	lfoTick(); // sidUpdate();
 	calculatePitch();
-	sidUpdate();
+	// FIXME FIXME FIXME update sid values here!
 
 	if (showPresetNumber) {
 		ledNumber(preset);

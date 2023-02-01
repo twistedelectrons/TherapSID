@@ -117,7 +117,7 @@ const int envMap2[] = {
 };
 
 // interrupt service route to animate things (LFO arp etc)
-// called at 10kHz frequency (probably slower)
+// called at 10kHz frequency (probably slower) // FIXME figure out the actual frequency.
 void isr() {
 
 	if (shape1Pressed) {
@@ -136,7 +136,7 @@ void isr() {
 	// ENV
 	switch (envState) {
 		case 1:
-			if (a4 == 0) {
+			if (a4 == 0) { // FIXME get rid of a4
 				env = 255;
 				envState = 2;
 			} else {
@@ -194,7 +194,6 @@ void isr() {
 			arpModeCounter = 0;
 			fatMode = static_cast<FatMode>(((int)fatMode + 1) % 4);
 			fatShow = true;
-			updateFatMode();
 		}
 	}
 
@@ -220,9 +219,8 @@ void isr() {
 			arpCounter++;
 		}
 	}
-	if ((presetUp) || (presetDown)) {
-
-		if ((presetUp) && (!presetDown)) {
+	if (presetUp || presetDown) {
+		if (presetUp && !presetDown) {
 			presetScrollTimer += 4;
 			if (presetScrollTimer > presetScrollSpeed) {
 				presetScrollTimer = 0;
@@ -236,7 +234,7 @@ void isr() {
 				showPresetNumber = true;
 				scrolled = true;
 			}
-		} else if ((!presetUp) && (presetDown)) {
+		} else if (!presetUp && presetDown) {
 			presetScrollTimer += 4;
 			if (presetScrollTimer > presetScrollSpeed) {
 				presetScrollTimer = 0;

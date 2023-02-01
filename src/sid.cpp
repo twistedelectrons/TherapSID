@@ -139,6 +139,11 @@ void Sid::set_freq(int voice, uint16_t value) {
 	registers[7*voice + FREQ_HI] = value >> 8;
 }
 
+void Sid::set_gate(int voice, bool on) {
+	registers[7*voice + CONTROL] &= ~0x01;
+	registers[7*voice + CONTROL] |= on ? 0x01 : 0x00;
+}
+
 /// `value` needs to be OR-ed together out of NOISE, PULSE, SAW and/or TRI.
 /// Note that enabling NOISE together with any other waveform can clear the
 /// noise shift register inside the chip.

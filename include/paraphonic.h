@@ -1,3 +1,3 @@
 #pragma once
-void paraChange();
-void paraShape();
+//void paraChange();
+//void paraShape();

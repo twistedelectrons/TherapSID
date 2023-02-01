@@ -355,7 +355,6 @@ void load(byte number) {
 
 	temp = ready();
 	fatMode = uint2FatMode(temp & 0x3);
-	updateFatMode();
 
 	preset_data.voice[0].fine_base = ready();
 	preset_data.voice[0].fine_base /= 255;
