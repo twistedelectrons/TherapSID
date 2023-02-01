@@ -62,10 +62,17 @@ void Preset::set_leds(int lastPot, int selectedLfo) {
 	ledSet(29, sid_chips[0].filter_mode() & Sid::HIGHPASS);
 
 
-	if (lastPot != 20) { // TODO why?
+	if (lastPot != 20) {
+		// lastPot != none
 		ledSet(13, lfoAss[0][lastPot]);
 		ledSet(14, lfoAss[1][lastPot]);
 		ledSet(15, lfoAss[2][lastPot]);
+	}
+	else {
+		// lastPot == none
+		ledSet(13, 0);
+		ledSet(14, 0);
+		ledSet(15, 0);
 	}
 
 
