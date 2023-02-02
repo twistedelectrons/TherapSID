@@ -213,8 +213,8 @@ void Sid::send(size_t index, int data) {
 Sid sid_chips[2] = {Sid(_BV(6)), Sid(_BV(2))};
 
 
-static uint16_t fat_pitch(uint16_t pitch, FatMode fatMode) {
-	switch (fatMode) {
+static uint16_t fat_pitch(uint16_t pitch, FatMode fat_mode) {
+	switch (fat_mode) {
 		case FatMode::UNISONO:
 			return pitch;
 		case FatMode::OCTAVE_UP:
@@ -235,7 +235,7 @@ static uint16_t fat_pitch(uint16_t pitch, FatMode fatMode) {
 
 void sidPitch(byte voice, int pitch) {
 	sid_chips[0].set_freq(voice, pitch);
-	sid_chips[1].set_freq(voice, fat_pitch(pitch, fatMode));
+	sid_chips[1].set_freq(voice, fat_pitch(pitch, preset_data.fat_mode));
 }
 
 // FIXME into preset
@@ -265,17 +265,17 @@ void sidShape(byte voice, byte shape, bool value) {
 
 // FIXME into preset
 void updateFilter() {
-	// assert((unsigned) filterMode < 5); // FIXME
+	// assert((unsigned) preset_data.filter_mode < 5); // FIXME
 
 	uint8_t filter_mapping[] = { Sid::LOWPASS, Sid::BANDPASS, Sid::HIGHPASS, Sid::LOWPASS | Sid::HIGHPASS, 0 };
 
 	for (auto& chip : sid_chips) {
-		chip.set_filter_mode(filter_mapping[(unsigned)filterMode]);
-		chip.set_voice_filter(3, filterMode != FilterMode::OFF);
+		chip.set_filter_mode(filter_mapping[(unsigned)preset_data.filter_mode]);
+		chip.set_voice_filter(3, preset_data.filter_mode != FilterMode::OFF);
 
 		// Disable voice->filter routing if voice is off or filter is off.
 		for (int voice = 0; voice < 3; voice++) {
-			if (chip.shape(voice) == 0 || filterMode == FilterMode::OFF) {
+			if (chip.shape(voice) == 0 || preset_data.filter_mode == FilterMode::OFF) {
 				chip.set_voice_filter(voice, false);
 			}
 		}

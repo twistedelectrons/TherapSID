@@ -62,10 +62,10 @@ void shapeButtPressed(uint8_t voice, PresetVoice::Shape shape) {
 	if (!filterModeHeld) {
 		preset_data.voice[voice].toggle_shape(shape);
 		// FIXME this needs deduplication of non-updates.
-		sendMidiButt(37 + 4*voice + 0, preset_data.voice[voice].control & PresetVoice::PULSE);
-		sendMidiButt(37 + 4*voice + 1, preset_data.voice[voice].control & PresetVoice::TRI);
-		sendMidiButt(37 + 4*voice + 2, preset_data.voice[voice].control & PresetVoice::SAW);
-		sendMidiButt(37 + 4*voice + 3, preset_data.voice[voice].control & PresetVoice::NOISE);
+		sendMidiButt(37 + 4*voice + 0, preset_data.voice[voice].reg_control & PresetVoice::PULSE);
+		sendMidiButt(37 + 4*voice + 1, preset_data.voice[voice].reg_control & PresetVoice::TRI);
+		sendMidiButt(37 + 4*voice + 2, preset_data.voice[voice].reg_control & PresetVoice::SAW);
+		sendMidiButt(37 + 4*voice + 3, preset_data.voice[voice].reg_control & PresetVoice::NOISE);
 
 		if (voice == 0) {
 			shape1Pressed = true;
@@ -97,30 +97,30 @@ void buttChanged(byte number, bool value) {
 			case NOISE3: shapeButtPressed(2, PresetVoice::NOISE); break;
 
 			case SYNC1:
-				preset_data.voice[0].control ^= 2;
-				sendMidiButt(49, preset_data.voice[0].control & 2);
+				preset_data.voice[0].reg_control ^= 2;
+				sendMidiButt(49, preset_data.voice[0].reg_control & 2);
 				break;
 			case RING1:
-				preset_data.voice[0].control ^= 4;
-				sendMidiButt(50, preset_data.voice[0].control & 4);
+				preset_data.voice[0].reg_control ^= 4;
+				sendMidiButt(50, preset_data.voice[0].reg_control & 4);
 				break;
 
 			case SYNC2:
-				preset_data.voice[1].control ^= 2;
-				sendMidiButt(51, preset_data.voice[1].control & 2);
+				preset_data.voice[1].reg_control ^= 2;
+				sendMidiButt(51, preset_data.voice[1].reg_control & 2);
 				break;
 			case RING2:
-				preset_data.voice[1].control ^= 4;
-				sendMidiButt(52, preset_data.voice[1].control & 4);
+				preset_data.voice[1].reg_control ^= 4;
+				sendMidiButt(52, preset_data.voice[1].reg_control & 4);
 				break;
 
 			case SYNC3:
-				preset_data.voice[2].control ^= 2;
-				sendMidiButt(53, preset_data.voice[2].control & 2);
+				preset_data.voice[2].reg_control ^= 2;
+				sendMidiButt(53, preset_data.voice[2].reg_control & 2);
 				break;
 			case RING3:
-				preset_data.voice[2].control ^= 4;
-				sendMidiButt(54, preset_data.voice[2].control & 4);
+				preset_data.voice[2].reg_control ^= 4;
+				sendMidiButt(54, preset_data.voice[2].reg_control & 4);
 				break;
 
 			case LFO_CHAIN1:
@@ -272,12 +272,9 @@ void buttChanged(byte number, bool value) {
 			case FILTER_MODE:
 				assignmentChanged = false;
 				filterModeHeld = true;
-				showFilterAssigns();
 
 				break;
 		}
-
-		preset_data.set_leds(lastPot, selectedLfo);
 	} else {
 		switch (number) {
 			case RECT1:
@@ -360,11 +357,11 @@ void buttChanged(byte number, bool value) {
 
 					if (!assignmentChanged) {
 						// TODO ugh
-						filterMode = static_cast<FilterMode>(
-							(static_cast<int>(filterMode) + 1) % 5
+						preset_data.filter_mode = static_cast<FilterMode>(
+							(static_cast<int>(preset_data.filter_mode) + 1) % 5
 						);
 						updateFilter();
-						sendCC(55, map((int)filterMode, 0, 4, 0, 1023));
+						sendCC(55, map((int)preset_data.filter_mode, 0, 4, 0, 1023));
 					}
 				} else {
 					fatChanged = false;
@@ -373,4 +370,6 @@ void buttChanged(byte number, bool value) {
 				break;
 		}
 	}
+
+	preset_data.set_leds(lastPot, selectedLfo, filterModeHeld);
 }

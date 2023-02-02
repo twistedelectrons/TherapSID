@@ -28,25 +28,22 @@ MEMORY MAPPING
 
 */
 
-void Preset::set_leds(int lastPot, int selectedLfo) {
+void Preset::set_leds(int lastPot, int selectedLfo, bool show_filter_assign) {
 	// assert(lastPot < TODO); // FIXME
 	assert(selectedLfo < 3);
 
-	if (!paraphonic) {
+	if (!show_filter_assign) {
 		for (int i=0; i<3; i++) {
-			ledSet(4*i+1, bitRead(voice[i].reg_control, 6));
-			ledSet(4*i+2, bitRead(voice[i].reg_control, 4));
-			ledSet(4*i+3, bitRead(voice[i].reg_control, 5));
-			ledSet(4*i+4, bitRead(voice[i].reg_control, 7));
+			ledSet(4*i+1, voice[paraphonic ? 0 : i].reg_control & PresetVoice::PULSE);
+			ledSet(4*i+2, voice[paraphonic ? 0 : i].reg_control & PresetVoice::TRI);
+			ledSet(4*i+3, voice[paraphonic ? 0 : i].reg_control & PresetVoice::SAW);
+			ledSet(4*i+4, voice[paraphonic ? 0 : i].reg_control & PresetVoice::NOISE);
 		}
 	}
 	else {
-		for (int i=0; i<3; i++) {
-			ledSet(4*i+1, bitRead(voice[0].reg_control, 6));
-			ledSet(4*i+2, bitRead(voice[0].reg_control, 4));
-			ledSet(4*i+3, bitRead(voice[0].reg_control, 5));
-			ledSet(4*i+4, bitRead(voice[0].reg_control, 7));
-		}
+		for (int i=0; i<3; i++)
+			for (int k=0; k<4; k++) 
+				ledSet(4*i+1+k, voice[paraphonic ? 0 : i].filter_enabled);
 	}
 
 	// FIXME this should probably depend on paraphonic
@@ -64,9 +61,9 @@ void Preset::set_leds(int lastPot, int selectedLfo) {
 
 	if (lastPot != 20) {
 		// lastPot != none
-		ledSet(13, lfoAss[0][lastPot]);
-		ledSet(14, lfoAss[1][lastPot]);
-		ledSet(15, lfoAss[2][lastPot]);
+		ledSet(13, preset_data.lfo_map[0][lastPot]);
+		ledSet(14, preset_data.lfo_map[1][lastPot]);
+		ledSet(15, preset_data.lfo_map[2][lastPot]);
 	}
 	else {
 		// lastPot == none
@@ -113,7 +110,7 @@ void save() {
 	writey(preset_data.voice[1].reg_control);
 	writey(preset_data.voice[2].reg_control);
 	temp = 0;
-	temp |= ((int)fatMode) & 0x3;
+	temp |= ((int)preset_data.fat_mode) & 0x3;
 
 	writey(temp);
 	writey(preset_data.voice[0].fine_base * 255);
@@ -158,73 +155,73 @@ void save() {
 	writey(preset_data.lfo[1].depth >> 2);
 	writey(preset_data.lfo[2].depth >> 2); // 27
 	// FIXME loop
-	bitWrite(temp, 0, lfoAss[0][0]);
-	bitWrite(temp, 1, lfoAss[0][1]);
-	bitWrite(temp, 2, lfoAss[0][2]);
-	bitWrite(temp, 3, lfoAss[0][3]);
-	bitWrite(temp, 4, lfoAss[0][4]);
-	bitWrite(temp, 5, lfoAss[0][5]);
-	bitWrite(temp, 6, lfoAss[0][6]);
-	bitWrite(temp, 7, lfoAss[0][7]);
+	bitWrite(temp, 0, preset_data.lfo_map[0][0]);
+	bitWrite(temp, 1, preset_data.lfo_map[0][1]);
+	bitWrite(temp, 2, preset_data.lfo_map[0][2]);
+	bitWrite(temp, 3, preset_data.lfo_map[0][3]);
+	bitWrite(temp, 4, preset_data.lfo_map[0][4]);
+	bitWrite(temp, 5, preset_data.lfo_map[0][5]);
+	bitWrite(temp, 6, preset_data.lfo_map[0][6]);
+	bitWrite(temp, 7, preset_data.lfo_map[0][7]);
 	writey(temp);
-	bitWrite(temp, 0, lfoAss[0][8]);
-	bitWrite(temp, 1, lfoAss[0][9]);
-	bitWrite(temp, 2, lfoAss[0][10]);
-	bitWrite(temp, 3, lfoAss[0][11]);
-	bitWrite(temp, 4, lfoAss[0][12]);
-	bitWrite(temp, 5, lfoAss[0][13]);
-	bitWrite(temp, 6, lfoAss[0][14]);
-	bitWrite(temp, 7, lfoAss[0][15]);
+	bitWrite(temp, 0, preset_data.lfo_map[0][8]);
+	bitWrite(temp, 1, preset_data.lfo_map[0][9]);
+	bitWrite(temp, 2, preset_data.lfo_map[0][10]);
+	bitWrite(temp, 3, preset_data.lfo_map[0][11]);
+	bitWrite(temp, 4, preset_data.lfo_map[0][12]);
+	bitWrite(temp, 5, preset_data.lfo_map[0][13]);
+	bitWrite(temp, 6, preset_data.lfo_map[0][14]);
+	bitWrite(temp, 7, preset_data.lfo_map[0][15]);
 	writey(temp);
-	bitWrite(temp, 0, lfoAss[0][16]);
-	bitWrite(temp, 1, lfoAss[0][17]);
-	bitWrite(temp, 2, lfoAss[0][18]);
-	bitWrite(temp, 3, lfoAss[0][19]);
-	bitWrite(temp, 4, lfoAss[1][0]);
-	bitWrite(temp, 5, lfoAss[1][1]);
-	bitWrite(temp, 6, lfoAss[1][2]);
-	bitWrite(temp, 7, lfoAss[1][3]);
+	bitWrite(temp, 0, preset_data.lfo_map[0][16]);
+	bitWrite(temp, 1, preset_data.lfo_map[0][17]);
+	bitWrite(temp, 2, preset_data.lfo_map[0][18]);
+	bitWrite(temp, 3, preset_data.lfo_map[0][19]);
+	bitWrite(temp, 4, preset_data.lfo_map[1][0]);
+	bitWrite(temp, 5, preset_data.lfo_map[1][1]);
+	bitWrite(temp, 6, preset_data.lfo_map[1][2]);
+	bitWrite(temp, 7, preset_data.lfo_map[1][3]);
 	writey(temp); // 30
-	bitWrite(temp, 0, lfoAss[1][4]);
-	bitWrite(temp, 1, lfoAss[1][5]);
-	bitWrite(temp, 2, lfoAss[1][6]);
-	bitWrite(temp, 3, lfoAss[1][7]);
-	bitWrite(temp, 4, lfoAss[1][8]);
-	bitWrite(temp, 5, lfoAss[1][9]);
-	bitWrite(temp, 6, lfoAss[1][10]);
-	bitWrite(temp, 7, lfoAss[1][11]);
+	bitWrite(temp, 0, preset_data.lfo_map[1][4]);
+	bitWrite(temp, 1, preset_data.lfo_map[1][5]);
+	bitWrite(temp, 2, preset_data.lfo_map[1][6]);
+	bitWrite(temp, 3, preset_data.lfo_map[1][7]);
+	bitWrite(temp, 4, preset_data.lfo_map[1][8]);
+	bitWrite(temp, 5, preset_data.lfo_map[1][9]);
+	bitWrite(temp, 6, preset_data.lfo_map[1][10]);
+	bitWrite(temp, 7, preset_data.lfo_map[1][11]);
 	writey(temp); //
-	bitWrite(temp, 0, lfoAss[1][12]);
-	bitWrite(temp, 1, lfoAss[1][13]);
-	bitWrite(temp, 2, lfoAss[1][14]);
-	bitWrite(temp, 3, lfoAss[1][15]);
-	bitWrite(temp, 4, lfoAss[1][16]);
-	bitWrite(temp, 5, lfoAss[1][17]);
-	bitWrite(temp, 6, lfoAss[1][18]);
-	bitWrite(temp, 7, lfoAss[1][19]);
+	bitWrite(temp, 0, preset_data.lfo_map[1][12]);
+	bitWrite(temp, 1, preset_data.lfo_map[1][13]);
+	bitWrite(temp, 2, preset_data.lfo_map[1][14]);
+	bitWrite(temp, 3, preset_data.lfo_map[1][15]);
+	bitWrite(temp, 4, preset_data.lfo_map[1][16]);
+	bitWrite(temp, 5, preset_data.lfo_map[1][17]);
+	bitWrite(temp, 6, preset_data.lfo_map[1][18]);
+	bitWrite(temp, 7, preset_data.lfo_map[1][19]);
 	writey(temp); //
-	bitWrite(temp, 0, lfoAss[2][0]);
-	bitWrite(temp, 1, lfoAss[2][1]);
-	bitWrite(temp, 2, lfoAss[2][2]);
-	bitWrite(temp, 3, lfoAss[2][3]);
-	bitWrite(temp, 4, lfoAss[2][4]);
-	bitWrite(temp, 5, lfoAss[2][5]);
-	bitWrite(temp, 6, lfoAss[2][6]);
-	bitWrite(temp, 7, lfoAss[2][7]);
+	bitWrite(temp, 0, preset_data.lfo_map[2][0]);
+	bitWrite(temp, 1, preset_data.lfo_map[2][1]);
+	bitWrite(temp, 2, preset_data.lfo_map[2][2]);
+	bitWrite(temp, 3, preset_data.lfo_map[2][3]);
+	bitWrite(temp, 4, preset_data.lfo_map[2][4]);
+	bitWrite(temp, 5, preset_data.lfo_map[2][5]);
+	bitWrite(temp, 6, preset_data.lfo_map[2][6]);
+	bitWrite(temp, 7, preset_data.lfo_map[2][7]);
 	writey(temp); //
-	bitWrite(temp, 0, lfoAss[2][8]);
-	bitWrite(temp, 1, lfoAss[2][9]);
-	bitWrite(temp, 2, lfoAss[2][10]);
-	bitWrite(temp, 3, lfoAss[2][11]);
-	bitWrite(temp, 4, lfoAss[2][12]);
-	bitWrite(temp, 5, lfoAss[2][13]);
-	bitWrite(temp, 6, lfoAss[2][14]);
-	bitWrite(temp, 7, lfoAss[2][15]);
+	bitWrite(temp, 0, preset_data.lfo_map[2][8]);
+	bitWrite(temp, 1, preset_data.lfo_map[2][9]);
+	bitWrite(temp, 2, preset_data.lfo_map[2][10]);
+	bitWrite(temp, 3, preset_data.lfo_map[2][11]);
+	bitWrite(temp, 4, preset_data.lfo_map[2][12]);
+	bitWrite(temp, 5, preset_data.lfo_map[2][13]);
+	bitWrite(temp, 6, preset_data.lfo_map[2][14]);
+	bitWrite(temp, 7, preset_data.lfo_map[2][15]);
 	writey(temp); //
-	bitWrite(temp, 0, lfoAss[2][16]);
-	bitWrite(temp, 1, lfoAss[2][17]);
-	bitWrite(temp, 2, lfoAss[2][18]);
-	bitWrite(temp, 3, lfoAss[2][19]);
+	bitWrite(temp, 0, preset_data.lfo_map[2][16]);
+	bitWrite(temp, 1, preset_data.lfo_map[2][17]);
+	bitWrite(temp, 2, preset_data.lfo_map[2][18]);
+	bitWrite(temp, 3, preset_data.lfo_map[2][19]);
 	bitWrite(temp, 4, bitRead(lfoShape[0], 0));
 	bitWrite(temp, 5, bitRead(lfoShape[0], 1));
 	bitWrite(temp, 6, bitRead(lfoShape[0], 2));
@@ -242,9 +239,9 @@ void save() {
 	bitWrite(temp, 0, looping[0]);
 	bitWrite(temp, 1, looping[1]);
 	bitWrite(temp, 2, looping[2]);
-	bitWrite(temp, 3, bitRead((int)filterMode, 0));
-	bitWrite(temp, 4, bitRead((int)filterMode, 1));
-	bitWrite(temp, 5, bitRead((int)filterMode, 2));
+	bitWrite(temp, 3, bitRead((int)preset_data.filter_mode, 0));
+	bitWrite(temp, 4, bitRead((int)preset_data.filter_mode, 1));
+	bitWrite(temp, 5, bitRead((int)preset_data.filter_mode, 2));
 	bitWrite(temp, 6, bitRead(arpRangeBase, 0));
 	bitWrite(temp, 7, bitRead(arpRangeBase, 1));
 	writey(temp); // 37
@@ -354,7 +351,7 @@ void load(byte number) {
 	}
 
 	temp = ready();
-	fatMode = uint2FatMode(temp & 0x3);
+	preset_data.fat_mode = uint2FatMode(temp & 0x3);
 
 	preset_data.voice[0].fine_base = ready();
 	preset_data.voice[0].fine_base /= 255;
@@ -459,80 +456,80 @@ void load(byte number) {
 
 	// FIXME loop!
 	temp = ready();
-	lfoAss[0][0] = bitRead(temp, 0);
-	lfoAss[0][1] = bitRead(temp, 1);
-	lfoAss[0][2] = bitRead(temp, 2);
-	lfoAss[0][3] = bitRead(temp, 3);
-	lfoAss[0][4] = bitRead(temp, 4);
-	lfoAss[0][5] = bitRead(temp, 5);
-	lfoAss[0][6] = bitRead(temp, 6);
-	lfoAss[0][7] = bitRead(temp, 7);
+	preset_data.lfo_map[0][0] = bitRead(temp, 0);
+	preset_data.lfo_map[0][1] = bitRead(temp, 1);
+	preset_data.lfo_map[0][2] = bitRead(temp, 2);
+	preset_data.lfo_map[0][3] = bitRead(temp, 3);
+	preset_data.lfo_map[0][4] = bitRead(temp, 4);
+	preset_data.lfo_map[0][5] = bitRead(temp, 5);
+	preset_data.lfo_map[0][6] = bitRead(temp, 6);
+	preset_data.lfo_map[0][7] = bitRead(temp, 7);
 
 	temp = ready();
-	lfoAss[0][8] = bitRead(temp, 0);
-	lfoAss[0][9] = bitRead(temp, 1);
-	lfoAss[0][10] = bitRead(temp, 2);
-	lfoAss[0][11] = bitRead(temp, 3);
-	lfoAss[0][12] = bitRead(temp, 4);
-	lfoAss[0][13] = bitRead(temp, 5);
-	lfoAss[0][14] = bitRead(temp, 6);
-	lfoAss[0][15] = bitRead(temp, 7);
+	preset_data.lfo_map[0][8] = bitRead(temp, 0);
+	preset_data.lfo_map[0][9] = bitRead(temp, 1);
+	preset_data.lfo_map[0][10] = bitRead(temp, 2);
+	preset_data.lfo_map[0][11] = bitRead(temp, 3);
+	preset_data.lfo_map[0][12] = bitRead(temp, 4);
+	preset_data.lfo_map[0][13] = bitRead(temp, 5);
+	preset_data.lfo_map[0][14] = bitRead(temp, 6);
+	preset_data.lfo_map[0][15] = bitRead(temp, 7);
 
 	temp = ready();
-	lfoAss[0][16] = bitRead(temp, 0);
-	lfoAss[0][17] = bitRead(temp, 1);
-	lfoAss[0][18] = bitRead(temp, 2);
-	lfoAss[0][19] = bitRead(temp, 3);
-	lfoAss[1][0] = bitRead(temp, 4);
-	lfoAss[1][1] = bitRead(temp, 5);
-	lfoAss[1][2] = bitRead(temp, 6);
-	lfoAss[1][3] = bitRead(temp, 7);
+	preset_data.lfo_map[0][16] = bitRead(temp, 0);
+	preset_data.lfo_map[0][17] = bitRead(temp, 1);
+	preset_data.lfo_map[0][18] = bitRead(temp, 2);
+	preset_data.lfo_map[0][19] = bitRead(temp, 3);
+	preset_data.lfo_map[1][0] = bitRead(temp, 4);
+	preset_data.lfo_map[1][1] = bitRead(temp, 5);
+	preset_data.lfo_map[1][2] = bitRead(temp, 6);
+	preset_data.lfo_map[1][3] = bitRead(temp, 7);
 
 	temp = ready();
-	lfoAss[1][4] = bitRead(temp, 0);
-	lfoAss[1][5] = bitRead(temp, 1);
-	lfoAss[1][6] = bitRead(temp, 2);
-	lfoAss[1][7] = bitRead(temp, 3);
-	lfoAss[1][8] = bitRead(temp, 4);
-	lfoAss[1][9] = bitRead(temp, 5);
-	lfoAss[1][10] = bitRead(temp, 6);
-	lfoAss[1][11] = bitRead(temp, 7);
+	preset_data.lfo_map[1][4] = bitRead(temp, 0);
+	preset_data.lfo_map[1][5] = bitRead(temp, 1);
+	preset_data.lfo_map[1][6] = bitRead(temp, 2);
+	preset_data.lfo_map[1][7] = bitRead(temp, 3);
+	preset_data.lfo_map[1][8] = bitRead(temp, 4);
+	preset_data.lfo_map[1][9] = bitRead(temp, 5);
+	preset_data.lfo_map[1][10] = bitRead(temp, 6);
+	preset_data.lfo_map[1][11] = bitRead(temp, 7);
 
 	temp = ready();
-	lfoAss[1][12] = bitRead(temp, 0);
-	lfoAss[1][13] = bitRead(temp, 1);
-	lfoAss[1][14] = bitRead(temp, 2);
-	lfoAss[1][15] = bitRead(temp, 3);
-	lfoAss[1][16] = bitRead(temp, 4);
-	lfoAss[1][17] = bitRead(temp, 5);
-	lfoAss[1][18] = bitRead(temp, 6);
-	lfoAss[1][19] = bitRead(temp, 7);
+	preset_data.lfo_map[1][12] = bitRead(temp, 0);
+	preset_data.lfo_map[1][13] = bitRead(temp, 1);
+	preset_data.lfo_map[1][14] = bitRead(temp, 2);
+	preset_data.lfo_map[1][15] = bitRead(temp, 3);
+	preset_data.lfo_map[1][16] = bitRead(temp, 4);
+	preset_data.lfo_map[1][17] = bitRead(temp, 5);
+	preset_data.lfo_map[1][18] = bitRead(temp, 6);
+	preset_data.lfo_map[1][19] = bitRead(temp, 7);
 
 	temp = ready();
-	lfoAss[2][0] = bitRead(temp, 0);
-	lfoAss[2][1] = bitRead(temp, 1);
-	lfoAss[2][2] = bitRead(temp, 2);
-	lfoAss[2][3] = bitRead(temp, 3);
-	lfoAss[2][4] = bitRead(temp, 4);
-	lfoAss[2][5] = bitRead(temp, 5);
-	lfoAss[2][6] = bitRead(temp, 6);
-	lfoAss[2][7] = bitRead(temp, 7);
+	preset_data.lfo_map[2][0] = bitRead(temp, 0);
+	preset_data.lfo_map[2][1] = bitRead(temp, 1);
+	preset_data.lfo_map[2][2] = bitRead(temp, 2);
+	preset_data.lfo_map[2][3] = bitRead(temp, 3);
+	preset_data.lfo_map[2][4] = bitRead(temp, 4);
+	preset_data.lfo_map[2][5] = bitRead(temp, 5);
+	preset_data.lfo_map[2][6] = bitRead(temp, 6);
+	preset_data.lfo_map[2][7] = bitRead(temp, 7);
 
 	temp = ready();
-	lfoAss[2][8] = bitRead(temp, 0);
-	lfoAss[2][9] = bitRead(temp, 1);
-	lfoAss[2][10] = bitRead(temp, 2);
-	lfoAss[2][11] = bitRead(temp, 3);
-	lfoAss[2][12] = bitRead(temp, 4);
-	lfoAss[2][13] = bitRead(temp, 5);
-	lfoAss[2][14] = bitRead(temp, 6);
-	lfoAss[2][15] = bitRead(temp, 7);
+	preset_data.lfo_map[2][8] = bitRead(temp, 0);
+	preset_data.lfo_map[2][9] = bitRead(temp, 1);
+	preset_data.lfo_map[2][10] = bitRead(temp, 2);
+	preset_data.lfo_map[2][11] = bitRead(temp, 3);
+	preset_data.lfo_map[2][12] = bitRead(temp, 4);
+	preset_data.lfo_map[2][13] = bitRead(temp, 5);
+	preset_data.lfo_map[2][14] = bitRead(temp, 6);
+	preset_data.lfo_map[2][15] = bitRead(temp, 7);
 
 	temp = ready();
-	lfoAss[2][16] = bitRead(temp, 0);
-	lfoAss[2][17] = bitRead(temp, 1);
-	lfoAss[2][18] = bitRead(temp, 2);
-	lfoAss[2][19] = bitRead(temp, 3);
+	preset_data.lfo_map[2][16] = bitRead(temp, 0);
+	preset_data.lfo_map[2][17] = bitRead(temp, 1);
+	preset_data.lfo_map[2][18] = bitRead(temp, 2);
+	preset_data.lfo_map[2][19] = bitRead(temp, 3);
 	bitWrite(lfoShape[0], 0, bitRead(temp, 4));
 	bitWrite(lfoShape[0], 1, bitRead(temp, 5));
 	bitWrite(lfoShape[0], 2, bitRead(temp, 6));
@@ -541,20 +538,20 @@ void load(byte number) {
 	if (jumble) {
 		for (int i = 0; i < 20; i++) {
 
-			lfoAss[0][i] = 0;
-			lfoAss[1][i] = 0;
-			lfoAss[2][i] = 0;
+			preset_data.lfo_map[0][i] = 0;
+			preset_data.lfo_map[1][i] = 0;
+			preset_data.lfo_map[2][i] = 0;
 		}
 
 		for (int i = 0; i < 20; i++) {
 			if (random(20) > 15) {
-				lfoAss[0][random(19)] = 1;
+				preset_data.lfo_map[0][random(19)] = 1;
 			}
 			if (random(20) > 15) {
-				lfoAss[1][random(19)] = 1;
+				preset_data.lfo_map[1][random(19)] = 1;
 			}
 			if (random(20) > 15) {
-				lfoAss[2][random(19)] = 1;
+				preset_data.lfo_map[2][random(19)] = 1;
 			}
 		}
 	}
@@ -573,7 +570,7 @@ void load(byte number) {
 	looping[1] = bitRead(temp, 1);
 	looping[2] = bitRead(temp, 2);
 
-	filterMode = uint2FilterMode((temp >> 3) & 0x7);
+	preset_data.filter_mode = uint2FilterMode((temp >> 3) & 0x7);
 	bitWrite(arpRangeBase, 0, bitRead(temp, 6));
 	bitWrite(arpRangeBase, 1, bitRead(temp, 7));
 
@@ -600,7 +597,7 @@ void load(byte number) {
 	if (jumble)
 		arpMode = 0;
 
-	preset_data.set_leds(lastPot, selectedLfo);
+	preset_data.set_leds(lastPot, selectedLfo, filterModeHeld);
 
 	Timer1.initialize(100);      //
 	Timer1.attachInterrupt(isr); // attach the service routine here

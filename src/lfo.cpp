@@ -76,34 +76,34 @@ void lfoTick() {
 		}
 	}
 
-	if (lfoAss[1][10]) {
+	if (preset_data.lfo_map[1][10]) {
 		lfoDepthLfo1 = map(lfo[1], 0, 255, 0, lfoDepth[1]);
 	} else {
 		lfoDepthLfo1 = 0;
 	}
-	if (lfoAss[2][10]) {
+	if (preset_data.lfo_map[2][10]) {
 		lfoDepthLfo2 = map(lfo[2], 0, 255, 0, lfoDepth[2]);
 	} else {
 		lfoDepthLfo2 = 0;
 	}
 
-	if (lfoAss[0][12]) {
+	if (preset_data.lfo_map[0][12]) {
 		lfoDepthLfo3 = map(lfo[0], 0, 255, 0, lfoDepth[0]);
 	} else {
 		lfoDepthLfo3 = 0;
 	}
-	if (lfoAss[2][12]) {
+	if (preset_data.lfo_map[2][12]) {
 		lfoDepthLfo4 = map(lfo[2], 0, 255, 0, lfoDepth[2]);
 	} else {
 		lfoDepthLfo4 = 0;
 	}
 
-	if (lfoAss[0][14]) {
+	if (preset_data.lfo_map[0][14]) {
 		lfoDepthLfo5 = map(lfo[0], 0, 255, 0, lfoDepth[0]);
 	} else {
 		lfoDepthLfo5 = 0;
 	}
-	if (lfoAss[1][14]) {
+	if (preset_data.lfo_map[1][14]) {
 		lfoDepthLfo6 = map(lfo[1], 0, 255, 0, lfoDepth[1]);
 	} else {
 		lfoDepthLfo6 = 0;
@@ -127,270 +127,270 @@ void lfoTick() {
 	if (lfoSpeed[0] < 1)
 		lfoSpeed[0] = 0;
 
-	if (lfoAss[0][1]) {
+	if (preset_data.lfo_map[0][1]) {
 		lfoTune1 = map(lfo[0], 0, 255, -lfoDepth[0] >> 5, lfoDepth[0] >> 5);
 	} else {
 		lfoTune1 = 0;
 	}
-	if (lfoAss[1][1]) {
+	if (preset_data.lfo_map[1][1]) {
 		lfoTune2 = map(lfo[1], 0, 255, -lfoDepth[1] >> 5, lfoDepth[1] >> 5);
 	} else {
 		lfoTune2 = 0;
 	}
-	if (lfoAss[2][1]) {
+	if (preset_data.lfo_map[2][1]) {
 		lfoTune3 = map(lfo[2], 0, 255, -lfoDepth[2] >> 5, lfoDepth[2] >> 5);
 	} else {
 		lfoTune3 = 0;
 	}
 
-	if (lfoAss[0][4]) {
+	if (preset_data.lfo_map[0][4]) {
 		lfoTune4 = map(lfo[0], 0, 255, -lfoDepth[0] >> 5, lfoDepth[0] >> 5);
 	} else {
 		lfoTune4 = 0;
 	}
-	if (lfoAss[1][4]) {
+	if (preset_data.lfo_map[1][4]) {
 		lfoTune5 = map(lfo[1], 0, 255, -lfoDepth[1] >> 5, lfoDepth[1] >> 5);
 	} else {
 		lfoTune5 = 0;
 	}
-	if (lfoAss[2][4]) {
+	if (preset_data.lfo_map[2][4]) {
 		lfoTune6 = map(lfo[2], 0, 255, -lfoDepth[2] >> 5, lfoDepth[2] >> 5);
 	} else {
 		lfoTune6 = 0;
 	}
 
-	if (lfoAss[0][7]) {
+	if (preset_data.lfo_map[0][7]) {
 		lfoTune7 = map(lfo[0], 0, 255, -lfoDepth[0] >> 5, lfoDepth[0] >> 5);
 		lfoTune7 *= 2;
 	} else {
 		lfoTune7 = 0;
 	}
-	if (lfoAss[1][7]) {
+	if (preset_data.lfo_map[1][7]) {
 		lfoTune8 = map(lfo[1], 0, 255, -lfoDepth[1] >> 5, lfoDepth[1] >> 5);
 		lfoTune8 *= 2;
 	} else {
 		lfoTune8 = 0;
 	}
-	if (lfoAss[2][7]) {
+	if (preset_data.lfo_map[2][7]) {
 		lfoTune9 = map(lfo[2], 0, 255, -lfoDepth[2] >> 5, lfoDepth[2] >> 5);
 		lfoTune9 *= 2;
 	} else {
 		lfoTune9 = 0;
 	}
 
-	if (lfoAss[0][15]) {
+	if (preset_data.lfo_map[0][15]) {
 		lfoCut1 = map(lfo[0], 0, 255, 0, lfoDepth[0]);
 	} else {
 		lfoCut1 = 0;
 	}
-	if (lfoAss[1][15]) {
+	if (preset_data.lfo_map[1][15]) {
 		lfoCut2 = map(lfo[1], 0, 255, 0, lfoDepth[1]);
 	} else {
 		lfoCut2 = 0;
 	}
-	if (lfoAss[2][15]) {
+	if (preset_data.lfo_map[2][15]) {
 		lfoCut3 = map(lfo[2], 0, 255, 0, lfoDepth[2]);
 	} else {
 		lfoCut3 = 0;
 	}
 
-	if (lfoAss[0][0]) {
+	if (preset_data.lfo_map[0][0]) {
 		pw1Lfo1 = map(lfo[0], 0, 255, 0, lfoDepth[0] << 1);
 	} else {
 		pw1Lfo1 = 0;
 	}
-	if (lfoAss[1][0]) {
+	if (preset_data.lfo_map[1][0]) {
 		pw1Lfo2 = map(lfo[1], 0, 255, 0, lfoDepth[1] << 1);
 	} else {
 		pw1Lfo2 = 0;
 	}
-	if (lfoAss[2][0]) {
+	if (preset_data.lfo_map[2][0]) {
 		pw1Lfo3 = map(lfo[2], 0, 255, 0, lfoDepth[2] << 1);
 	} else {
 		pw1Lfo3 = 0;
 	}
 
-	if (lfoAss[0][3]) {
+	if (preset_data.lfo_map[0][3]) {
 		pw2Lfo1 = map(lfo[0], 0, 255, 0, lfoDepth[0] << 1);
 	} else {
 		pw2Lfo1 = 0;
 	}
-	if (lfoAss[1][3]) {
+	if (preset_data.lfo_map[1][3]) {
 		pw2Lfo2 = map(lfo[1], 0, 255, 0, lfoDepth[1] << 1);
 	} else {
 		pw2Lfo2 = 0;
 	}
-	if (lfoAss[2][3]) {
+	if (preset_data.lfo_map[2][3]) {
 		pw2Lfo3 = map(lfo[2], 0, 255, 0, lfoDepth[2] << 1);
 	} else {
 		pw2Lfo3 = 0;
 	}
 
-	if (lfoAss[0][6]) {
+	if (preset_data.lfo_map[0][6]) {
 		pw3Lfo1 = map(lfo[0], 0, 255, 0, lfoDepth[0] << 1);
 	} else {
 		pw3Lfo1 = 0;
 	}
-	if (lfoAss[1][6]) {
+	if (preset_data.lfo_map[1][6]) {
 		pw3Lfo2 = map(lfo[1], 0, 255, 0, lfoDepth[1] << 1);
 	} else {
 		pw3Lfo2 = 0;
 	}
-	if (lfoAss[2][6]) {
+	if (preset_data.lfo_map[2][6]) {
 		pw3Lfo3 = map(lfo[2], 0, 255, 0, lfoDepth[2] << 1);
 	} else {
 		pw3Lfo3 = 0;
 	}
 
-	if (lfoAss[0][2]) {
+	if (preset_data.lfo_map[0][2]) {
 		lfoFine1 = map(lfo[0], 0, 255, 0, lfoDepth[0]);
 		lfoFine1 /= 1023;
 	} else {
 		lfoFine1 = 0;
 	}
-	if (lfoAss[1][2]) {
+	if (preset_data.lfo_map[1][2]) {
 		lfoFine2 = map(lfo[1], 0, 255, 0, lfoDepth[1]);
 		lfoFine2 /= 1023;
 	} else {
 		lfoFine2 = 0;
 	}
-	if (lfoAss[2][2]) {
+	if (preset_data.lfo_map[2][2]) {
 		lfoFine3 = map(lfo[2], 0, 255, 0, lfoDepth[2]);
 		lfoFine3 /= 1023;
 	} else {
 		lfoFine3 = 0;
 	}
 
-	if (lfoAss[0][5]) {
+	if (preset_data.lfo_map[0][5]) {
 		lfoFine4 = map(lfo[0], 0, 255, 0, lfoDepth[0]);
 		lfoFine4 /= 1023;
 	} else {
 		lfoFine4 = 0;
 	}
-	if (lfoAss[1][5]) {
+	if (preset_data.lfo_map[1][5]) {
 		lfoFine5 = map(lfo[1], 0, 255, 0, lfoDepth[1]);
 		lfoFine5 /= 1023;
 	} else {
 		lfoFine5 = 0;
 	}
-	if (lfoAss[2][5]) {
+	if (preset_data.lfo_map[2][5]) {
 		lfoFine6 = map(lfo[2], 0, 255, 0, lfoDepth[2]);
 		lfoFine6 /= 1023;
 	} else {
 		lfoFine6 = 0;
 	}
 
-	if (lfoAss[0][8]) {
+	if (preset_data.lfo_map[0][8]) {
 		lfoFine7 = map(lfo[0], 0, 255, 0, lfoDepth[0]);
 		lfoFine7 /= 1023;
 	} else {
 		lfoFine7 = 0;
 	}
-	if (lfoAss[1][8]) {
+	if (preset_data.lfo_map[1][8]) {
 		lfoFine8 = map(lfo[1], 0, 255, 0, lfoDepth[1]);
 		lfoFine8 /= 1023;
 	} else {
 		lfoFine8 = 0;
 	}
-	if (lfoAss[2][8]) {
+	if (preset_data.lfo_map[2][8]) {
 		lfoFine9 = map(lfo[2], 0, 255, 0, lfoDepth[2]);
 		lfoFine9 /= 1023;
 	} else {
 		lfoFine9 = 0;
 	}
 
-	if (lfoAss[0][16]) {
+	if (preset_data.lfo_map[0][16]) {
 		resLfo1 = map(lfo[0], 0, 255, 0, lfoDepth[0]) >> 6;
 	} else {
 		resLfo1 = 0;
 	}
-	if (lfoAss[1][16]) {
+	if (preset_data.lfo_map[1][16]) {
 		resLfo2 = map(lfo[1], 0, 255, 0, lfoDepth[1]) >> 6;
 	} else {
 		resLfo2 = 0;
 	}
-	if (lfoAss[2][16]) {
+	if (preset_data.lfo_map[2][16]) {
 		resLfo3 = map(lfo[2], 0, 255, 0, lfoDepth[2]) >> 6;
 	} else {
 		resLfo3 = 0;
 	}
 
-	if (lfoAss[1][9]) {
+	if (preset_data.lfo_map[1][9]) {
 		lfoSpeedLfo1 = map(lfo[1], 0, 255, 0, lfoDepth[1]);
 	} else {
 		lfoSpeedLfo1 = 0;
 	}
-	if (lfoAss[2][9]) {
+	if (preset_data.lfo_map[2][9]) {
 		lfoSpeedLfo2 = map(lfo[2], 0, 255, 0, lfoDepth[2]);
 	} else {
 		lfoSpeedLfo2 = 0;
 	}
 
-	if (lfoAss[0][11]) {
+	if (preset_data.lfo_map[0][11]) {
 		lfoSpeedLfo3 = map(lfo[0], 0, 255, 0, lfoDepth[0]);
 	} else {
 		lfoSpeedLfo3 = 0;
 	}
-	if (lfoAss[2][11]) {
+	if (preset_data.lfo_map[2][11]) {
 		lfoSpeedLfo4 = map(lfo[2], 0, 255, 0, lfoDepth[2]);
 	} else {
 		lfoSpeedLfo4 = 0;
 	}
 
-	if (lfoAss[0][13]) {
+	if (preset_data.lfo_map[0][13]) {
 		lfoSpeedLfo5 = map(lfo[0], 0, 255, 0, lfoDepth[0]);
 	} else {
 		lfoSpeedLfo5 = 0;
 	}
-	if (lfoAss[1][13]) {
+	if (preset_data.lfo_map[1][13]) {
 		lfoSpeedLfo6 = map(lfo[1], 0, 255, 0, lfoDepth[1]);
 	} else {
 		lfoSpeedLfo6 = 0;
 	}
 
-	if (lfoAss[0][18]) {
+	if (preset_data.lfo_map[0][18]) {
 		arpSpeedLfo1 = map(lfo[0], 0, 255, 0, lfoDepth[0]) << 2;
 	} else {
 		arpSpeedLfo1 = 0;
 	}
-	if (lfoAss[1][18]) {
+	if (preset_data.lfo_map[1][18]) {
 		arpSpeedLfo2 = map(lfo[1], 0, 255, 0, lfoDepth[1]) << 2;
 	} else {
 		arpSpeedLfo2 = 0;
 	}
-	if (lfoAss[2][18]) {
+	if (preset_data.lfo_map[2][18]) {
 		arpSpeedLfo3 = map(lfo[2], 0, 255, 0, lfoDepth[2]) << 2;
 	} else {
 		arpSpeedLfo3 = 0;
 	}
 
-	if (lfoAss[0][19]) {
+	if (preset_data.lfo_map[0][19]) {
 		arpRangeLfo1 = map(lfo[0], 0, 255, 0, lfoDepth[0]) >> 7;
 	} else {
 		arpRangeLfo1 = 0;
 	}
-	if (lfoAss[1][19]) {
+	if (preset_data.lfo_map[1][19]) {
 		arpRangeLfo2 = map(lfo[1], 0, 255, 0, lfoDepth[1]) >> 7;
 	} else {
 		arpRangeLfo2 = 0;
 	}
-	if (lfoAss[2][19]) {
+	if (preset_data.lfo_map[2][19]) {
 		arpRangeLfo3 = map(lfo[2], 0, 255, 0, lfoDepth[2]) >> 7;
 	} else {
 		arpRangeLfo3 = 0;
 	}
 
-	if (lfoAss[0][17]) {
+	if (preset_data.lfo_map[0][17]) {
 		arpStepLfo1 = map(lfo[0], 0, 255, 0, lfoDepth[0] >> 2);
 	} else {
 		arpStepLfo1 = 0;
 	}
-	if (lfoAss[1][17]) {
+	if (preset_data.lfo_map[1][17]) {
 		arpStepLfo2 = map(lfo[1], 0, 255, 0, lfoDepth[1] >> 2);
 	} else {
 		arpStepLfo2 = 0;
 	}
-	if (lfoAss[2][17]) {
+	if (preset_data.lfo_map[2][17]) {
 		arpStepLfo3 = map(lfo[2], 0, 255, 0, lfoDepth[2] >> 2);
 	} else {
 		arpStepLfo3 = 0;
@@ -499,12 +499,12 @@ void lfoTick() {
 
 void lastMovedPot(byte number) {
 	lastPot = number;
-	preset_data.set_leds(lastPot, selectedLfo);
+	preset_data.set_leds(lastPot, selectedLfo, filterModeHeld);
 }
 
 void chain() {
 	if (lastPot != 20) {
-		lfoAss[selectedLfo][lastPot] = !lfoAss[selectedLfo][lastPot];
+		preset_data.lfo_map[selectedLfo][lastPot] = !preset_data.lfo_map[selectedLfo][lastPot];
 
 		lastMovedPot(lastPot);
 	}
@@ -513,7 +513,7 @@ void chain() {
 void clearLfo() {
 
 	for (int i = 0; i < 20; i++) {
-		lfoAss[selectedLfo][i] = 0;
+		preset_data.lfo_map[selectedLfo][i] = 0;
 	}
 	digit(0, 10);
 	digit(1, 11);

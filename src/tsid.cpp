@@ -47,8 +47,6 @@ void setup() {
 
 	Serial.begin(31250);
 
-	filterEnabled[0] = filterEnabled[1] = filterEnabled[2] = 1;
-
 	arpSpeedBase = 100;
 
 	// let sid chip wake up

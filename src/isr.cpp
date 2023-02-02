@@ -192,7 +192,7 @@ void isr() {
 		if (arpModeCounter > 25000) {
 			fatChanged = true;
 			arpModeCounter = 0;
-			fatMode = static_cast<FatMode>(((int)fatMode + 1) % 4);
+			preset_data.fat_mode = static_cast<FatMode>(((int)preset_data.fat_mode + 1) % 4);
 			fatShow = true;
 		}
 	}

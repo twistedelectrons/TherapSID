@@ -1,42 +1,6 @@
 #include <Arduino.h>
 #include "preset.h"
 
-// FIXME integrate into program
-enum class FilterMode {
-	LOWPASS,
-	BANDPASS,
-	HIGHPASS,
-	NOTCH,
-	OFF
-};
-extern FilterMode filterMode;
-
-inline FilterMode uint2FilterMode(uint8_t i) { // FIXME
-	if (i < 5) {
-		return static_cast<FilterMode>(i);
-	}
-	else {
-		return FilterMode::OFF;
-	}
-}
-
-enum class FatMode {
-	UNISONO,
-	OCTAVE_UP,
-	DETUNE_SLIGHT,
-	DETUNE_MUCH
-};
-extern FatMode fatMode;
-
-inline FatMode uint2FatMode(uint8_t i) { // FIXME
-	if (i < 4) {
-		return static_cast<FatMode>(i);
-	}
-	else {
-		return FatMode::UNISONO;
-	}
-}
-
 extern Preset preset_data;
 
 extern bool sendLfo;
@@ -65,7 +29,6 @@ extern bool presetUp, presetDown;
 extern byte preset;
 extern int presetLast;
 extern byte lastPot;
-extern bool lfoAss[3][20];
 extern bool retrig[3];
 extern bool fatChanged;
 extern bool looping[3];
@@ -76,7 +39,6 @@ extern byte lfoShape[3];
 
 extern byte lfoClockSpeedPending[3];
 extern bool filterModeHeld;
-extern bool filterEnabled[3];
 extern int lfoTune1, lfoTune2, lfoTune3, lfoTune4, lfoTune5, lfoTune6, lfoTune7, lfoTune8,
     lfoTune9;
 extern int destiPitch1, destiPitch2, destiPitch3;

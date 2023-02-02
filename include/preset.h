@@ -21,24 +21,22 @@ struct PresetVoice {
 	int pulsewidth_base;
 	float fine_base;
 
-	byte reg_control; // register 4
-
-	uint8_t control = 0;
+	byte reg_control = 0; // register 4
 	bool filter_enabled = true;
 
 	void toggle_shape(Shape shape) {
-		control ^= shape;
+		reg_control ^= shape;
 
 		// Make sure that noise is not enabled together with any other waveform.
-		auto enabled = control & shape;
+		auto enabled = reg_control & shape;
 		if (enabled) {
 			if (shape == NOISE) {
 				// If the noise waveform has been turned on, disable the other three.
-				control &= ~(TRI | SAW | PULSE);
+				reg_control &= ~(TRI | SAW | PULSE);
 			}
 			else {
 				// If one of the other three waveforms was enabled, make sure to disable noise.
-				control &= ~NOISE;
+				reg_control &= ~NOISE;
 			}
 		}
 	}
@@ -49,6 +47,40 @@ struct PresetLfo {
 	int speed;
 };
 
+enum class FilterMode {
+	LOWPASS,
+	BANDPASS,
+	HIGHPASS,
+	NOTCH,
+	OFF
+};
+
+inline FilterMode uint2FilterMode(uint8_t i) { // FIXME
+	if (i < 5) {
+		return static_cast<FilterMode>(i);
+	}
+	else {
+		return FilterMode::OFF;
+	}
+}
+
+enum class FatMode {
+	UNISONO,
+	OCTAVE_UP,
+	DETUNE_SLIGHT,
+	DETUNE_MUCH
+};
+
+inline FatMode uint2FatMode(uint8_t i) { // FIXME
+	if (i < 4) {
+		return static_cast<FatMode>(i);
+	}
+	else {
+		return FatMode::UNISONO;
+	}
+}
+
+
 // FIXME move to preset.h
 struct Preset {
 	PresetVoice voice[3];
@@ -57,9 +89,13 @@ struct Preset {
 	byte resonance_base;
 
 	PresetLfo lfo[3];
+	bool lfo_map[3][20]; // FIXME put this into PresetLfo
 
 	int cutoff;
 
-	void set_leds(int lastPot, int selectedLfo);
+	FilterMode filter_mode = FilterMode::LOWPASS;
+	FatMode fat_mode = FatMode::UNISONO;
+
+	void set_leds(int lastPot, int selectedLfo, bool show_filter_assign);
 };
 

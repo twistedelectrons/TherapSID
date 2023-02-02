@@ -37,7 +37,7 @@ void loop() {
 
 	if (fatShow) {
 		digit(0, 12);
-		digit(1, (int)fatMode + 1);
+		digit(1, (int)preset_data.fat_mode + 1);
 		fatShow = false;
 		unShowFilterAssigns();
 	}
@@ -61,9 +61,8 @@ void loop() {
 			mydisplay.setLed(0, 7, 7, 0);
 		}
 	}
-	// preset_data.paraphonic mode
 
-	if ((gate) && (!preset_data.paraphonic)) {
+	if (gate && !preset_data.paraphonic) {
 		mux(15);
 		key = map(analogRead(A2), 0, 1023, 12, 72);
 	}

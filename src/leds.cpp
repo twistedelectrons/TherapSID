@@ -13,17 +13,17 @@ void leds() { ledSet(32, 1); }
 void showFilterAssigns() {
 	for (int voice = 0; voice < 3; voice++) {
 		for (int i=0; i<4; i++) {
-			ledSet(1+4*voice+i, filterEnabled[voice]);
+			ledSet(1+4*voice+i, preset_data.voice[voice].filter_enabled);
 		}
 	}
 }
 
 void unShowFilterAssigns() {
 	for (int voice = 0; voice < 3; voice++) {
-		ledSet(4*voice + 1, preset_data.voice[voice].control & PresetVoice::PULSE);
-		ledSet(4*voice + 2, preset_data.voice[voice].control & PresetVoice::TRI);
-		ledSet(4*voice + 3, preset_data.voice[voice].control & PresetVoice::SAW);
-		ledSet(4*voice + 4, preset_data.voice[voice].control & PresetVoice::NOISE);
+		ledSet(4*voice + 1, preset_data.voice[voice].reg_control & PresetVoice::PULSE);
+		ledSet(4*voice + 2, preset_data.voice[voice].reg_control & PresetVoice::TRI);
+		ledSet(4*voice + 3, preset_data.voice[voice].reg_control & PresetVoice::SAW);
+		ledSet(4*voice + 4, preset_data.voice[voice].reg_control & PresetVoice::NOISE);
 	}
 }
 
