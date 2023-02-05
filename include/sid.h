@@ -6,7 +6,6 @@ void sidReset();
 void init1MhzClock();
 void sidSend(byte address, byte data);
 void sidPitch(byte voice, int pitch);
-void sidShape(byte voice, byte shape, bool value);
 void updateFilter();
 void calculatePitch();
 
@@ -19,6 +18,10 @@ class Sid {
 
 		void set_freq(int voice, uint16_t value);
 		void set_gate(int voice, bool on);
+		/// attack,decay in [0; 15]
+		void set_attack_decay(int voice, uint8_t attack, uint8_t decay);
+		/// sustain,release in [0; 15]
+		void set_sustain_release(int voice, uint8_t sustain, uint8_t release);
 
 		enum Shape {
 			NOISE = 1<<7,
@@ -31,6 +34,17 @@ class Sid {
 		/// Note that enabling NOISE together with any other waveform can clear the
 		/// noise shift register inside the chip.
 		void set_shape(int voice, byte value);
+
+		/// 0..4095
+		void set_pulsewidth(int voice, uint16_t width);
+
+		/// 0..4095
+		void set_filter_cutoff(uint16_t cutoff);
+
+		void set_resonance_and_filter_enable(uint8_t resonance /* 0..15*/, bool en1, bool en2, bool en3, bool en_ext);
+
+		/// Sets gate, shape, sync and ring.
+		void set_reg_control(int voice, byte value);
 
 		byte shape(int voice) const;
 

@@ -28,6 +28,27 @@ MEMORY MAPPING
 
 */
 
+
+uint16_t Preset::fatten_pitch(uint16_t pitch) const {
+	switch (fat_mode) {
+		case FatMode::UNISONO:
+			return pitch;
+		case FatMode::OCTAVE_UP:
+			if (pitch < 0xffff / 2) {
+				return pitch * 2;
+			}
+			else {
+				return pitch;
+			}
+		case FatMode::DETUNE_SLIGHT:
+			return pitch - 15;
+		case FatMode::DETUNE_MUCH:
+			return pitch - 50;
+		default:
+			return pitch;
+	}
+}
+
 void Preset::set_leds(int lastPot, int selectedLfo, bool show_filter_assign) {
 	// assert(lastPot < TODO); // FIXME
 	assert(selectedLfo < 3);

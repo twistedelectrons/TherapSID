@@ -156,7 +156,8 @@ static void HandleControlChange(byte channel, byte data1, byte data2) {
 			movedPot(mapping[data1], data2 << 3, true);
 		} else if (37 <= data1 && data1 <= 48) {
 			int offset = data1 - 37;
-			sidShape(offset / 4, offset % 4 + 1, data2); // FIXME remove
+			static const PresetVoice::Shape mapping[] = { PresetVoice::PULSE, PresetVoice::TRI, PresetVoice::SAW, PresetVoice::NOISE };
+			preset_data.voice[offset/4].set_shape(mapping[offset % 4], data2);
 			// FIXME update leds here
 		} else {
 			switch (data1) {

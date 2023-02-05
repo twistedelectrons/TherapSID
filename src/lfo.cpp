@@ -8,15 +8,13 @@ static int arpRangeLfo1, arpRangeLfo3, arpRangeLfo2;
 static int arpSpeedLfo1, arpSpeedLfo2, arpSpeedLfo3;
 static int arpStep;
 static int arpStepLast, arpStepLfo1, arpStepLfo2, arpStepLfo3;
-static int finalCut;
 static int lfoCut1, lfoCut2, lfoCut3;
 static int lfoSpeedLfo1, lfoSpeedLfo2, lfoSpeedLfo3, lfoSpeedLfo4, lfoSpeedLfo5, lfoSpeedLfo6, lfoDepthLfo1,
     lfoDepthLfo2, lfoDepthLfo3, lfoDepthLfo4, lfoDepthLfo5, lfoDepthLfo6;
-static int pw1, pw2, pw3;
 static int pw1Lfo1, pw1Lfo2, pw1Lfo3, pw2Lfo1, pw2Lfo2, pw2Lfo3, pw3Lfo1, pw3Lfo2, pw3Lfo3;
-static byte resLfo1, resLfo2, resLfo3, res;
+static byte resLfo1, resLfo2, resLfo3;
 static byte selectedLfoLast;
-static int lfoDepth[3];
+static int lfoDepth[3] = {0,0,0};
 static byte lfoLast[3];
 
 static const bool limitPw = true;
@@ -30,7 +28,9 @@ void setLfo(byte number) {
 	}
 }
 
-void lfoTick() {
+/// Sets a lot of global variables and returns sid's parameters after lfo'ing them.
+ParamsAfterLfo lfoTick() {
+	ParamsAfterLfo result;
 
 	for (int i = 0; i < 3; i++) {
 		if (!cvActive[i]) {
@@ -125,7 +125,7 @@ void lfoTick() {
 	}
 
 	if (lfoSpeed[0] < 1)
-		lfoSpeed[0] = 0;
+		lfoSpeed[0] = 0; // FIXME why only [0]?
 
 	if (preset_data.lfo_map[0][1]) {
 		lfoTune1 = map(lfo[0], 0, 255, -lfoDepth[0] >> 5, lfoDepth[0] >> 5);
@@ -425,26 +425,18 @@ void lfoTick() {
 
 	lfoSpeed[2] = preset_data.lfo[2].speed + lfoSpeedLfo5 + lfoSpeedLfo6;
 
-	res = preset_data.resonance_base + resLfo1 + resLfo2 + resLfo3;
-	if (res > 15)
-		res = 15;
+	result.resonance = preset_data.resonance_base + resLfo1 + resLfo2 + resLfo3;
+	if (result.resonance > 15)
+		result.resonance = 15;
 
-	// bitWrite(sid[23], 4, bitRead(res, 0)); // FIXME restore resonance LFO
-	// bitWrite(sid[23], 5, bitRead(res, 1));
-	// bitWrite(sid[23], 6, bitRead(res, 2));
-	// bitWrite(sid[23], 7, bitRead(res, 3));
-
-	finalCut = preset_data.cutoff + lfoCut1 + lfoCut2 + lfoCut3;
-	if (finalCut < 0) {
-		finalCut = 0;
-	} else if (finalCut > 1023) {
-		finalCut = 1023;
+	result.cutoff = preset_data.cutoff + lfoCut1 + lfoCut2 + lfoCut3;
+	if (result.cutoff < 0) {
+		result.cutoff = 0;
+	} else if (result.cutoff > 1023) {
+		result.cutoff = 1023;
 	}
 
-	// sid[21] = finalCut; // FIXME restore cutoff LFO
-	// sid[22] = finalCut >> 3;
-
-	pw1 = preset_data.voice[0].pulsewidth_base + pw1Lfo1 + pw1Lfo2 + pw1Lfo3;
+	int pw1 = preset_data.voice[0].pulsewidth_base + pw1Lfo1 + pw1Lfo2 + pw1Lfo3;
 	if (pw1 < 0) {
 		pw1 = 0;
 	} else if (pw1 > 2046) {
@@ -455,10 +447,9 @@ void lfoTick() {
 		pw1 = constrain(pw1, pwMin, pwMax);
 	}
 
-	// sid[2] = lowByte(pw1); // FIXME restore pulse width LFO
-	// sid[3] = highByte(pw1);
+	result.pulsewidth[0] = pw1;
 
-	pw2 = preset_data.voice[1].pulsewidth_base + pw2Lfo1 + pw2Lfo2 + pw2Lfo3;
+	int pw2 = preset_data.voice[1].pulsewidth_base + pw2Lfo1 + pw2Lfo2 + pw2Lfo3;
 	if (pw2 < 0) {
 		pw2 = 0;
 	} else if (pw2 > 2046) {
@@ -469,10 +460,9 @@ void lfoTick() {
 		pw2 = constrain(pw2, pwMin, pwMax);
 	}
 
-	// sid[9] = lowByte(pw2); // FIXME
-	// sid[10] = highByte(pw2);
+	result.pulsewidth[1] = pw2;
 
-	pw3 = preset_data.voice[2].pulsewidth_base + pw3Lfo1 + pw3Lfo2 + pw3Lfo3;
+	int pw3 = preset_data.voice[2].pulsewidth_base + pw3Lfo1 + pw3Lfo2 + pw3Lfo3;
 	if (pw3 < 0) {
 		pw3 = 0;
 	} else if (pw3 > 2046) {
@@ -483,9 +473,8 @@ void lfoTick() {
 		pw3 = constrain(pw3, pwMin, pwMax);
 	}
 
-	// sid[16] = lowByte(pw3); // FIXME
-	// sid[17] = highByte(pw3);
-
+	result.pulsewidth[2] = pw3;
+	
 	byte temp;
 	for (int i = 0; i < 3; i++) {
 		temp = map(lfo[i], 0, 255, 0, lfoDepth[i]) >> 3;
@@ -495,6 +484,8 @@ void lfoTick() {
 				sendControlChange(56 + i, temp);
 		}
 	}
+
+	return result;
 }
 
 void lastMovedPot(byte number) {

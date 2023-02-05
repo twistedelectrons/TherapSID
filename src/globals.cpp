@@ -49,22 +49,6 @@ int pitch1, pitch2, pitch3;
 float lfoFine1, lfoFine2, lfoFine3, lfoFine4, lfoFine5, lfoFine6, lfoFine7, lfoFine8,
     lfoFine9;
 
-/* FIXME do this in main loop:
-					sid[5] = 255 & preset_data.voice[0].attack << 4;
-					sid[5] = sid[5] | preset_data.voice[0].decay;
-					sid[12] = 255 & preset_data.voice[1].attack << 4;
-					sid[12] = sid[12] | preset_data.voice[1].decay;
-					sid[19] = 255 & preset_data.voice[2].attack << 4;
-					sid[19] = sid[19] | preset_data.voice[2].decay;
-					
-					sid[6] = 255 & preset_data.voice[0].sustain << 4;
-					sid[6] = sid[6] | preset_data.voice[0].release;
-					sid[13] = 255 & preset_data.voice[1].sustain << 4;
-					sid[13] = sid[13] | preset_data.voice[1].release;
-					sid[20] = 255 & preset_data.voice[2].sustain << 4;
-					sid[20] = sid[20] | preset_data.voice[2].release;
-*/
-
 
 
 Preset preset_data;

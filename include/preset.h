@@ -40,6 +40,12 @@ struct PresetVoice {
 			}
 		}
 	}
+
+	void set_shape(Shape shape, bool enabled) {
+		bool is_enabled = !!(reg_control & shape);
+		if (enabled != is_enabled)
+			toggle_shape(shape);
+	}
 };
 
 struct PresetLfo {
@@ -97,5 +103,6 @@ struct Preset {
 	FatMode fat_mode = FatMode::UNISONO;
 
 	void set_leds(int lastPot, int selectedLfo, bool show_filter_assign);
+	uint16_t fatten_pitch(uint16_t pitch) const;
 };
 

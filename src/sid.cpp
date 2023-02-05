@@ -213,56 +213,6 @@ void Sid::send(size_t index, int data) {
 Sid sid_chips[2] = {Sid(_BV(6)), Sid(_BV(2))};
 
 
-static uint16_t fat_pitch(uint16_t pitch, FatMode fat_mode) {
-	switch (fat_mode) {
-		case FatMode::UNISONO:
-			return pitch;
-		case FatMode::OCTAVE_UP:
-			if (pitch < 0xffff / 2) {
-				return pitch * 2;
-			}
-			else {
-				return pitch;
-			}
-		case FatMode::DETUNE_SLIGHT:
-			return pitch - 15;
-		case FatMode::DETUNE_MUCH:
-			return pitch - 50;
-		default:
-			return pitch;
-	}
-}
-
-void sidPitch(byte voice, int pitch) {
-	sid_chips[0].set_freq(voice, pitch);
-	sid_chips[1].set_freq(voice, fat_pitch(pitch, preset_data.fat_mode));
-}
-
-// FIXME into preset
-void sidShape(byte voice, byte shape, bool value) {
-	if (shape <= 1 || shape > 4) return;
-	const byte mapping[] = { 0, Sid::PULSE, Sid::TRI, Sid::SAW, Sid::NOISE };
-	byte shape_mask = mapping[shape];
-
-	for (auto& chip : sid_chips) {
-		auto new_value = (chip.shape(voice) & (~shape_mask)) | (value? shape_mask : 0);
-
-		// Make sure that noise is not enabled together with any other waveform.
-		if (value) {
-			if (shape_mask == Sid::NOISE) {
-				// If the noise waveform has been turned on, disable the other three.
-				new_value &= ~(Sid::TRI | Sid::SAW | Sid::PULSE);
-			}
-			else {
-				// If one of the other three waveforms was enabled, make sure to disable noise.
-				new_value &= ~Sid::NOISE;
-			}
-		}
-
-		chip.set_shape(voice, new_value);
-	}
-}
-
 // FIXME into preset
 void updateFilter() {
 	// assert((unsigned) preset_data.filter_mode < 5); // FIXME
@@ -321,7 +271,6 @@ static void updateDestiPitches(int note1, int note2, int note3) {
 }
 
 void calculatePitch() {
-
 	if ((!note_val[0]) && (!note_val[1]) && (!note_val[2])) {
 		// no individual channels
 		if (!preset_data.paraphonic) {
@@ -332,9 +281,4 @@ void calculatePitch() {
 	} else {
 		updateDestiPitches(note_val[0], note_val[1], note_val[2]);
 	}
-	
-	// FIXME can we move this out to loop.cpp?
-	sidPitch(0, pitch1);
-	sidPitch(1, pitch2);
-	sidPitch(2, pitch3);
 }

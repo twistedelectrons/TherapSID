@@ -14,8 +14,44 @@
 static bool loadedAfterStartup; // we load the preset after 2sec (when SID is ready)
 static bool saveModeFlash;
 
-void loop() {
+void setSidRegisters(Preset const& preset, ParamsAfterLfo const& params_after_lfo) {
+	int pitches[] = { pitch1, pitch2, pitch3 };
 
+	for (int i=0; i<2; i++) {
+		for (int v=0; v<3; v++) {
+			sid_chips[i].set_attack_decay(v, preset.voice[v].attack, preset.voice[v].decay);
+			sid_chips[i].set_sustain_release(v, preset.voice[v].sustain, preset.voice[v].release);
+			sid_chips[i].set_pulsewidth(v, params_after_lfo.pulsewidth[v]);
+
+			sid_chips[i].set_freq(v, i==0 ? pitches[v] : preset.fatten_pitch(pitches[v]));
+
+			sid_chips[i].set_reg_control(v, preset.voice[v].reg_control); // FIXME gate
+		}
+
+		sid_chips[i].set_resonance_and_filter_enable(params_after_lfo.resonance, preset.voice[0].filter_enabled, preset.voice[1].filter_enabled, preset.voice[2].filter_enabled, false /* TODO external filter? */);
+		sid_chips[i].set_filter_cutoff(params_after_lfo.cutoff);
+
+		switch (preset.filter_mode) {
+			case FilterMode::OFF:
+				sid_chips[i].set_filter_mode(0);
+				break;
+			case FilterMode::LOWPASS:
+				sid_chips[i].set_filter_mode(Sid::LOWPASS);
+				break;
+			case FilterMode::HIGHPASS:
+				sid_chips[i].set_filter_mode(Sid::HIGHPASS);
+				break;
+			case FilterMode::BANDPASS:
+				sid_chips[i].set_filter_mode(Sid::BANDPASS);
+				break;
+			case FilterMode::NOTCH:
+				sid_chips[i].set_filter_mode(Sid::LOWPASS | Sid::HIGHPASS);
+				break;
+		}
+	}
+}
+
+void loop() {
 	// load the first preset after all the butts and pots have been scanned
 	if (!loadedAfterStartup) {
 		if (millis() > 1400) {
@@ -106,10 +142,11 @@ void loop() {
 		frozen--;
 	}
 
-	readMux(); // sidUpdate();
+	readMux();
 
-	lfoTick(); // sidUpdate();
+	ParamsAfterLfo params_after_lfo = lfoTick();
 	calculatePitch();
+	setSidRegisters(preset_data, params_after_lfo);
 	// FIXME FIXME FIXME update sid values here!
 
 	if (showPresetNumber) {
