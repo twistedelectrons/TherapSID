@@ -75,9 +75,33 @@ void Preset::set_leds(int lastPot, int selectedLfo, bool show_filter_assign) {
 	ledSet(20, bitRead(voice[2].reg_control, 1));
 	ledSet(21, bitRead(voice[2].reg_control, 2));
 
-	ledSet(27, sid_chips[0].filter_mode() & Sid::LOWPASS);
-	ledSet(28, sid_chips[0].filter_mode() & Sid::BANDPASS);
-	ledSet(29, sid_chips[0].filter_mode() & Sid::HIGHPASS);
+	switch(filter_mode) {
+		case FilterMode::LOWPASS:
+			ledSet(27, true);
+			ledSet(28, false);
+			ledSet(29, false);
+			break;
+		case FilterMode::BANDPASS:
+			ledSet(27, false);
+			ledSet(28, true);
+			ledSet(29, false);
+			break;
+		case FilterMode::HIGHPASS:
+			ledSet(27, false);
+			ledSet(28, false);
+			ledSet(29, true);
+			break;
+		case FilterMode::NOTCH:
+			ledSet(27, true);
+			ledSet(28, false);
+			ledSet(29, true);
+			break;
+		case FilterMode::OFF:
+			ledSet(27, false);
+			ledSet(28, false);
+			ledSet(29, false);
+			break;
+	}
 
 
 	if (lastPot != 20) {

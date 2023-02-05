@@ -7,7 +7,6 @@
 static int presetScrollTimer;
 static int envCounter;
 // static bool gateLast; // FIXME
-static byte glideCounter1, glideCounter2, glideCounter3;
 static int lfoCounter[3];
 static int env2;
 
@@ -261,69 +260,16 @@ void isr() {
 	} // delete LFO stuff
 
 	// glides
-	if (((!preset_data.paraphonic) && (preset_data.voice[0].glide) && (held > 1)) || ((preset_data.voice[0].glide) && (preset_data.paraphonic))) {
-		glideCounter1++;
-		if (glideCounter1 >= preset_data.voice[0].glide) {
-			glideCounter1 = 0;
-			if (pitch1 < destiPitch1) {
-				pitch1 += ((destiPitch1 - pitch1) / preset_data.voice[0].glide) + 1;
-				if (pitch1 > destiPitch1) {
-					pitch1 = destiPitch1;
-				}
-			} else if (pitch1 > destiPitch1) {
-				pitch1 -= ((pitch1 - destiPitch1) / preset_data.voice[0].glide) + 1;
-				if (pitch1 < destiPitch1) {
-					pitch1 = destiPitch1;
-				}
-			}
-		}
-	} else {
-		pitch1 = destiPitch1;
+
+	// in monophonic mode, we glide only while the old note is still held down.
+	bool skip_glide = !preset_data.paraphonic && held <= 1;
+	for (int i=0; i<3; i++) {
+		voice_state[i].glide_tick(skip_glide ? 0 : preset_data.voice[i].glide);
 	}
 
-	if (((!preset_data.paraphonic) && (preset_data.voice[1].glide) && (held > 1)) || ((preset_data.voice[1].glide) && (preset_data.paraphonic))) {
-		glideCounter2++;
-		if (glideCounter2 >= preset_data.voice[1].glide) {
-			glideCounter2 = 0;
-			if (pitch2 < destiPitch2) {
-				pitch2 += ((destiPitch2 - pitch2) / preset_data.voice[1].glide) + 1;
-				if (pitch2 > destiPitch2) {
-					pitch2 = destiPitch2;
-				}
-			} else if (pitch2 > destiPitch2) {
-				pitch2 -= ((pitch2 - destiPitch2) / preset_data.voice[1].glide) + 1;
-				if (pitch2 < destiPitch2) {
-					pitch2 = destiPitch2;
-				}
-			}
-		}
-	} else {
-		pitch2 = destiPitch2;
-	}
-
-	if (((!preset_data.paraphonic) && (preset_data.voice[2].glide) && (held > 1)) || ((preset_data.voice[2].glide) && (preset_data.paraphonic))) {
-		glideCounter3++;
-		if (glideCounter3 >= preset_data.voice[2].glide) {
-			glideCounter3 = 0;
-			if (pitch3 < destiPitch3) {
-				pitch3 += ((destiPitch3 - pitch3) / preset_data.voice[2].glide) + 1;
-				if (pitch3 > destiPitch3) {
-					pitch3 = destiPitch3;
-				}
-			} else if (pitch3 > destiPitch3) {
-				pitch3 -= ((pitch3 - destiPitch3) / preset_data.voice[2].glide) + 1;
-				if (pitch3 < destiPitch3) {
-					pitch3 = destiPitch3;
-				}
-			}
-		}
-	} else {
-		pitch3 = destiPitch3;
-	}
 
 	// LFO
 	for (int i = 0; i < 3; i++) {
-
 		if (!sync) {
 			lfoCounter[i] += lfoSpeed[i];
 			if (lfoCounter[i] >= 4000) {
@@ -331,7 +277,6 @@ void isr() {
 				lfoStep[i]++;
 
 				if (lfoStep[i] > 254) {
-
 					if (looping[i]) {
 						lfoStep[i] = 0;
 					} else {

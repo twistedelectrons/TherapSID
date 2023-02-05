@@ -270,6 +270,7 @@ static void updateDestiPitches(int note1, int note2, int note3) {
 	}
 }
 
+// FIXME move to machine_state.cpp
 void calculatePitch() {
 	if ((!note_val[0]) && (!note_val[1]) && (!note_val[2])) {
 		// no individual channels

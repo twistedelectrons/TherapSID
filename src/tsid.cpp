@@ -93,8 +93,6 @@ void setup() {
 	pinMode(A7, INPUT);
 	digitalWrite(A7, HIGH); // gate
 
-	destiPitch1 = destiPitch2 = destiPitch3 = 1;
-
 	// turns on display
 	mydisplay.shutdown(0, false);
 	mydisplay.setIntensity(0, 1); // 15 = brightest

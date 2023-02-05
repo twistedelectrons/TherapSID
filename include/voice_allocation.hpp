@@ -43,9 +43,9 @@ template <size_t N> class MonoNoteTracker {
 template <size_t N> class PolyVoiceAllocator {
 	public:
 		struct VoiceSlot {
-				uint8_t note;
-				uint8_t velocity;
-				bool playing;
+			uint8_t note;
+			uint8_t velocity;
+			bool playing;
 		};
 
 		void set_max_voices(size_t value) {

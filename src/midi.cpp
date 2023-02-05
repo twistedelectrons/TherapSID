@@ -77,7 +77,7 @@ static void HandleNoteOn(byte channel, byte note, byte velocity) {
 					}
 				}
 
-				if (!arpMode) {
+				if (!arpMode) { // TODO this should probably use active_note()
 					key = note;
 				}
 

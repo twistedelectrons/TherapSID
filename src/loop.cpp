@@ -15,15 +15,14 @@ static bool loadedAfterStartup; // we load the preset after 2sec (when SID is re
 static bool saveModeFlash;
 
 void setSidRegisters(Preset const& preset, ParamsAfterLfo const& params_after_lfo) {
-	int pitches[] = { pitch1, pitch2, pitch3 };
-
 	for (int i=0; i<2; i++) {
 		for (int v=0; v<3; v++) {
 			sid_chips[i].set_attack_decay(v, preset.voice[v].attack, preset.voice[v].decay);
 			sid_chips[i].set_sustain_release(v, preset.voice[v].sustain, preset.voice[v].release);
 			sid_chips[i].set_pulsewidth(v, params_after_lfo.pulsewidth[v]);
 
-			sid_chips[i].set_freq(v, i==0 ? pitches[v] : preset.fatten_pitch(pitches[v]));
+			auto pitch = voice_state[v].current_pitch();
+			sid_chips[i].set_freq(v, i==0 ? pitch : preset.fatten_pitch(pitch));
 
 			sid_chips[i].set_reg_control(v, preset.voice[v].reg_control); // FIXME gate
 		}

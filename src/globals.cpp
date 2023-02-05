@@ -44,8 +44,6 @@ bool filterModeHeld;
 int lfoTune1, lfoTune2, lfoTune3, lfoTune4, lfoTune5, lfoTune6, lfoTune7, lfoTune8,
     lfoTune9;
 
-int destiPitch1, destiPitch2, destiPitch3;
-int pitch1, pitch2, pitch3;
 float lfoFine1, lfoFine2, lfoFine3, lfoFine4, lfoFine5, lfoFine6, lfoFine7, lfoFine8,
     lfoFine9;
 

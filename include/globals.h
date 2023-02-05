@@ -10,7 +10,7 @@ extern int loadTimer;
 extern const byte version;
 extern const byte versionDecimal;
 extern bool fatShow;
-extern float bend, bend1, bend2, bend3;
+extern float bend, bend1, bend2, bend3; // TODO reactivate bend1-bend3
 extern bool sync;
 extern int arpModeCounter;
 extern bool cvActive[3];
@@ -41,9 +41,7 @@ extern byte lfoClockSpeedPending[3];
 extern bool filterModeHeld;
 extern int lfoTune1, lfoTune2, lfoTune3, lfoTune4, lfoTune5, lfoTune6, lfoTune7, lfoTune8,
     lfoTune9;
-extern int destiPitch1, destiPitch2, destiPitch3;
 extern float lfoFine1, lfoFine2, lfoFine3, lfoFine4, lfoFine5, lfoFine6, lfoFine7, lfoFine8, lfoFine9;
-extern int pitch1, pitch2, pitch3;
 extern byte key;
 extern byte arpMode;
 extern int frozen;
