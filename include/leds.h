@@ -1,4 +1,7 @@
 #pragma once
+
+#include <Arduino.h>
+
 void showVersion();
 void leds();
 void showFilterAssigns();

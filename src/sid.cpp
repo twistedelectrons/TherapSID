@@ -2,19 +2,6 @@
 #include "leds.h"
 #include "sid.h"
 
-static const int32_t sidScale[] = {
-    137,   145,   154,   163,   173,   183,   194,   205,   217,   230,   122,   259,   274,   291,   308,
-    326,   346,   366,   388,   411,   435,   461,   489,   518,   549,   581,   616,   652,   691,   732,
-    776,   822,   871,   923,   976,   1036,  1097,  1163,  1232,  1305,  1383,  1465,  1552,  1644,  1742,
-    1845,  1955,  2071,  2195,  2325,  2463,  2610,  2765,  2930,  3104,  3288,  3484,  3691,  3910,  4143,
-    4389,  4650,  4927,  5220,  5530,  5859,  6207,  6577,  6968,  7382,  7821,  8286,  8779,  9301,  9854,
-    10440, 11060, 11718, 12415, 13153, 13935, 14764, 15642, 16572, 17557, 18601, 19709, 20897, 22121, 23436,
-    24830, 26306, 27871, 29528, 31234, 33144, 35115, 37203, 39415, 41759, 44242, 46873, 49660, 52613, 55741,
-    59056, 62567, 33144, 35115, 37203, 39415, 41759, 44242, 46873, 49660, 52613, 55741, 59056, 62567, 33144,
-    35115, 37203, 39415, 41759, 44242, 46873, 49660, 52613, 55741, 59056, 62567,
-
-};
-
 // COMS WITH SID CHIP
 
 void sidReset() {
@@ -233,53 +220,3 @@ void updateFilter() {
 }
 
 
-static int calc_pitch(int note, float frac) {
-	if (note > 127) {
-		note = 127;
-	} else if (note - 13 < 0) {
-		note = 13;
-	}
-
-	float fine = frac / 2 + 0.5;
-	fine *= .90;
-
-	return sidScale[note - 12 - 1] + (sidScale[note - 12 + 2] - sidScale[note - 12]) * fine;
-}
-
-
-static void updateDestiPitches(int note1, int note2, int note3) {
-	if (note1) {
-		destiPitch1 = calc_pitch(
-			note1 + preset_data.voice[0].tune_base + lfoTune1 + lfoTune2 + lfoTune3,
-			preset_data.voice[0].fine_base + lfoFine2 + lfoFine1 + lfoFine3 + bend/0.9
-		);
-	}
-
-	if (note2) {
-		destiPitch2 = calc_pitch(
-			note2 + preset_data.voice[1].tune_base + lfoTune4 + lfoTune5 + lfoTune6,
-			preset_data.voice[1].fine_base + lfoFine4 + lfoFine5 + lfoFine6 + bend / 0.9
-		);
-	}
-	
-	if (note3) {
-		destiPitch3 = calc_pitch(
-			note3 + preset_data.voice[2].tune_base + lfoTune7 + lfoTune8 + lfoTune9,
-			preset_data.voice[2].fine_base + lfoFine7 + lfoFine8 + lfoFine9 + bend / 0.9
-		);
-	}
-}
-
-// FIXME move to machine_state.cpp
-void calculatePitch() {
-	if ((!note_val[0]) && (!note_val[1]) && (!note_val[2])) {
-		// no individual channels
-		if (!preset_data.paraphonic) {
-			updateDestiPitches(key, key, key);
-		} else {
-			updateDestiPitches(pKey[0], pKey[1], pKey[2]);
-		}
-	} else {
-		updateDestiPitches(note_val[0], note_val[1], note_val[2]);
-	}
-}

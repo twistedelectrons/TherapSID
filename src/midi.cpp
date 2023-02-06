@@ -45,99 +45,41 @@ static void HandleNoteOn(byte channel, byte note, byte velocity) {
 
 	note -= 12;
 
+	if (velocity) {
+		for (int i = 0; i < 3; i++) {
+			if (retrig[i]) {
+				lfoStep[i] = lfoStepF[i] = 0;
+			}
+		}
+	}
+
 	if (channel == masterChannel) {
-		if (!preset_data.paraphonic) { // Monophonic mode
-			if (!velocity) {
-				// note off
-				held--;
-				heldKeys[note] = false;
+		if (velocity)
+			velocityLast = velocity;
 
-				mono_note_tracker.note_off(note);
-				if (mono_note_tracker.has_active_note()) {
-					if (!arpMode)
-						key = mono_note_tracker.active_note()->note;
-				} else {
-					envState = 4;
-					arpRound = 0;
+		switch (voice_state.note_on(note, velocity)) {
+			case VoiceStateEvent::LAST_NOTE_OFF:
+				envState = 4;
+				arpRound = 0;
+				break;
+			case VoiceStateEvent::FIRST_NOTE_ON:
+				envState = 1;
+				env = 0;
+				clockCount = preset_data.arp_rate;
 
-					for (int voice = 0; voice < 3; voice++) {
-						sid_chips[0].set_gate(voice, false);
-						sid_chips[1].set_gate(voice, false);
-					}
-				}
-			} else {
-				// note on
-				velocityLast = velocity;
-				heldKeys[note] = true;
-				held++;
-
-				for (int i = 0; i < 3; i++) {
-					if (retrig[i]) {
-						lfoStep[i] = lfoStepF[i] = 0;
-					}
-				}
-
-				if (!arpMode) { // TODO this should probably use active_note()
-					key = note;
-				}
-
-				auto had_active_note = mono_note_tracker.has_active_note();
-				mono_note_tracker.note_on(note, velocity);
-
-				if (!had_active_note) {
-					envState = 1;
-					env = 0;
-					clockCount = preset_data.arp_rate;
-
-					if (arpMode)
-						arpReset(note);
-
-					for (int voice = 0; voice < 3; voice++) {
-						sid_chips[0].set_gate(voice, true);
-						sid_chips[1].set_gate(voice, true);
-					}
-				}
-			}
-
-		} else {             // paraphonic mode
-			if (!velocity) { // note off
-				auto voice_idx = voice_allocator.note_off(note);
-
-				if (voice_idx.has_value()) {
-					sid_chips[0].set_gate(*voice_idx, false);
-					sid_chips[1].set_gate(*voice_idx, false);
-				}
-			} else { // note on
-				auto voice_idx = voice_allocator.note_on(note, velocity);
-
-				sid_chips[0].set_gate(voice_idx, true);
-				sid_chips[1].set_gate(voice_idx, true);
-				pKey[voice_idx] = note;
-			}
+				if (arpMode)
+					arpReset(note);
+				break;
+			default:
+				break;
 		}
 	} else if (!preset_data.paraphonic && masterChannel == 1 && (channel == 2 || channel == 3 || channel == 4)) {
 		auto voice = channel - 2;
 
-		bool had_active_note = mono_note_trackers[voice].has_active_note();
-		if (!velocity) { // note off
-			mono_note_trackers[voice].note_off(note);
-		} else {
-			mono_note_trackers[voice].note_on(note, velocity);
-		}
-
-		if (mono_note_trackers[voice].has_active_note()) {
-			note_val[voice] = mono_note_trackers[voice].active_note()->note;
-			if (!had_active_note) {
-				sid_chips[0].set_gate(voice, true);
-				sid_chips[1].set_gate(voice, true);
-			}
-		} else {
-			note_val[voice] = 0;
-			sid_chips[0].set_gate(voice, false);
-			sid_chips[1].set_gate(voice, false);
-		}
-
-		calculatePitch();
+		if (velocity)
+			voice_state.note_on_individual(voice, note);
+		else
+			voice_state.note_off_individual(voice, note);
 	}
 	leftDot();
 }
@@ -303,11 +245,9 @@ static void handleBend(byte channel, int value) {
 			bend2 = value_f;
 		else if (channel == 4)
 			bend3 = value_f;
-		calculatePitch();
 	} else {
 		if (channel == masterChannel) {
 			bend = value_f;
-			calculatePitch();
 		}
 	}
 }

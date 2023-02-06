@@ -8,6 +8,8 @@ static int arpNote;
 static bool arpPendulum;
 static byte scrubNote, scrubNoteLast;
 
+static int arp_note; // FIXME FIXME FIXME this is never used. send note_on/off to the voice manager instead!
+
 void showArp() {
 	arpRound = 0;
 	arpCounter = 0;
@@ -57,7 +59,7 @@ void arpSteptrigger(int number) {
 	// count held notes
 	arpCount = 0;
 	for (int i = 0; i < 127; i++) {
-		if (heldKeys[i]) {
+		if (voice_state.held_key(i)) {
 			arpNotes[arpCount] = i;
 			arpCount++;
 		}
@@ -79,9 +81,9 @@ void arpSteptrigger(int number) {
 	scrubNote += arpNotes[arpCountTarget];
 
 	if ((scrubNote) && (scrubNote != scrubNoteLast)) {
-		scrubNoteLast = key = scrubNote;
+		scrubNoteLast = arp_note = scrubNote;
 		if (sendArp)
-			midiOut(key);
+			midiOut(arp_note);
 	}
 }
 
@@ -108,9 +110,7 @@ void arpReset(byte note) {
 }
 
 void arpTick() {
-
-	if (held) {
-
+	if (voice_state.n_held_keys() > 0) {
 		if (arpMode) {
 			if (retrig[0]) {
 				lfoStep[0] = 0;
@@ -127,7 +127,7 @@ void arpTick() {
 					arpNote++;
 					if (arpNote > 127)
 						arpNote = 0;
-					while (!heldKeys[arpNote]) {
+					while (!voice_state.held_key(arpNote)) {
 						arpNote++;
 						if (arpNote > 127) {
 							arpNote = 0;
@@ -137,16 +137,16 @@ void arpTick() {
 							}
 						}
 					}
-					key = arpNote + (arpRound * 12);
+					arp_note = arpNote + (arpRound * 12);
 					if (sendArp)
-						midiOut(key);
+						midiOut(arp_note);
 					break;
 
 				case 2:
 					arpNote--;
 					if (arpNote < 1)
 						arpNote = 127;
-					while (!heldKeys[arpNote]) {
+					while (!voice_state.held_key(arpNote)) {
 						arpNote--;
 						if (arpNote == 0) {
 							arpNote = 127;
@@ -156,16 +156,16 @@ void arpTick() {
 							}
 						}
 					}
-					key = arpNote + (arpRound * 12);
+					arp_note = arpNote + (arpRound * 12);
 					if (sendArp)
-						midiOut(key);
+						midiOut(arp_note);
 					break;
 
 				case 3:
 					switch (arpPendulum) {
 						case 0:
 							arpNote++;
-							while (!heldKeys[arpNote]) {
+							while (!voice_state.held_key(arpNote)) {
 								arpNote++;
 								if (arpNote > 127) {
 									arpNote = 0;
@@ -176,14 +176,14 @@ void arpTick() {
 									}
 								}
 							}
-							key = arpNote + (arpRound * 12);
+							arp_note = arpNote + (arpRound * 12);
 							if (sendArp)
-								midiOut(key);
+								midiOut(arp_note);
 							break;
 
 						case 1:
 							arpNote--;
-							while (!heldKeys[arpNote]) {
+							while (!voice_state.held_key(arpNote)) {
 								arpNote--;
 								if (arpNote == 0) {
 									arpNote = 127;
@@ -194,9 +194,9 @@ void arpTick() {
 									}
 								}
 							}
-							key = arpNote + (arpRound * 12);
+							arp_note = arpNote + (arpRound * 12);
 							if (sendArp)
-								midiOut(key);
+								midiOut(arp_note);
 							break;
 					}
 					break;

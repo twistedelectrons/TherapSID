@@ -309,7 +309,7 @@ void save() {
 }
 
 void load(byte number) {
-	held = 0;
+	// TODO: reset held := 0
 	lfo[0] = lfo[1] = lfo[2] = 0;
 
 	loadTimer = 800;

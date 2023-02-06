@@ -22,7 +22,6 @@ bool gate;
 bool arping; // PATCH
 bool shape1Pressed;
 int shape1PressedTimer;
-byte pKey[3];
 int lfoStep[3], resetDownTimer; // PATCH
 int lfoSpeed[3]; // not PATCH
 int presetScrollSpeed = 10000;
@@ -52,19 +51,16 @@ float lfoFine1, lfoFine2, lfoFine3, lfoFine4, lfoFine5, lfoFine6, lfoFine7, lfoF
 Preset preset_data;
 
 
-byte key;
 byte arpMode;
 int frozen;
 bool jumble;
 bool lfoButtPressed;
 byte masterChannel = 1;
 byte masterChannelOut = 1;
-byte note_val[3];
 
-int held, arpCounter;
+int arpCounter;
 int arpRangeBase; // PATCH
 int lfoButtTimer;
-bool heldKeys[128];
 int arpSpeed, arpSpeedBase;
 int arpRange;
 int arpRound;

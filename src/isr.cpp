@@ -214,7 +214,7 @@ void isr() {
 
 	if (!sync) {
 		// ARP
-		if ((arpMode) && (arping) && (held)) {
+		if (arpMode && arping && voice_state.n_held_keys() > 0) {
 			arpCounter++;
 		}
 	}
@@ -262,9 +262,10 @@ void isr() {
 	// glides
 
 	// in monophonic mode, we glide only while the old note is still held down.
-	bool skip_glide = !preset_data.paraphonic && held <= 1;
+	bool skip_glide = !preset_data.paraphonic && voice_state.n_held_keys() <= 1;
 	for (int i=0; i<3; i++) {
-		voice_state[i].glide_tick(skip_glide ? 0 : preset_data.voice[i].glide);
+		// FIXME count to 6, not to 3
+		glide[i].glide_tick(skip_glide ? 0 : preset_data.voice[i].glide);
 	}
 
 

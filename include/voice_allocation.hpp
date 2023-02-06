@@ -4,6 +4,7 @@
 #include <stddef.h>
 
 #include "util.hpp"
+#include "leds.h" // FIXME remove
 
 template <size_t N> class MonoNoteTracker {
 	public:
