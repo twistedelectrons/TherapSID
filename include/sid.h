@@ -5,9 +5,7 @@
 void sidReset();
 void init1MhzClock();
 void sidSend(byte address, byte data);
-void sidPitch(byte voice, int pitch);
 void updateFilter();
-void calculatePitch();
 
 class Sid {
 	public:

@@ -132,9 +132,5 @@ void setup() {
 		sendArp = true;
 	}
 
-	sidPitch(0, 0);
-	sidPitch(1, 0);
-	sidPitch(2, 0);
-
 	setupMux();
 }

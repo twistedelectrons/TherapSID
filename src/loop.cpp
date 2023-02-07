@@ -39,7 +39,7 @@ static int calc_pitch(int note, float frac) {
 	return sidScale[note - 12 - 1] + (sidScale[note - 12 + 2] - sidScale[note - 12]) * fine;
 }
 
-void calculatePitch() {
+static void calculatePitch() {
 	int lfo_tune[3] = {
 		lfoTune1 + lfoTune2 + lfoTune3,
 		lfoTune4 + lfoTune5 + lfoTune6,
