@@ -2,7 +2,15 @@
 #include <stddef.h>
 
 void panic(int num7seg, int numvoice);
-inline void assert(bool condition) {
+
+#define DEBUG // TODO
+#ifdef DEBUG
+	#define assert(x) _assert(x)
+#else
+	#define assert(x)
+#endif
+
+inline void _assert(bool condition) {
 	if (!condition)
 		panic(42, 0);
 }

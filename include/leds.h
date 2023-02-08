@@ -4,8 +4,6 @@
 
 void showVersion();
 void leds();
-void showFilterAssigns();
-void unShowFilterAssigns();
 void ledSet(byte number, bool value);
 void rightDot();
 void leftDot();

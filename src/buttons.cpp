@@ -2,10 +2,10 @@
 #include "leds.h"
 #include "preset.h"
 #include "sid.h"
-#include "paraphonic.h"
 #include "midi.h"
 #include "lfo.h"
 #include "arp.h"
+#include "util.hpp"
 
 static bool saveEngaged;
 static byte midiSetup = 0;
@@ -54,10 +54,8 @@ enum Button {
 	FILTER_MODE = 7
 };
 
-static void panic(){} // FIXME
-
-void shapeButtPressed(uint8_t voice, PresetVoice::Shape shape) {
-	if (voice >= 3) panic();
+static void shapeButtPressed(uint8_t voice, PresetVoice::Shape shape) {
+	if (voice >= 3) panic(2, 1);
 
 	if (!filterModeHeld) {
 		preset_data.voice[voice].toggle_shape(shape);
@@ -73,7 +71,6 @@ void shapeButtPressed(uint8_t voice, PresetVoice::Shape shape) {
 	}
 	else {
 		preset_data.voice[voice].filter_enabled ^= 1;
-		showFilterAssigns(); // FIXME remove
 		assignmentChanged = true;
 	}
 }
@@ -353,8 +350,6 @@ void buttChanged(byte number, bool value) {
 
 			case FILTER_MODE:
 				if (!fatChanged) {
-					unShowFilterAssigns();
-
 					if (!assignmentChanged) {
 						// TODO ugh
 						preset_data.filter_mode = static_cast<FilterMode>(

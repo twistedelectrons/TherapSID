@@ -90,7 +90,7 @@ static void HandleControlChange(byte channel, byte data1, byte data2) {
 	leftDot();
 	if (channel == masterChannel) {
 		if (data1 == 59)
-			data1 = 32; // FIXME why?
+			data1 = 32;
 
 		if (1 <= data1 && data1 <= 36) {
 			int mapping[] = {-1, 12, 4,  6,  14, 1,  5, 15, 13, 16, 24, 26, 17, 27, 22, 25, 23, 20, 30,
@@ -100,7 +100,7 @@ static void HandleControlChange(byte channel, byte data1, byte data2) {
 			int offset = data1 - 37;
 			static const PresetVoice::Shape mapping[] = { PresetVoice::PULSE, PresetVoice::TRI, PresetVoice::SAW, PresetVoice::NOISE };
 			preset_data.voice[offset/4].set_shape(mapping[offset % 4], data2);
-			// FIXME update leds here
+			preset_data.set_leds(lastPot, selectedLfo, filterModeHeld);
 		} else {
 			switch (data1) {
 				case 49: // sync1
@@ -222,7 +222,7 @@ static void HandleControlChange(byte channel, byte data1, byte data2) {
 					}
 					break; // arp send
 			}
-			// FIXME update leds here
+			preset_data.set_leds(lastPot, selectedLfo, filterModeHeld);
 		}
 	}
 }

@@ -6,7 +6,6 @@
 
 static int presetScrollTimer;
 static int envCounter;
-// static bool gateLast; // FIXME
 static int lfoCounter[3];
 static int env2;
 
@@ -263,9 +262,9 @@ void isr() {
 
 	// in monophonic mode, we glide only while the old note is still held down.
 	bool skip_glide = !preset_data.paraphonic && voice_state.n_held_keys() <= 1;
-	for (int i=0; i<3; i++) {
-		// FIXME count to 6, not to 3
-		glide[i].glide_tick(skip_glide ? 0 : preset_data.voice[i].glide);
+	for (int i=0; i<6; i++) {
+		int voice_idx = preset_data.paraphonic ? 0 : (i % 3); // FIXME this is not nice
+		glide[i].glide_tick(skip_glide ? 0 : preset_data.voice[voice_idx].glide);
 	}
 
 

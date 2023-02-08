@@ -30,29 +30,16 @@ static byte octScale(int value) {
 }
 
 void movedPot(byte number, int value, bool isMidi) {
-	/*int foo[] = { FIXME
-		RESONANCE, GLIDE1, DEPTH2,RELEASE3,   PW1,            ATTACK1,  TUNE1,ARP_SCRUB,CUTOFF,DEPTH2,
-		    RATE2,  RATE1, DEPTH1,SUSTAIN1, FINE1,             DECAY1,RELEASE1, FINE2, DECAY3, GLIDE3,
-		  RELEASE2, TUNE3,ATTACK2,SUSTAIN2,   PW2,             DECAY2,  TUNE2,GLIDE2,SUSTAIN3,ATTACK3,
-		      PW3,  FINE3,ARP_RANGE,UNKNOWN,UNKNOWN,          UNKNOWN,  RATE3,UNKNOWN,UNKNOWN,UNKNOWN,
-		  UNKNOWN, ARP_RATE
-	};*/
-
 	if (!saveMode) {
-
 		if (!isMidi) {
 			lastMovedPot(20); // unselect
 		}
 		switch (number) {
-
 			case 4:
-				preset_data.voice[0].pulsewidth_base = value << 1;
-				if (preset_data.paraphonic) { // FIXME all das hier weg
-					preset_data.voice[1].pulsewidth_base = preset_data.voice[2].pulsewidth_base = preset_data.voice[0].pulsewidth_base;
-				}
 				if (value < 1) {
 					value = 1;
 				}
+				preset_data.voice[0].pulsewidth_base = value << 1;
 				if (!isMidi) {
 					sendCC(2, value);
 					ledNumber(scale100(value));
@@ -60,10 +47,10 @@ void movedPot(byte number, int value, bool isMidi) {
 				}
 				break; // PW1
 			case 24:
-				preset_data.voice[1].pulsewidth_base = value << 1;
 				if (value < 1) {
 					value = 1;
 				}
+				preset_data.voice[1].pulsewidth_base = value << 1;
 				if (!isMidi) {
 					sendCC(10, value);
 					ledNumber(scale100(value));
@@ -71,10 +58,10 @@ void movedPot(byte number, int value, bool isMidi) {
 				}
 				break; // PW2
 			case 30:
-				preset_data.voice[2].pulsewidth_base = value << 1;
 				if (value < 1) {
 					value = 1;
 				}
+				preset_data.voice[2].pulsewidth_base = value << 1;
 				if (!isMidi) {
 					sendCC(18, value);
 					ledNumber(scale100(value));
@@ -84,9 +71,6 @@ void movedPot(byte number, int value, bool isMidi) {
 
 			case 6:
 				preset_data.voice[0].tune_base = octScale(value);
-				if (preset_data.paraphonic) {
-					preset_data.voice[1].tune_base = preset_data.voice[2].tune_base = preset_data.voice[0].tune_base;
-				}
 				if (!isMidi) {
 					sendCC(3, value);
 					ledNumber(preset_data.voice[0].tune_base - 12);
@@ -112,9 +96,6 @@ void movedPot(byte number, int value, bool isMidi) {
 
 			case 14:
 				preset_data.voice[0].fine_base = value / 1023.f;
-				if (preset_data.paraphonic) {
-					preset_data.voice[1].fine_base = preset_data.voice[2].fine_base = preset_data.voice[0].fine_base;
-				}
 				if (!isMidi) {
 					sendCC(4, value);
 					ledNumber(scaleFine(value));
@@ -140,9 +121,6 @@ void movedPot(byte number, int value, bool isMidi) {
 
 			case 1:
 				preset_data.voice[0].glide = value >> 4;
-				if (preset_data.paraphonic) {
-					preset_data.voice[1].glide = preset_data.voice[2].glide = preset_data.voice[0].glide;
-				}
 				if (!isMidi) {
 					sendCC(5, value);
 					ledNumber(preset_data.voice[0].glide);
@@ -164,7 +142,6 @@ void movedPot(byte number, int value, bool isMidi) {
 				break; // GLIDE 3
 
 			case 5: // ATTACK 1
-
 				if (!isMidi) {
 					sendCC(6, value);
 				}
@@ -381,7 +358,7 @@ void movedPot(byte number, int value, bool isMidi) {
 					sendCC(34, value);
 					lastMovedPot(17);
 				}
-				if (voice_state.n_held_keys() > 1) { // FIXME why >, not >=?
+				if (voice_state.n_held_keys() > 1) { // TODO why >, not >=?
 					arpStepBase = value >> 2;
 				}
 				break; // ARP SCRUB

@@ -8,7 +8,6 @@
 #include "preset.h"
 #include "sid.h"
 #include "leds.h"
-#include "paraphonic.h"
 #include "lfo.h"
 
 /*

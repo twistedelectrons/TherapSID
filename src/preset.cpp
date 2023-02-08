@@ -3,14 +3,11 @@
 
 #include "globals.h"
 #include "leds.h"
-#include "sid.h" // FIXME
 #include "isr.h"
 #include "preset.h"
 #include "lfo.h"
 #include "midi.h"
 #include "util.hpp"
-
-// FIXME deduplicate
 
 /*
 
@@ -50,7 +47,7 @@ uint16_t Preset::fatten_pitch(uint16_t pitch) const {
 }
 
 void Preset::set_leds(int lastPot, int selectedLfo, bool show_filter_assign) {
-	// assert(lastPot < TODO); // FIXME
+	assert(lastPot <= 20);
 	assert(selectedLfo < 3);
 
 	if (!show_filter_assign) {
@@ -199,7 +196,6 @@ void save() {
 	writey(preset_data.lfo[0].depth >> 2);
 	writey(preset_data.lfo[1].depth >> 2);
 	writey(preset_data.lfo[2].depth >> 2); // 27
-	// FIXME loop
 	bitWrite(temp, 0, preset_data.lfo_map[0][0]);
 	bitWrite(temp, 1, preset_data.lfo_map[0][1]);
 	bitWrite(temp, 2, preset_data.lfo_map[0][2]);
@@ -309,7 +305,7 @@ void save() {
 }
 
 void load(byte number) {
-	// TODO: reset held := 0
+	// TODO: reset held := 0 and arpCount
 	lfo[0] = lfo[1] = lfo[2] = 0;
 
 	loadTimer = 800;
@@ -318,13 +314,8 @@ void load(byte number) {
 	Serial1.end();
 	Timer1.stop(); //
 
-	sidReset();
+	// sidReset(); TODO is that really needed? i'd rather get rid of this.
 
-	//sidSend(4, sid[0]);
-	//sidSend(11, sid[0]);
-	//sidSend(18, sid[0]); //FIXME
-
-	// held=0;arpCount=0;
 	writeIndex = number * 40;
 	byte temp;
 
@@ -461,7 +452,6 @@ void load(byte number) {
 		}
 	}
 
-	// FIXME loop
 	temp = ready();
 	preset_data.voice[0].decay = temp & 0x0F;
 	preset_data.voice[0].attack = (temp >> 4) & 0x0F;
@@ -499,7 +489,6 @@ void load(byte number) {
 	preset_data.lfo[1].depth = ready() << 2;
 	preset_data.lfo[2].depth = ready() << 2;
 
-	// FIXME loop!
 	temp = ready();
 	preset_data.lfo_map[0][0] = bitRead(temp, 0);
 	preset_data.lfo_map[0][1] = bitRead(temp, 1);

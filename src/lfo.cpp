@@ -21,10 +21,11 @@ static const bool limitPw = true;
 static const int pwMin = 10;
 static const int pwMax = 2050;
 
+// FIXME move to gui. make selectedLfo and filterModeHeld a property with setter and getter
 void setLfo(byte number) {
 	if (number != selectedLfoLast) {
 		selectedLfo = selectedLfoLast = number;
-		// FIXME update leds
+		preset_data.set_leds(lastPot, selectedLfo, filterModeHeld);
 	}
 }
 
@@ -123,9 +124,6 @@ ParamsAfterLfo lfoTick() {
 	if (lfoDepth[2] > 1023) {
 		lfoDepth[2] = 1023;
 	}
-
-	if (lfoSpeed[0] < 1)
-		lfoSpeed[0] = 0; // FIXME why only [0]?
 
 	if (preset_data.lfo_map[0][1]) {
 		lfoTune1 = map(lfo[0], 0, 255, -lfoDepth[0] >> 5, lfoDepth[0] >> 5);
