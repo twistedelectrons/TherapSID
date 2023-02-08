@@ -99,6 +99,26 @@ Sid::Sid(int chip_enable_bit) : chip_enable_bit(chip_enable_bit) {
 	registers[FILTER_MODE_VOLUME] = 0x11; // Filter off full vol
 }
 
+
+void Sid::set_pulsewidth(int voice, uint16_t pulsewidth) {
+	registers[7*voice + PULSEWIDTH_HI] = pulsewidth << 8;
+	registers[7*voice + PULSEWIDTH_LO] = pulsewidth & 0xFF;
+}
+
+void Sid::set_attack_decay(int voice, uint8_t attack, uint8_t decay) {
+	assert(attack <= 0x0F);
+	assert(decay <= 0x0F);
+
+	registers[7*voice + ATTACK_DECAY] = decay | (attack << 4);
+}
+
+void Sid::set_sustain_release(int voice, uint8_t sustain, uint8_t release) {
+	assert(sustain <= 0x0F);
+	assert(release <= 0x0F);
+
+	registers[7*voice + SUSTAIN_RELEASE] = release | (sustain << 4);
+}
+
 /// Updates the next pair of changed registers. Call this in your main loop.
 void Sid::send_next_update_pair() {
 	// some get sent twice just because it's easier to not special-case them.
@@ -139,6 +159,10 @@ void Sid::set_shape(int voice, byte value) {
 	registers[7*voice + CONTROL] |= value;
 }
 
+void Sid::set_reg_control(int voice, uint8_t control) {
+	registers[7*voice + CONTROL] = control;
+}
+
 byte Sid::shape(int voice) const {
 	return registers[7*voice + CONTROL] & 0xf0;
 }
@@ -158,6 +182,18 @@ void Sid::set_voice_filter(int voice, bool enable) {
 
 bool Sid::is_voice_playing(size_t voice) {
 	return registers[7*voice + CONTROL] & 1;
+}
+
+void Sid::set_resonance_and_filter_enable(uint8_t resonance, bool fen1, bool fen2, bool fen3, bool fen4) {
+	assert(resonance <= 0x0F);
+
+	registers[FILTER_RESONANCE_ROUTING] = (resonance << 4) | (fen1 ? 1 : 0) | (fen2 ? 2 : 0) | (fen3 ? 4 : 0) | (fen4 ? 8 : 0 );
+}
+
+void Sid::set_filter_cutoff(uint16_t cutoff) {
+	assert(cutoff <= 0x07FF);
+	registers[FILTER_CUTOFF_LO] = cutoff & 0x07;
+	registers[FILTER_CUTOFF_HI] = cutoff >> 3;
 }
 
 bool Sid::is_update_allowed(size_t register_index) {
@@ -198,25 +234,3 @@ void Sid::send(size_t index, int data) {
 
 
 Sid sid_chips[2] = {Sid(_BV(6)), Sid(_BV(2))};
-
-
-// FIXME into preset
-void updateFilter() {
-	// assert((unsigned) preset_data.filter_mode < 5); // FIXME
-
-	uint8_t filter_mapping[] = { Sid::LOWPASS, Sid::BANDPASS, Sid::HIGHPASS, Sid::LOWPASS | Sid::HIGHPASS, 0 };
-
-	for (auto& chip : sid_chips) {
-		chip.set_filter_mode(filter_mapping[(unsigned)preset_data.filter_mode]);
-		chip.set_voice_filter(3, preset_data.filter_mode != FilterMode::OFF);
-
-		// Disable voice->filter routing if voice is off or filter is off.
-		for (int voice = 0; voice < 3; voice++) {
-			if (chip.shape(voice) == 0 || preset_data.filter_mode == FilterMode::OFF) {
-				chip.set_voice_filter(voice, false);
-			}
-		}
-	}
-}
-
-

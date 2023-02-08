@@ -5,7 +5,6 @@
 void sidReset();
 void init1MhzClock();
 void sidSend(byte address, byte data);
-void updateFilter();
 
 class Sid {
 	public:
@@ -15,7 +14,7 @@ class Sid {
 		void send_next_update_pair();
 
 		void set_freq(int voice, uint16_t value);
-		void set_gate(int voice, bool on);
+		[[deprecated]] void set_gate(int voice, bool on);
 		/// attack,decay in [0; 15]
 		void set_attack_decay(int voice, uint8_t attack, uint8_t decay);
 		/// sustain,release in [0; 15]
@@ -31,7 +30,7 @@ class Sid {
 		/// `value` needs to be OR-ed together out of NOISE, PULSE, SAW and/or TRI.
 		/// Note that enabling NOISE together with any other waveform can clear the
 		/// noise shift register inside the chip.
-		void set_shape(int voice, byte value);
+		[[deprecated]] void set_shape(int voice, byte value);
 
 		/// 0..4095
 		void set_pulsewidth(int voice, uint16_t width);
@@ -57,7 +56,7 @@ class Sid {
 		uint8_t filter_mode();
 
 		/// In addition to the usual 3 voices, this accepts voice==3 for the external input.
-		void set_voice_filter(int voice, bool enable);
+		[[deprecated]] void set_voice_filter(int voice, bool enable);
 
 	private:
 		bool is_voice_playing(size_t voice);

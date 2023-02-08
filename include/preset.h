@@ -46,6 +46,10 @@ struct PresetVoice {
 		if (enabled != is_enabled)
 			toggle_shape(shape);
 	}
+
+	uint8_t shape() const {
+		return reg_control & (TRI | SAW | PULSE | NOISE);
+	}
 };
 
 struct PresetLfo {

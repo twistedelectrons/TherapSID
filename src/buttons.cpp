@@ -360,7 +360,6 @@ void buttChanged(byte number, bool value) {
 						preset_data.filter_mode = static_cast<FilterMode>(
 							(static_cast<int>(preset_data.filter_mode) + 1) % 5
 						);
-						updateFilter();
 						sendCC(55, map((int)preset_data.filter_mode, 0, 4, 0, 1023));
 					}
 				} else {

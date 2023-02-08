@@ -633,8 +633,6 @@ void load(byte number) {
 
 	lastMovedPot(lastPot);
 
-	updateFilter();
-
 	bitWrite(preset_data.voice[0].reg_control, 0, 0);
 	bitWrite(preset_data.voice[1].reg_control, 0, 0);
 	bitWrite(preset_data.voice[2].reg_control, 0, 0);

@@ -73,7 +73,14 @@ void setSidRegisters(Preset const& preset, ParamsAfterLfo const& params_after_lf
 			sid_chips[i].set_reg_control(v, preset.voice[v].reg_control); // FIXME gate
 		}
 
-		sid_chips[i].set_resonance_and_filter_enable(params_after_lfo.resonance, preset.voice[0].filter_enabled, preset.voice[1].filter_enabled, preset.voice[2].filter_enabled, false /* TODO external filter? */);
+		// disable voice->filter routing if voice is off or filter is off.
+		sid_chips[i].set_resonance_and_filter_enable(
+			params_after_lfo.resonance,
+			preset.voice[0].filter_enabled && preset.filter_mode != FilterMode::OFF && preset.voice[0].shape() != 0,
+			preset.voice[1].filter_enabled && preset.filter_mode != FilterMode::OFF && preset.voice[1].shape() != 0,
+			preset.voice[2].filter_enabled && preset.filter_mode != FilterMode::OFF && preset.voice[2].shape() != 0,
+			preset.filter_mode != FilterMode::OFF
+		);
 		sid_chips[i].set_filter_cutoff(params_after_lfo.cutoff);
 
 		switch (preset.filter_mode) {
