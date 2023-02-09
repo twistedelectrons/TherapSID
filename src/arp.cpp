@@ -112,13 +112,13 @@ void arpReset(byte note) {
 void arpTick() {
 	if (voice_state.n_held_keys() > 0) {
 		if (arpMode) {
-			if (retrig[0]) {
+			if (preset_data.lfo[0].retrig) {
 				lfoStep[0] = 0;
 			}
-			if (retrig[1]) {
+			if (preset_data.lfo[1].retrig) {
 				lfoStep[1] = 0;
 			}
-			if (retrig[2]) {
+			if (preset_data.lfo[2].retrig) {
 				lfoStep[2] = 0;
 			}
 

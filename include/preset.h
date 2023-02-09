@@ -55,6 +55,8 @@ struct PresetVoice {
 struct PresetLfo {
 	int depth;
 	int speed;
+	bool retrig;
+	bool looping;
 };
 
 enum class FilterMode {

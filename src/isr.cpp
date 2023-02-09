@@ -277,7 +277,7 @@ void isr() {
 				lfoStep[i]++;
 
 				if (lfoStep[i] > 254) {
-					if (looping[i]) {
+					if (preset_data.lfo[i].looping) {
 						lfoStep[i] = 0;
 					} else {
 						lfoStep[i] = 255;

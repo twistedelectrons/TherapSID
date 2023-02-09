@@ -118,8 +118,8 @@ void Preset::set_leds(int lastPot, int selectedLfo, bool show_filter_assign) {
 	for (int shape = 1; shape<=5; shape++) {
 		ledSet(21 + shape, lfoShape[selectedLfo] == shape);
 	}
-	ledSet(30, retrig[selectedLfo]);
-	ledSet(31, looping[selectedLfo]);
+	ledSet(30, preset_data.lfo[selectedLfo].retrig);
+	ledSet(31, preset_data.lfo[selectedLfo].looping);
 }
 
 static int writeIndex;
@@ -273,13 +273,13 @@ void save() {
 	bitWrite(temp, 2, bitRead(lfoShape[2], 0));
 	bitWrite(temp, 3, bitRead(lfoShape[2], 1));
 	bitWrite(temp, 4, bitRead(lfoShape[2], 2));
-	bitWrite(temp, 5, retrig[0]);
-	bitWrite(temp, 6, retrig[1]);
-	bitWrite(temp, 7, retrig[2]);
+	bitWrite(temp, 5, preset_data.lfo[0].retrig);
+	bitWrite(temp, 6, preset_data.lfo[1].retrig);
+	bitWrite(temp, 7, preset_data.lfo[2].retrig);
 	writey(temp); // 36
-	bitWrite(temp, 0, looping[0]);
-	bitWrite(temp, 1, looping[1]);
-	bitWrite(temp, 2, looping[2]);
+	bitWrite(temp, 0, preset_data.lfo[0].looping);
+	bitWrite(temp, 1, preset_data.lfo[1].looping);
+	bitWrite(temp, 2, preset_data.lfo[2].looping);
 	bitWrite(temp, 3, bitRead((int)preset_data.filter_mode, 0));
 	bitWrite(temp, 4, bitRead((int)preset_data.filter_mode, 1));
 	bitWrite(temp, 5, bitRead((int)preset_data.filter_mode, 2));
@@ -595,14 +595,14 @@ void load(byte number) {
 	bitWrite(lfoShape[2], 0, bitRead(temp, 2));
 	bitWrite(lfoShape[2], 1, bitRead(temp, 3));
 	bitWrite(lfoShape[2], 2, bitRead(temp, 4));
-	retrig[0] = bitRead(temp, 5);
-	retrig[1] = bitRead(temp, 6);
-	retrig[2] = bitRead(temp, 7);
+	preset_data.lfo[0].retrig = bitRead(temp, 5);
+	preset_data.lfo[1].retrig = bitRead(temp, 6);
+	preset_data.lfo[2].retrig = bitRead(temp, 7);
 
 	temp = ready();
-	looping[0] = bitRead(temp, 0);
-	looping[1] = bitRead(temp, 1);
-	looping[2] = bitRead(temp, 2);
+	preset_data.lfo[0].looping = bitRead(temp, 0);
+	preset_data.lfo[1].looping = bitRead(temp, 1);
+	preset_data.lfo[2].looping = bitRead(temp, 2);
 
 	preset_data.filter_mode = uint2FilterMode((temp >> 3) & 0x7);
 	bitWrite(arpRangeBase, 0, bitRead(temp, 6));

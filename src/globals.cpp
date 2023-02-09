@@ -31,9 +31,7 @@ bool presetUp, presetDown;
 byte preset = 1;
 int presetLast = 1;
 byte lastPot = 20;
-bool retrig[3]; // PATCH
 bool fatChanged = true;
-bool looping[3];
 bool resetDown;
 byte selectedLfo;
 byte lfoShape[3]; // PATCH

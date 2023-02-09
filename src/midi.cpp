@@ -47,7 +47,7 @@ static void HandleNoteOn(byte channel, byte note, byte velocity) {
 
 	if (velocity) {
 		for (int i = 0; i < 3; i++) {
-			if (retrig[i]) {
+			if (preset_data.lfo[i].retrig) {
 				lfoStep[i] = lfoStepF[i] = 0;
 			}
 		}
@@ -189,18 +189,10 @@ static void HandleControlChange(byte channel, byte data1, byte data2) {
 					break; // lfo shape5
 
 				case 66:
-					if (data2) {
-						retrig[selectedLfo] = 1;
-					} else {
-						retrig[selectedLfo] = 0;
-					}
-					break; // lfo retrig
+					preset_data.lfo[selectedLfo].retrig = !!data2;
+					break; // lfo retrigger
 				case 67:
-					if (data2) {
-						looping[selectedLfo] = 1;
-					} else {
-						looping[selectedLfo] = 0;
-					}
+					preset_data.lfo[selectedLfo].looping = !!data2;
 					break; // lfo loop
 
 				case 68:
@@ -322,7 +314,7 @@ void midiRead() {
 					for (int i = 0; i < 3; i++) {
 						lfoStepF[i] += lfoClockRates[lfoClockSpeed[i]];
 						if (lfoStepF[i] > 254) {
-							if (looping[i]) {
+							if (preset_data.lfo[i].looping) {
 								lfoStepF[i] = 0;
 								lfoNewRand[i] = 1;
 							} else {

@@ -36,8 +36,6 @@ extern bool resetDown;
 extern byte selectedLfo;
 
 // lfo preset data
-extern bool retrig[3]; // PRESET
-extern bool looping[3]; // PRESET
 extern byte lfoShape[3]; // PRESET
 
 

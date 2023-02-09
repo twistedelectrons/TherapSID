@@ -189,10 +189,10 @@ void buttChanged(byte number, bool value) {
 				break;
 
 			case RETRIG:
-				retrig[selectedLfo] = !retrig[selectedLfo];
+				preset_data.lfo[selectedLfo].retrig = !preset_data.lfo[selectedLfo].retrig;
 				break;
 			case LOOP:
-				looping[selectedLfo] = !looping[selectedLfo];
+				preset_data.lfo[selectedLfo].looping = !preset_data.lfo[selectedLfo].looping;
 				break;
 
 			case PRESET_UP:
