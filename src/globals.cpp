@@ -21,8 +21,8 @@ bool scrolled;
 bool gate;
 bool shape1Pressed;
 int shape1PressedTimer;
-int lfoStep[3], resetDownTimer; // PATCH
-int lfoSpeed[3]; // not PATCH
+int lfoStep[3], resetDownTimer;
+int lfoSpeed[3];
 int presetScrollSpeed = 10000;
 int saveBounce;
 byte lfo[3];
@@ -67,6 +67,6 @@ int a4, d4, s4, r4;
 bool saveMode;
 int saveModeTimer;
 byte lastNote = 0;
-int arpStepBase; // oof. PATCH??
+int arpStepBase;
 int dotTimer;
 bool showPresetNumber; // when high we show preset number once
