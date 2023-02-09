@@ -143,38 +143,38 @@ void buttChanged(byte number, bool value) {
 				break;
 
 			case LFO_RECT:
-				if (lfoShape[selectedLfo] != 1) {
-					lfoShape[selectedLfo] = 1;
+				if (preset_data.lfo[selectedLfo].shape != 1) {
+					preset_data.lfo[selectedLfo].shape = 1;
 				} else {
-					lfoShape[selectedLfo] = 0;
+					preset_data.lfo[selectedLfo].shape = 0;
 				}
 				break;
 			case LFO_SAW:
-				if (lfoShape[selectedLfo] != 2) {
-					lfoShape[selectedLfo] = 2;
+				if (preset_data.lfo[selectedLfo].shape != 2) {
+					preset_data.lfo[selectedLfo].shape = 2;
 				} else {
-					lfoShape[selectedLfo] = 0;
+					preset_data.lfo[selectedLfo].shape = 0;
 				}
 				break;
 			case LFO_TRI:
-				if (lfoShape[selectedLfo] != 3) {
-					lfoShape[selectedLfo] = 3;
+				if (preset_data.lfo[selectedLfo].shape != 3) {
+					preset_data.lfo[selectedLfo].shape = 3;
 				} else {
-					lfoShape[selectedLfo] = 0;
+					preset_data.lfo[selectedLfo].shape = 0;
 				}
 				break;
 			case LFO_NOISE:
-				if (lfoShape[selectedLfo] != 4) {
-					lfoShape[selectedLfo] = 4;
+				if (preset_data.lfo[selectedLfo].shape != 4) {
+					preset_data.lfo[selectedLfo].shape = 4;
 				} else {
-					lfoShape[selectedLfo] = 0;
+					preset_data.lfo[selectedLfo].shape = 0;
 				}
 				break;
 			case LFO_ENV3:
-				if (lfoShape[selectedLfo] != 5) {
-					lfoShape[selectedLfo] = 5;
+				if (preset_data.lfo[selectedLfo].shape != 5) {
+					preset_data.lfo[selectedLfo].shape = 5;
 				} else {
-					lfoShape[selectedLfo] = 0;
+					preset_data.lfo[selectedLfo].shape = 0;
 				}
 
 				break;

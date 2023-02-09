@@ -134,9 +134,9 @@ static void HandleControlChange(byte channel, byte data1, byte data2) {
 
 				case 60:
 					if (data2) {
-						lfoShape[selectedLfo] = 1;
+						preset_data.lfo[selectedLfo].shape = 1;
 					} else {
-						lfoShape[selectedLfo] = 0;
+						preset_data.lfo[selectedLfo].shape = 0;
 					}
 					sendControlChange(61, 0);
 					sendControlChange(62, 0);
@@ -145,9 +145,9 @@ static void HandleControlChange(byte channel, byte data1, byte data2) {
 					break; // lfo shape1
 				case 61:
 					if (data2) {
-						lfoShape[selectedLfo] = 2;
+						preset_data.lfo[selectedLfo].shape = 2;
 					} else {
-						lfoShape[selectedLfo] = 0;
+						preset_data.lfo[selectedLfo].shape = 0;
 					}
 					sendControlChange(60, 0);
 					sendControlChange(62, 0);
@@ -156,9 +156,9 @@ static void HandleControlChange(byte channel, byte data1, byte data2) {
 					break; // lfo shape2
 				case 62:
 					if (data2) {
-						lfoShape[selectedLfo] = 3;
+						preset_data.lfo[selectedLfo].shape = 3;
 					} else {
-						lfoShape[selectedLfo] = 0;
+						preset_data.lfo[selectedLfo].shape = 0;
 					}
 					sendControlChange(61, 0);
 					sendControlChange(60, 0);
@@ -167,9 +167,9 @@ static void HandleControlChange(byte channel, byte data1, byte data2) {
 					break; // lfo shape3
 				case 63:
 					if (data2) {
-						lfoShape[selectedLfo] = 4;
+						preset_data.lfo[selectedLfo].shape = 4;
 					} else {
-						lfoShape[selectedLfo] = 0;
+						preset_data.lfo[selectedLfo].shape = 0;
 					}
 					sendControlChange(61, 0);
 					sendControlChange(62, 0);
@@ -178,9 +178,9 @@ static void HandleControlChange(byte channel, byte data1, byte data2) {
 					break; // lfo shape4
 				case 65:
 					if (data2) {
-						lfoShape[selectedLfo] = 5;
+						preset_data.lfo[selectedLfo].shape = 5;
 					} else {
-						lfoShape[selectedLfo] = 0;
+						preset_data.lfo[selectedLfo].shape = 0;
 					}
 					sendControlChange(61, 0);
 					sendControlChange(62, 0);

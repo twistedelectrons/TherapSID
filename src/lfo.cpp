@@ -35,7 +35,7 @@ ParamsAfterLfo lfoTick() {
 
 	for (int i = 0; i < 3; i++) {
 		if (!cvActive[i]) {
-			switch (lfoShape[i]) {
+			switch (preset_data.lfo[i].shape) {
 				case 0:
 					lfo[i] = 255;
 					break; // manual

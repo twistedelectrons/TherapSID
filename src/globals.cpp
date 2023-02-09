@@ -34,7 +34,6 @@ byte lastPot = 20;
 bool fatChanged = true;
 bool resetDown;
 byte selectedLfo;
-byte lfoShape[3]; // PATCH
 byte lfoClockSpeedPending[3];
 bool filterModeHeld;
 

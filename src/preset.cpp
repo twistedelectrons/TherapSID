@@ -116,7 +116,7 @@ void Preset::set_leds(int lastPot, int selectedLfo, bool show_filter_assign) {
 
 
 	for (int shape = 1; shape<=5; shape++) {
-		ledSet(21 + shape, lfoShape[selectedLfo] == shape);
+		ledSet(21 + shape, preset_data.lfo[selectedLfo].shape == shape);
 	}
 	ledSet(30, preset_data.lfo[selectedLfo].retrig);
 	ledSet(31, preset_data.lfo[selectedLfo].looping);
@@ -263,16 +263,16 @@ void save() {
 	bitWrite(temp, 1, preset_data.lfo_map[2][17]);
 	bitWrite(temp, 2, preset_data.lfo_map[2][18]);
 	bitWrite(temp, 3, preset_data.lfo_map[2][19]);
-	bitWrite(temp, 4, bitRead(lfoShape[0], 0));
-	bitWrite(temp, 5, bitRead(lfoShape[0], 1));
-	bitWrite(temp, 6, bitRead(lfoShape[0], 2));
-	bitWrite(temp, 7, bitRead(lfoShape[1], 0));
+	bitWrite(temp, 4, bitRead(preset_data.lfo[0].shape, 0));
+	bitWrite(temp, 5, bitRead(preset_data.lfo[0].shape, 1));
+	bitWrite(temp, 6, bitRead(preset_data.lfo[0].shape, 2));
+	bitWrite(temp, 7, bitRead(preset_data.lfo[1].shape, 0));
 	writey(temp); // 35
-	bitWrite(temp, 0, bitRead(lfoShape[1], 1));
-	bitWrite(temp, 1, bitRead(lfoShape[1], 2));
-	bitWrite(temp, 2, bitRead(lfoShape[2], 0));
-	bitWrite(temp, 3, bitRead(lfoShape[2], 1));
-	bitWrite(temp, 4, bitRead(lfoShape[2], 2));
+	bitWrite(temp, 0, bitRead(preset_data.lfo[1].shape, 1));
+	bitWrite(temp, 1, bitRead(preset_data.lfo[1].shape, 2));
+	bitWrite(temp, 2, bitRead(preset_data.lfo[2].shape, 0));
+	bitWrite(temp, 3, bitRead(preset_data.lfo[2].shape, 1));
+	bitWrite(temp, 4, bitRead(preset_data.lfo[2].shape, 2));
 	bitWrite(temp, 5, preset_data.lfo[0].retrig);
 	bitWrite(temp, 6, preset_data.lfo[1].retrig);
 	bitWrite(temp, 7, preset_data.lfo[2].retrig);
@@ -564,10 +564,10 @@ void load(byte number) {
 	preset_data.lfo_map[2][17] = bitRead(temp, 1);
 	preset_data.lfo_map[2][18] = bitRead(temp, 2);
 	preset_data.lfo_map[2][19] = bitRead(temp, 3);
-	bitWrite(lfoShape[0], 0, bitRead(temp, 4));
-	bitWrite(lfoShape[0], 1, bitRead(temp, 5));
-	bitWrite(lfoShape[0], 2, bitRead(temp, 6));
-	bitWrite(lfoShape[1], 0, bitRead(temp, 7));
+	bitWrite(preset_data.lfo[0].shape, 0, bitRead(temp, 4));
+	bitWrite(preset_data.lfo[0].shape, 1, bitRead(temp, 5));
+	bitWrite(preset_data.lfo[0].shape, 2, bitRead(temp, 6));
+	bitWrite(preset_data.lfo[1].shape, 0, bitRead(temp, 7));
 
 	if (jumble) {
 		for (int i = 0; i < 20; i++) {
@@ -590,11 +590,11 @@ void load(byte number) {
 		}
 	}
 	temp = ready();
-	bitWrite(lfoShape[1], 1, bitRead(temp, 0));
-	bitWrite(lfoShape[1], 2, bitRead(temp, 1));
-	bitWrite(lfoShape[2], 0, bitRead(temp, 2));
-	bitWrite(lfoShape[2], 1, bitRead(temp, 3));
-	bitWrite(lfoShape[2], 2, bitRead(temp, 4));
+	bitWrite(preset_data.lfo[1].shape, 1, bitRead(temp, 0));
+	bitWrite(preset_data.lfo[1].shape, 2, bitRead(temp, 1));
+	bitWrite(preset_data.lfo[2].shape, 0, bitRead(temp, 2));
+	bitWrite(preset_data.lfo[2].shape, 1, bitRead(temp, 3));
+	bitWrite(preset_data.lfo[2].shape, 2, bitRead(temp, 4));
 	preset_data.lfo[0].retrig = bitRead(temp, 5);
 	preset_data.lfo[1].retrig = bitRead(temp, 6);
 	preset_data.lfo[2].retrig = bitRead(temp, 7);

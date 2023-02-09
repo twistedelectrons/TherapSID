@@ -35,8 +35,6 @@ extern bool fatChanged;
 extern bool resetDown;
 extern byte selectedLfo;
 
-// lfo preset data
-extern byte lfoShape[3]; // PRESET
 
 
 extern byte lfoClockSpeedPending[3];

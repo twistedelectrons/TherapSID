@@ -57,6 +57,7 @@ struct PresetLfo {
 	int speed;
 	bool retrig;
 	bool looping;
+	byte shape;
 };
 
 enum class FilterMode {
