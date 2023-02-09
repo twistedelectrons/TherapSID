@@ -213,7 +213,7 @@ void isr() {
 
 	if (!sync) {
 		// ARP
-		if (preset_data.arp_mode && arping && voice_state.n_held_keys() > 0) {
+		if (preset_data.arp_mode && arping() && voice_state.n_held_keys() > 0) {
 			arpCounter++;
 		}
 	}

@@ -19,7 +19,6 @@ int arpModeCounter;
 bool cvActive[3];
 bool scrolled;
 bool gate;
-bool arping; // PATCH
 bool shape1Pressed;
 int shape1PressedTimer;
 int lfoStep[3], resetDownTimer; // PATCH

@@ -371,12 +371,6 @@ void movedPot(byte number, int value, bool isMidi) {
 				}
 
 				preset_data.arp_speed_base = (1023 - value) >> 2;
-				if (preset_data.arp_speed_base << 4 > 4000) {
-					arping = false;
-				} else {
-					arping = true;
-				}
-
 				preset_data.arp_rate = arpDivisions[preset_data.arp_speed_base >> 5];
 
 				break; // ARP RATE

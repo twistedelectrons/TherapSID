@@ -291,7 +291,7 @@ void midiRead() {
 				case 0xf8: // clock
 
 					sync = 1;
-					if ((preset_data.arp_mode) && (arping)) {
+					if ((preset_data.arp_mode) && arping()) {
 						clockCount++;
 						if (clockCount >= preset_data.arp_rate) {
 							clockCount = 0;

@@ -19,7 +19,6 @@ extern int arpModeCounter;
 extern bool cvActive[3];
 extern bool scrolled;
 extern bool gate;
-extern bool arping;
 extern bool shape1Pressed;
 extern int shape1PressedTimer;
 extern int lfoStep[3], resetDownTimer;
@@ -34,6 +33,10 @@ extern byte lastPot;
 extern bool fatChanged;
 extern bool resetDown;
 extern byte selectedLfo;
+
+inline bool arping() {
+	return preset_data.arp_speed_base << 4 > 4000;
+}
 
 
 
