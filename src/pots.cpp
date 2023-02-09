@@ -370,14 +370,14 @@ void movedPot(byte number, int value, bool isMidi) {
 					ledNumber(scale100(value - 10));
 				}
 
-				arpSpeedBase = (1023 - value) >> 2;
-				if (arpSpeedBase << 4 > 4000) {
+				preset_data.arp_speed_base = (1023 - value) >> 2;
+				if (preset_data.arp_speed_base << 4 > 4000) {
 					arping = false;
 				} else {
 					arping = true;
 				}
 
-				preset_data.arp_rate = arpDivisions[arpSpeedBase >> 5];
+				preset_data.arp_rate = arpDivisions[preset_data.arp_speed_base >> 5];
 
 				break; // ARP RATE
 
@@ -387,7 +387,7 @@ void movedPot(byte number, int value, bool isMidi) {
 					ledNumber(arpRange + 1);
 				}
 				lastMovedPot(19);
-				arpRangeBase = value >> 8;
+				preset_data.arp_range_base = value >> 8;
 				break; // ARP RANGE
 		}
 	}

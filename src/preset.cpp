@@ -283,21 +283,21 @@ void save() {
 	bitWrite(temp, 3, bitRead((int)preset_data.filter_mode, 0));
 	bitWrite(temp, 4, bitRead((int)preset_data.filter_mode, 1));
 	bitWrite(temp, 5, bitRead((int)preset_data.filter_mode, 2));
-	bitWrite(temp, 6, bitRead(arpRangeBase, 0));
-	bitWrite(temp, 7, bitRead(arpRangeBase, 1));
+	bitWrite(temp, 6, bitRead(preset_data.arp_range_base, 0));
+	bitWrite(temp, 7, bitRead(preset_data.arp_range_base, 1));
 	writey(temp); // 37
 	bitWrite(temp, 0, bitRead(preset_data.resonance_base, 0));
 	bitWrite(temp, 1, bitRead(preset_data.resonance_base, 1));
 	bitWrite(temp, 2, bitRead(preset_data.resonance_base, 2));
 	bitWrite(temp, 3, bitRead(preset_data.resonance_base, 3));
-	bitWrite(temp, 4, bitRead(arpMode, 0));
-	bitWrite(temp, 5, bitRead(arpMode, 1));
-	bitWrite(temp, 6, bitRead(arpMode, 2));
-	bitWrite(temp, 7, bitRead(arpMode, 3));
+	bitWrite(temp, 4, bitRead(preset_data.arp_mode, 0));
+	bitWrite(temp, 5, bitRead(preset_data.arp_mode, 1));
+	bitWrite(temp, 6, bitRead(preset_data.arp_mode, 2));
+	bitWrite(temp, 7, bitRead(preset_data.arp_mode, 3));
 	writey(temp); //
 	writey(preset_data.cutoff >> 2);
 
-	writey(arpSpeedBase); // 40
+	writey(preset_data.arp_speed_base); // 40
 
 	saveBounce = 1600;
 	saveMode = false;
@@ -605,20 +605,20 @@ void load(byte number) {
 	preset_data.lfo[2].looping = bitRead(temp, 2);
 
 	preset_data.filter_mode = uint2FilterMode((temp >> 3) & 0x7);
-	bitWrite(arpRangeBase, 0, bitRead(temp, 6));
-	bitWrite(arpRangeBase, 1, bitRead(temp, 7));
+	bitWrite(preset_data.arp_range_base, 0, bitRead(temp, 6));
+	bitWrite(preset_data.arp_range_base, 1, bitRead(temp, 7));
 
 
 	temp = ready();
 	preset_data.resonance_base = temp & 0x0F;
-	arpMode = (temp >> 4) & 0x0F;
+	preset_data.arp_mode = (temp >> 4) & 0x0F;
 
 	arpRound = 0;
 	arpCount = 0;
 	preset_data.cutoff = ready() << 2;
-	arpSpeedBase = ready();
-	if (arpSpeedBase == 0)
-		arpSpeedBase = 1;
+	preset_data.arp_speed_base = ready();
+	if (preset_data.arp_speed_base == 0)
+		preset_data.arp_speed_base = 1;
 
 	lastMovedPot(lastPot);
 
@@ -627,7 +627,7 @@ void load(byte number) {
 	bitWrite(preset_data.voice[2].reg_control, 0, 0);
 
 	if (jumble)
-		arpMode = 0;
+		preset_data.arp_mode = 0;
 
 	preset_data.set_leds(lastPot, selectedLfo, filterModeHeld);
 
@@ -674,8 +674,8 @@ void load(byte number) {
 	sendCC(31, preset_data.lfo[2].depth);
 
 	sendCC(34, arpStepBase << 2);
-	sendCC(36, arpRangeBase << 8);
-	sendCC(35, arpSpeedBase << 2);
+	sendCC(36, preset_data.arp_range_base << 8);
+	sendCC(35, preset_data.arp_speed_base << 2);
 
 	sendCC(59, preset_data.cutoff);
 	sendCC(33, preset_data.resonance_base << 6);

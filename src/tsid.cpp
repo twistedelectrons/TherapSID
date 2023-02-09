@@ -46,7 +46,7 @@ void setup() {
 
 	Serial.begin(31250);
 
-	arpSpeedBase = 100;
+	preset_data.arp_speed_base = 100;
 
 	// let sid chip wake up
 	DDRD |= _BV(2); // SID1

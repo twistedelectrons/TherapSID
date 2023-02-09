@@ -50,7 +50,6 @@ VoiceState<6> voice_state;
 Glide glide[6];
 
 
-byte arpMode;
 int frozen;
 bool jumble;
 bool lfoButtPressed;
@@ -58,9 +57,8 @@ byte masterChannel = 1;
 byte masterChannelOut = 1;
 
 int arpCounter;
-int arpRangeBase; // PATCH
 int lfoButtTimer;
-int arpSpeed, arpSpeedBase;
+int arpSpeed;
 int arpRange;
 int arpRound;
 byte arpCount;

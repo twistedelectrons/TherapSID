@@ -394,7 +394,7 @@ ParamsAfterLfo lfoTick() {
 		arpStepLfo3 = 0;
 	}
 
-	if (voice_state.n_held_keys() > 0 && !arpMode) {
+	if (voice_state.n_held_keys() > 0 && !preset_data.arp_mode) {
 		arpStep = arpStepBase + arpStepLfo1 + arpStepLfo2 + arpStepLfo3;
 		if (arpStep > 255) {
 			arpStep = 255;
@@ -408,11 +408,11 @@ ParamsAfterLfo lfoTick() {
 		}
 	}
 
-	arpRange = arpRangeBase + arpRangeLfo1 + arpRangeLfo2 + arpRangeLfo3;
+	arpRange = preset_data.arp_range_base + arpRangeLfo1 + arpRangeLfo2 + arpRangeLfo3;
 	if (arpRange > 3)
 		arpRange = 3;
 
-	arpSpeed = (arpSpeedBase << 4) - arpSpeedLfo1 - arpSpeedLfo2 - arpSpeedLfo3;
+	arpSpeed = (preset_data.arp_speed_base << 4) - arpSpeedLfo1 - arpSpeedLfo2 - arpSpeedLfo3;
 	if (arpSpeed < 0)
 		arpSpeed = 0;
 

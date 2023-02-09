@@ -294,9 +294,9 @@ void buttChanged(byte number, bool value) {
 				arpModeCounter = 0;
 				if (!midiSetup) {
 					if (!preset_data.paraphonic) {
-						arpMode++;
-						if (arpMode > 4) {
-							arpMode = 0;
+						preset_data.arp_mode++;
+						if (preset_data.arp_mode > 4) {
+							preset_data.arp_mode = 0;
 							sendNoteOff(lastNote, 127, masterChannelOut);
 						}
 						showArp();

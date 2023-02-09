@@ -97,15 +97,19 @@ inline FatMode uint2FatMode(uint8_t i) { // FIXME
 // FIXME move to preset.h
 struct Preset {
 	PresetVoice voice[3];
+
 	bool paraphonic;
+
 	int arp_rate = 24;
-	byte resonance_base;
+	int arp_speed_base = 100;
+	int arp_range_base = 0;
+	byte arp_mode = 0;
 
 	PresetLfo lfo[3];
 	bool lfo_map[3][20]; // FIXME put this into PresetLfo
 
+	byte resonance_base;
 	int cutoff;
-
 	FilterMode filter_mode = FilterMode::LOWPASS;
 	FatMode fat_mode = FatMode::UNISONO;
 

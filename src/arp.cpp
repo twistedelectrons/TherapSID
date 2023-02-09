@@ -19,7 +19,7 @@ void showArp() {
 	if (millis() > 2000)
 		frozen = 500;
 
-	switch (arpMode) {
+	switch (preset_data.arp_mode) {
 
 		case 0: // OFF
 			digit(0, 0);
@@ -89,7 +89,7 @@ void arpSteptrigger(int number) {
 
 void arpReset(byte note) {
 
-	switch (arpMode) {
+	switch (preset_data.arp_mode) {
 
 		case 1:
 			arpNote = 0;
@@ -111,7 +111,7 @@ void arpReset(byte note) {
 
 void arpTick() {
 	if (voice_state.n_held_keys() > 0) {
-		if (arpMode) {
+		if (preset_data.arp_mode) {
 			if (preset_data.lfo[0].retrig) {
 				lfoStep[0] = 0;
 			}
@@ -122,7 +122,7 @@ void arpTick() {
 				lfoStep[2] = 0;
 			}
 
-			switch (arpMode) {
+			switch (preset_data.arp_mode) {
 				case 1:
 					arpNote++;
 					if (arpNote > 127)

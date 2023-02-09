@@ -67,7 +67,7 @@ static void HandleNoteOn(byte channel, byte note, byte velocity) {
 				env = 0;
 				clockCount = preset_data.arp_rate;
 
-				if (arpMode)
+				if (preset_data.arp_mode)
 					arpReset(note);
 				break;
 			default:
@@ -291,7 +291,7 @@ void midiRead() {
 				case 0xf8: // clock
 
 					sync = 1;
-					if ((arpMode) && (arping)) {
+					if ((preset_data.arp_mode) && (arping)) {
 						clockCount++;
 						if (clockCount >= preset_data.arp_rate) {
 							clockCount = 0;
