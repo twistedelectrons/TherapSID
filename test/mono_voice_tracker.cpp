@@ -103,5 +103,4 @@ TEST_CASE("MonoNoteTracker") {
 		tracker.note_off(3);
 		CHECK_FALSE(tracker.has_active_note());
 	}
-
 }

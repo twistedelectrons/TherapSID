@@ -19,6 +19,19 @@ make firmware.syx
 Then put the device into bootloader mode by holding down the "filter" button while turning it on,
 and send the sysex. Note that you need to wait about 200msec between each sysex.
 
+## Unit tests
+
+Parts of the code can be tested on your development machine. We use the
+[Catch2](https://github.com/catchorg/Catch2) unit testing framework. To run the tests that live
+in the `test/` folder, just type:
+
+```
+make test
+```
+
+Note that the tests also serve as a kind of documentation, as the section names usually give a
+good hint of what the class is supposed to do.
+
 ## Contributing
 
 If you want to fix a bug, add a feature or contribute in any other way to the development
@@ -28,6 +41,7 @@ your contribution adheres to the following:
 - Please update [CHANGELOG.md](CHANGELOG.md) to contain a brief description of your changes.
 - Ensure you do not break loading of old patches.
 - Format your code using `make fmt` before submitting.
+- Run the unit tests using `make test` before submitting.
 
 Thank you, we are looking forward to your contribution! :)
 
