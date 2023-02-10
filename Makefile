@@ -24,10 +24,10 @@ test: .build/test/test
 	g++ $^ -o $@
 
 .build/test/catch_amalgamated.o: test/3rdparty/catch_amalgamated.cpp
-	g++ -c $^ -o $@
+	g++ -c $< -o $@
 
-.build/test/%.o: test/%.cpp
-	g++ -c -Iinclude/ $^ -o $@
+.build/test/%.o: test/%.cpp include/voice_allocation.hpp include/voice_state.hpp
+	g++ -c -Iinclude/ $< -o $@
 
 compile_commands.json:
 	pio run -t compiledb
