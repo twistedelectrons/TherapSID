@@ -13,7 +13,12 @@ template <size_t N> class MonoNoteTracker {
 				uint8_t velocity;
 		};
 
-		void note_on(uint8_t note, uint8_t velocity) { notes.push_back(NoteVelo{note, velocity}); }
+		void note_on(uint8_t note, uint8_t velocity) {
+			if (!notes.push_back(NoteVelo{note, velocity})) {
+				notes.erase(0);
+				notes.push_back(NoteVelo{note, velocity});
+			}
+		}
 
 		void note_off(uint8_t note) {
 			for (size_t i = notes.size(); i-- > 0;) {
@@ -44,9 +49,9 @@ template <size_t N> class MonoNoteTracker {
 template <size_t N> class PolyVoiceAllocator {
 	public:
 		struct VoiceSlot {
-			uint8_t note;
-			uint8_t velocity;
-			bool playing;
+			uint8_t note = 0;
+			uint8_t velocity = 0;
+			bool playing = false;
 		};
 
 		void set_max_voices(size_t value) {

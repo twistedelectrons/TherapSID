@@ -64,8 +64,10 @@ template<size_t N_OPERATORS> struct VoiceState {
 		if (velocity == 0)
 			return note_off(note);
 
-		_n_held_keys++;
-		_held_keys[note] = true;
+		if (!_held_keys[note]) {
+			_n_held_keys++;
+			_held_keys[note] = true;
+		}
 
 		if (n_individual_voices == 1) { // Monophonic mode
 			auto had_active_note = mono_note_tracker.has_active_note();
@@ -84,15 +86,20 @@ template<size_t N_OPERATORS> struct VoiceState {
 	}
 
 	VoiceStateEvent note_off(int note) {
-		_n_held_keys--;
-		_held_keys[note] = false;
+		if (_held_keys[note]) {
+			_n_held_keys--;
+			_held_keys[note] = false;
+		}
 
 		if (n_individual_voices == 1) { // Monophonic mode
 			mono_note_tracker.note_off(note);
 			if (!mono_note_tracker.has_active_note()) {
 				voice_off(0);
-
 				return VoiceStateEvent::LAST_NOTE_OFF;
+			}
+			else {
+				voice_on(0, mono_note_tracker.active_note()->note);
+				return VoiceStateEvent::NEUTRAL;
 			}
 		} else {             // paraphonic mode
 			auto voice_idx = voice_allocator.note_off(note);
@@ -100,20 +107,20 @@ template<size_t N_OPERATORS> struct VoiceState {
 			if (voice_idx.has_value()) {
 				voice_off(*voice_idx);
 			}
+			return VoiceStateEvent::NEUTRAL;
 		}
-		return VoiceStateEvent::NEUTRAL;
 	}
 
 	void note_on_individual(int voice, int note) {
-		mono_note_trackers[voice].note_on(note, 64);
-		voice_on(voice, mono_note_trackers[voice].active_note()->note);
+		mono_tracker[voice].note_on(note, 64);
+		voice_on(voice, mono_tracker[voice].active_note()->note);
 	}
 
 	void note_off_individual(int voice, int note) {
-		mono_note_trackers[voice].note_off(note);
+		mono_tracker[voice].note_off(note);
 
-		if (mono_note_trackers[voice].has_active_note()) {
-			voice_on(voice, mono_note_trackers[voice].active_note()->note);
+		if (mono_tracker[voice].has_active_note()) {
+			voice_on(voice, mono_tracker[voice].active_note()->note);
 		} else {
 			voice_off(voice);
 		}
