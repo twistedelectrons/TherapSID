@@ -4,7 +4,7 @@
 #include <stddef.h>
 
 #include "util.hpp"
-#include "leds.h" // FIXME remove
+//#include "leds.h" // FIXME remove
 
 template <size_t N> class MonoNoteTracker {
 	public:
@@ -61,7 +61,7 @@ template <size_t N> class PolyVoiceAllocator {
 			}
 		}
 
-		optional<size_t> find_voice(uint8_t note) {
+		optional<size_t> find_voice(uint8_t note) const {
 			for (size_t i = 0; i < max_voices; i++) {
 				if (voices[i].note == note && voices[i].playing) {
 					return i;
@@ -82,7 +82,7 @@ template <size_t N> class PolyVoiceAllocator {
 			voices[slot] = VoiceSlot{note, velocity, true};
 			next_slot = (next_slot + 1) % max_voices;
 
-			ledNumber((!!voices[0].playing) + (!!voices[1].playing) * 2 + (!!voices[2].playing) * 4);
+			//ledNumber((!!voices[0].playing) + (!!voices[1].playing) * 2 + (!!voices[2].playing) * 4);
 
 			return slot;
 		}
@@ -92,7 +92,7 @@ template <size_t N> class PolyVoiceAllocator {
 			if (voice_idx.has_value()) {
 				voices[*voice_idx].playing = false;
 			}
-			ledNumber((!!voices[0].playing) + (!!voices[1].playing) * 2 + (!!voices[2].playing) * 4);
+			//ledNumber((!!voices[0].playing) + (!!voices[1].playing) * 2 + (!!voices[2].playing) * 4);
 			return voice_idx;
 		}
 

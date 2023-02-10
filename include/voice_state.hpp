@@ -1,4 +1,3 @@
-#include "Arduino.h"
 #include "voice_allocation.hpp"
 
 const long ONE_FP = 1L<<16;

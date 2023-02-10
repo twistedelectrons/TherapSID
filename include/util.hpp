@@ -4,10 +4,13 @@
 void panic(int num7seg, int numvoice);
 
 #define DEBUG // TODO
-#ifdef DEBUG
-	#define assert(x) _assert(x)
-#else
-	#define assert(x)
+
+#ifndef assert
+	#ifdef DEBUG
+		#define assert(x) _assert(x)
+	#else
+		#define assert(x)
+	#endif
 #endif
 
 inline void _assert(bool condition) {
