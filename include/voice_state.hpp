@@ -7,7 +7,7 @@ struct Glide {
 	int current_pitch() const { return current_pitch_fp / ONE_FP; }
 
 	void glide_tick(int glide) {
-		if (glide) {
+		if (false && glide) { // FIXME
 			glide_counter++;
 			if (glide_counter >= glide) {
 				glide_counter = 0;
