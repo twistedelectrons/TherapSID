@@ -101,7 +101,7 @@ Sid::Sid(int chip_enable_bit) : chip_enable_bit(chip_enable_bit) {
 
 
 void Sid::set_pulsewidth(int voice, uint16_t pulsewidth) {
-	registers[7*voice + PULSEWIDTH_HI] = pulsewidth << 8;
+	registers[7*voice + PULSEWIDTH_HI] = pulsewidth >> 8;
 	registers[7*voice + PULSEWIDTH_LO] = pulsewidth & 0xFF;
 }
 
