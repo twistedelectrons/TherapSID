@@ -22,6 +22,8 @@ class MidiPedalAdapter {
 						note_off_callback(channel, i + 64);
 					}
 				}
+				held_lo[channel] = 0;
+				held_hi[channel] = 0;
 			}
 
 			this->pedal_down = pedal_down;
