@@ -208,7 +208,7 @@ bool Sid::is_update_allowed(size_t register_index) {
 
 /// Updates a SID register if it has been changed, and if it's currently allowed to update it.
 bool Sid::maybe_update_register(size_t index) {
-	bool has_changed = registers_sent[index] == registers[index];
+	bool has_changed = registers_sent[index] != registers[index];
 	bool is_allowed = is_update_allowed(index);
 	if ((has_changed && is_allowed) || force_initial_update) {
 		registers_sent[index] = registers[index];
