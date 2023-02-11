@@ -62,14 +62,14 @@ void setSidRegisters(Preset const& preset, ParamsAfterLfo const& params_after_lf
 		for (int v=0; v<3; v++) {
 			int pv = preset_data.paraphonic ? 0 : v;
 			int oper = v + 3*i;
-			sid_chips[i].set_attack_decay(pv, preset.voice[pv].attack, preset.voice[pv].decay);
-			sid_chips[i].set_sustain_release(pv, preset.voice[pv].sustain, preset.voice[pv].release);
-			sid_chips[i].set_pulsewidth(pv, params_after_lfo.pulsewidth[pv]);
+			sid_chips[i].set_attack_decay(v, preset.voice[pv].attack, preset.voice[pv].decay);
+			sid_chips[i].set_sustain_release(v, preset.voice[pv].sustain, preset.voice[pv].release);
+			sid_chips[i].set_pulsewidth(v, params_after_lfo.pulsewidth[pv]);
 
 			auto pitch = glide[oper].current_pitch();
-			sid_chips[i].set_freq(pv, i==0 ? pitch : preset.fatten_pitch(pitch));
+			sid_chips[i].set_freq(v, i==0 ? pitch : preset.fatten_pitch(pitch));
 
-			sid_chips[i].set_reg_control(pv, preset.voice[pv].reg_control); // FIXME gate
+			sid_chips[i].set_reg_control(v, preset.voice[pv].reg_control | (voice_state.gate(oper) ? 1 : 0) );
 		}
 
 		// disable voice->filter routing if voice is off or filter is off.
