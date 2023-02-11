@@ -114,8 +114,3 @@ template <size_t N> class PolyVoiceAllocator {
 		size_t next_slot = 0;
 		size_t max_voices = N;
 };
-
-// FIXME separate globals from library code
-extern MonoNoteTracker<16> mono_note_tracker;
-extern MonoNoteTracker<16> mono_note_trackers[3];
-extern PolyVoiceAllocator<3> voice_allocator;

@@ -142,7 +142,7 @@ template<size_t N_OPERATORS> struct VoiceState {
 		uint8_t mono_note = 0;
 
 		MonoNoteTracker<16> mono_tracker[N_OPERATORS];
-		PolyVoiceAllocator<16> voice_allocator;
+		PolyVoiceAllocator<3> voice_allocator;
 		MonoNoteTracker<16> mono_note_tracker;
 
 		bool _held_keys[128] = {false};
