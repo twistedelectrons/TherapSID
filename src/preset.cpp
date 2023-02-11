@@ -298,17 +298,13 @@ void save() {
 	writey(preset_data.cutoff >> 2);
 
 	writey(preset_data.arp_speed_base); // 40
-
-	saveBounce = 1600;
-	saveMode = false;
-	ledNumber(preset);
 }
 
 void load(byte number) {
 	// TODO: reset held := 0 and arpCount
 	lfo[0] = lfo[1] = lfo[2] = 0;
 
-	loadTimer = 800;
+	// loadTimer = 800; // FIXME remove whole variable?
 
 	arpCounter = 0;
 	Serial1.end();
@@ -414,9 +410,6 @@ void load(byte number) {
 	bitWrite(preset_data.voice[2].tune_base, 2, bitRead(temp, 4));
 	bitWrite(preset_data.voice[2].tune_base, 3, bitRead(temp, 5));
 	bitWrite(preset_data.voice[2].tune_base, 4, bitRead(temp, 6));
-
-	shape1Pressed = false;
-	shape1PressedTimer = 0;
 
 	preset_data.voice[0].tune_base = constrain(preset_data.voice[0].tune_base, 0, 24);
 	preset_data.voice[1].tune_base = constrain(preset_data.voice[1].tune_base, 0, 24);
@@ -620,8 +613,6 @@ void load(byte number) {
 	if (preset_data.arp_speed_base == 0)
 		preset_data.arp_speed_base = 1;
 
-	lastMovedPot(lastPot);
-
 	bitWrite(preset_data.voice[0].reg_control, 0, 0);
 	bitWrite(preset_data.voice[1].reg_control, 0, 0);
 	bitWrite(preset_data.voice[2].reg_control, 0, 0);
@@ -629,7 +620,7 @@ void load(byte number) {
 	if (jumble)
 		preset_data.arp_mode = 0;
 
-	preset_data.set_leds(lastPot, selectedLfo, filterModeHeld);
+	// preset_data.set_leds(lastPot, selectedLfo, filterModeHeld); FIXME
 
 	Timer1.initialize(100);      //
 	Timer1.attachInterrupt(isr); // attach the service routine here

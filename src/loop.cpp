@@ -1,5 +1,3 @@
-#include <EEPROM.h>
-
 #include "globals.h"
 #include "display.h"
 #include "arp.h"
@@ -9,9 +7,9 @@
 #include "leds.h"
 #include "lfo.h"
 #include "sid.h"
+#include "ui.h"
 
 static bool loadedAfterStartup; // we load the preset after 2sec (when SID is ready)
-static bool saveModeFlash;
 
 static int calc_pitch(int note, float frac) {
 	static const int32_t sidScale[] = {
@@ -101,54 +99,34 @@ void setSidRegisters(Preset const& preset, ParamsAfterLfo const& params_after_lf
 				sid_chips[i].set_filter_mode(Sid::LOWPASS | Sid::HIGHPASS);
 				break;
 		}
+
+		sid_chips[i].send_next_update_pair();
 	}
 }
 
 void loop() {
+	//trace(41, 111);
 	// load the first preset after all the butts and pots have been scanned
 	if (!loadedAfterStartup) {
 		if (millis() > 1400) {
+			//trace(53, 111);
 			load(preset);
+			//trace(53, 222);
 			loadedAfterStartup = true;
 			ledNumber(preset);
 		}
 	}
-	if (saveModeTimer > 2000) {
-		saveModeTimer = 0;
-		saveModeFlash = !saveModeFlash;
-		if (saveModeFlash) {
-			digit(0, 99);
-			digit(1, 99);
-		} else {
-			ledNumber(preset);
-		}
-	}
 
-	if (fatShow) {
-		digit(0, 12);
-		digit(1, (int)preset_data.fat_mode + 1);
-		fatShow = false;
-	}
+	ui_loop();
+	//trace(41, 222);
 
 	midiRead();
+	//trace(41, 333);
 	if (arpCounter >= arpSpeed + 100) {
 		arpCounter = 0;
 		arpTick();
 	}
-
-	if (shape1PressedTimer > 10000) {
-		shape1Pressed = false;
-		shape1PressedTimer = 0;
-		preset_data.paraphonic = !preset_data.paraphonic;
-	}
-
-	if (dotTimer) {
-		dotTimer--;
-		if (!dotTimer) {
-			mydisplay.setLed(0, 7, 6, 0);
-			mydisplay.setLed(0, 7, 7, 0);
-		}
-	}
+	//trace(41, 444);
 
 	if (gate && !preset_data.paraphonic) {
 		mux(15);
@@ -177,32 +155,17 @@ void loop() {
 	} else {
 		cvActive[2] = false;
 	}
-
-	if (jumble) {
-		load(1);
-		jumble = 0;
-	}
-
-	if ((!saveMode) && (presetLast != preset)) {
-		load(preset);
-		presetLast = preset;
-		EEPROM.update(3999, presetLast);
-	}
-	if (saveBounce)
-		saveBounce--;
-	if (frozen) {
-		frozen--;
-	}
+	//trace(41, 555);
 
 	readMux();
+	//trace(41, 666);
 
 	voice_state.set_n_individual_voices(preset_data.paraphonic ? 3 : 1);
+	//trace(41, 777);
 	ParamsAfterLfo params_after_lfo = lfoTick();
+	//trace(41, 888);
 	calculatePitch();
+	//trace(41, 999);
 	setSidRegisters(preset_data, params_after_lfo);
-
-	if (showPresetNumber) {
-		ledNumber(preset);
-		showPresetNumber = false;
-	}
+	//trace(41, 909);
 }

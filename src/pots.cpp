@@ -3,6 +3,7 @@
 #include "leds.h"
 #include "lfo.h"
 #include "midi.h"
+#include "ui_vars.h"
 
 static int arpDivisions[] = {1, 3, 6, 8, 12, 24, 32, 48};
 
@@ -22,17 +23,32 @@ static byte scale100(int input) {
 }
 
 static byte octScale(int value) {
-
 	value = map(value, 0, 1023, 0, 25);
 	if (value > 24)
 		value = 24;
 	return (value);
 }
 
+// FIXME remove these two as soon we watch the values periodically
+static void setLastMovedPot(byte number) {
+	lastPot = number;
+	preset_data.set_leds(lastPot, selectedLfo, filterModeHeld);
+}
+
+static void setSelectedLfo(byte number) {
+	static byte selectedLfoLast = 0xFF;
+
+	if (number != selectedLfoLast) {
+		selectedLfo = selectedLfoLast = number;
+		preset_data.set_leds(lastPot, selectedLfo, filterModeHeld);
+	}
+}
+
+
 void movedPot(byte number, int value, bool isMidi) {
 	if (!saveMode) {
 		if (!isMidi) {
-			lastMovedPot(20); // unselect
+			setLastMovedPot(20); // unselect
 		}
 		switch (number) {
 			case 4:
@@ -43,7 +59,7 @@ void movedPot(byte number, int value, bool isMidi) {
 				if (!isMidi) {
 					sendCC(2, value);
 					ledNumber(scale100(value));
-					lastMovedPot(0);
+					setLastMovedPot(0);
 				}
 				break; // PW1
 			case 24:
@@ -54,7 +70,7 @@ void movedPot(byte number, int value, bool isMidi) {
 				if (!isMidi) {
 					sendCC(10, value);
 					ledNumber(scale100(value));
-					lastMovedPot(3);
+					setLastMovedPot(3);
 				}
 				break; // PW2
 			case 30:
@@ -65,7 +81,7 @@ void movedPot(byte number, int value, bool isMidi) {
 				if (!isMidi) {
 					sendCC(18, value);
 					ledNumber(scale100(value));
-					lastMovedPot(6);
+					setLastMovedPot(6);
 				}
 				break; // PW3
 
@@ -74,7 +90,7 @@ void movedPot(byte number, int value, bool isMidi) {
 				if (!isMidi) {
 					sendCC(3, value);
 					ledNumber(preset_data.voice[0].tune_base - 12);
-					lastMovedPot(1);
+					setLastMovedPot(1);
 				}
 				break; // TUNE1
 			case 26:
@@ -82,7 +98,7 @@ void movedPot(byte number, int value, bool isMidi) {
 				if (!isMidi) {
 					sendCC(11, value);
 					ledNumber(preset_data.voice[1].tune_base - 12);
-					lastMovedPot(4);
+					setLastMovedPot(4);
 				}
 				break; // TUNE2
 			case 21:
@@ -90,7 +106,7 @@ void movedPot(byte number, int value, bool isMidi) {
 				if (!isMidi) {
 					sendCC(19, value);
 					ledNumber(preset_data.voice[2].tune_base - 12);
-					lastMovedPot(7);
+					setLastMovedPot(7);
 				}
 				break; // TUNE3
 
@@ -99,7 +115,7 @@ void movedPot(byte number, int value, bool isMidi) {
 				if (!isMidi) {
 					sendCC(4, value);
 					ledNumber(scaleFine(value));
-					lastMovedPot(2);
+					setLastMovedPot(2);
 				}
 				break; // FINE1
 			case 17:
@@ -107,7 +123,7 @@ void movedPot(byte number, int value, bool isMidi) {
 				if (!isMidi) {
 					sendCC(12, value);
 					ledNumber(scaleFine(value));
-					lastMovedPot(5);
+					setLastMovedPot(5);
 				}
 				break; // FINE2
 			case 31:
@@ -115,7 +131,7 @@ void movedPot(byte number, int value, bool isMidi) {
 					sendCC(20, value);
 					preset_data.voice[2].fine_base = value / 1023.f;
 					ledNumber(scaleFine(value));
-					lastMovedPot(8);
+					setLastMovedPot(8);
 				}
 				break; // FINE3
 
@@ -264,21 +280,21 @@ void movedPot(byte number, int value, bool isMidi) {
 						ledNumber(scale100(value));
 					}
 
-					lastMovedPot(9);
+					setLastMovedPot(9);
 				}
 				lfoClockSpeedPending[0] = 1 + (value >> 7);
 				preset_data.lfo[0].speed = value * 1.3;
-				setLfo(0);
+				setSelectedLfo(0);
 				break; // LFO RATE 1
 
 			case 12:
 				if (!isMidi) {
 					sendCC(27, value);
 					ledNumber(scale100(value));
-					lastMovedPot(10);
+					setLastMovedPot(10);
 				}
 				preset_data.lfo[0].depth = value;
-				setLfo(0);
+				setSelectedLfo(0);
 				break; // LFO DEPTH 1
 
 			case 10:
@@ -291,21 +307,21 @@ void movedPot(byte number, int value, bool isMidi) {
 						ledNumber(scale100(value));
 					}
 
-					lastMovedPot(11);
+					setLastMovedPot(11);
 				}
 				lfoClockSpeedPending[1] = 1 + (value >> 7);
 				preset_data.lfo[1].speed = value * 1.3;
-				setLfo(1);
+				setSelectedLfo(1);
 				break; // LFO RATE 2
 
 			case 9:
 				if (!isMidi) {
 					sendCC(29, value);
 					ledNumber(scale100(value));
-					lastMovedPot(12);
+					setLastMovedPot(12);
 				}
 				preset_data.lfo[1].depth = value;
-				setLfo(1);
+				setSelectedLfo(1);
 				break; // LFO DEPTH 2
 
 			case 36:
@@ -318,28 +334,28 @@ void movedPot(byte number, int value, bool isMidi) {
 						ledNumber(scale100(value));
 					}
 
-					lastMovedPot(13);
+					setLastMovedPot(13);
 				}
 				lfoClockSpeedPending[2] = 1 + (value >> 7);
 				preset_data.lfo[2].speed = value * 1.3;
-				setLfo(2);
+				setSelectedLfo(2);
 				break; // LFO RATE 3
 
 			case 2:
 				if (!isMidi) {
 					sendCC(31, value);
-					lastMovedPot(14);
+					setLastMovedPot(14);
 					ledNumber(scale100(value));
 				}
 				preset_data.lfo[2].depth = value;
-				setLfo(2);
+				setSelectedLfo(2);
 				break; // LFO DEPTH 3
 
 			case 8:
 				if (!isMidi) {
 					sendCC(59, value);
 					ledNumber(scale100(value));
-					lastMovedPot(15);
+					setLastMovedPot(15);
 				}
 				preset_data.cutoff = value;
 				break; // CUTOFF
@@ -348,7 +364,7 @@ void movedPot(byte number, int value, bool isMidi) {
 				if (!isMidi) {
 					sendCC(33, value);
 					ledNumber(preset_data.resonance_base);
-					lastMovedPot(16);
+					setLastMovedPot(16);
 				}
 				preset_data.resonance_base = scale4bit(value);
 				break; // RESONANCE
@@ -356,7 +372,7 @@ void movedPot(byte number, int value, bool isMidi) {
 			case 7:
 				if (!isMidi) {
 					sendCC(34, value);
-					lastMovedPot(17);
+					setLastMovedPot(17);
 				}
 				if (voice_state.n_held_keys() > 1) { // TODO why >, not >=?
 					arpStepBase = value >> 2;
@@ -366,7 +382,7 @@ void movedPot(byte number, int value, bool isMidi) {
 			case 41:
 				if (!isMidi) {
 					sendCC(35, value);
-					lastMovedPot(18);
+					setLastMovedPot(18);
 					ledNumber(scale100(value - 10));
 				}
 
@@ -380,7 +396,7 @@ void movedPot(byte number, int value, bool isMidi) {
 					sendCC(36, value);
 					ledNumber(arpRange + 1);
 				}
-				lastMovedPot(19);
+				setLastMovedPot(19);
 				preset_data.arp_range_base = value >> 8;
 				break; // ARP RANGE
 		}

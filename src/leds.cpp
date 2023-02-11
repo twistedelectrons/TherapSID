@@ -1,6 +1,7 @@
 #include "globals.h"
 #include "leds.h"
 #include "display.h"
+#include "ui_vars.h"
 
 void showVersion() {
 	digit(1, versionDecimal);
@@ -26,14 +27,11 @@ void ledSet(byte number, bool value) {
 */
 
 void rightDot() {
-
 	mydisplay.setLed(0, 7, 7, 1);
-
 	dotTimer = 50;
 }
 
 void leftDot() {
-
 	mydisplay.setLed(0, 7, 6, 1);
 	dotTimer = 50;
 }

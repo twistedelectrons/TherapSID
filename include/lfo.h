@@ -5,8 +5,5 @@ struct ParamsAfterLfo {
 	int pulsewidth[3]; // 0..2048
 };
 
-void setLfo(byte number);
 ParamsAfterLfo lfoTick();
-void lastMovedPot(byte number);
-void chain();
 void clearLfo();

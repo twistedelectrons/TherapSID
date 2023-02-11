@@ -3,8 +3,8 @@
 #include "lfo.h"
 #include "leds.h"
 #include "isr.h"
+#include "ui.h"
 
-static int presetScrollTimer;
 static int envCounter;
 static int lfoCounter[3];
 static int env2;
@@ -117,19 +117,7 @@ const int envMap2[] = {
 // interrupt service route to animate things (LFO arp etc)
 // called at 10kHz frequency (probably slower) // FIXME figure out the actual frequency.
 void isr() {
-
-	if (shape1Pressed) {
-		shape1PressedTimer++;
-	}
-
-	if (resetDown) {
-		resetDownTimer++;
-		if (resetDownTimer > 16000) {
-			resetDown = 0;
-			resetDownTimer = 0;
-			jumble = 1;
-		}
-	}
+	ui_tick();
 
 	// ENV
 	switch (envState) {
@@ -182,19 +170,6 @@ void isr() {
 			break; // RELEASE
 	}
 
-	if (loadTimer)
-		loadTimer--;
-
-	if (filterModeHeld) {
-		arpModeCounter++;
-		if (arpModeCounter > 25000) {
-			fatChanged = true;
-			arpModeCounter = 0;
-			preset_data.fat_mode = static_cast<FatMode>(((int)preset_data.fat_mode + 1) % 4);
-			fatShow = true;
-		}
-	}
-
 	/* FIXME: redo CV/gate functionality
 	// cvGate
 	gate = (PINA & _BV(7)) == 0;
@@ -207,59 +182,13 @@ void isr() {
 	}
 	*/
 
-	if (saveMode) {
-		saveModeTimer++;
-	}
-
 	if (!sync) {
 		// ARP
 		if (preset_data.arp_mode && arping() && voice_state.n_held_keys() > 0) {
 			arpCounter++;
 		}
 	}
-	if (presetUp || presetDown) {
-		if (presetUp && !presetDown) {
-			presetScrollTimer += 4;
-			if (presetScrollTimer > presetScrollSpeed) {
-				presetScrollTimer = 0;
-				if (presetScrollSpeed > 1001) {
-					presetScrollSpeed -= 1000;
-				}
-				preset++;
-				if (preset > 99) {
-					preset = 1;
-				}
-				showPresetNumber = true;
-				scrolled = true;
-			}
-		} else if (!presetUp && presetDown) {
-			presetScrollTimer += 4;
-			if (presetScrollTimer > presetScrollSpeed) {
-				presetScrollTimer = 0;
-				if (presetScrollSpeed > 1001) {
-					presetScrollSpeed -= 1000;
-				}
-				preset--;
-				if (preset < 1) {
-					preset = 99;
-				}
-				showPresetNumber = true;
-				scrolled = true;
-			}
-		}
-	}
-
-	if (lfoButtPressed) {
-		lfoButtTimer++;
-		if (lfoButtTimer == 6000) {
-			clearLfo();
-			lfoButtTimer = 0;
-			lfoButtPressed = false;
-		}
-	} // delete LFO stuff
-
 	// glides
-
 	// in monophonic mode, we glide only while the old note is still held down.
 	bool skip_glide = !preset_data.paraphonic && voice_state.n_held_keys() <= 1;
 	for (int i=0; i<6; i++) {

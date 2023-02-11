@@ -106,10 +106,11 @@ void setup() {
 
 	DDRC = B11111000;
 
-	presetLast = EEPROM.read(3999);
-	if (presetLast > 98)
-		presetLast = 1;
-	preset = presetLast;
+	int preset_tmp;
+	preset_tmp = EEPROM.read(3999);
+	if (preset_tmp > 98)
+		preset_tmp = 1;
+	preset = preset_tmp;
 
 	masterChannel = EEPROM.read(3998);
 	if (masterChannel > 16) {

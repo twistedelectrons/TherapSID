@@ -13,21 +13,12 @@ static int lfoSpeedLfo1, lfoSpeedLfo2, lfoSpeedLfo3, lfoSpeedLfo4, lfoSpeedLfo5,
     lfoDepthLfo2, lfoDepthLfo3, lfoDepthLfo4, lfoDepthLfo5, lfoDepthLfo6;
 static int pw1Lfo1, pw1Lfo2, pw1Lfo3, pw2Lfo1, pw2Lfo2, pw2Lfo3, pw3Lfo1, pw3Lfo2, pw3Lfo3;
 static byte resLfo1, resLfo2, resLfo3;
-static byte selectedLfoLast;
 static int lfoDepth[3] = {0,0,0};
 static byte lfoLast[3];
 
 static const bool limitPw = true;
 static const int pwMin = 10;
 static const int pwMax = 2050;
-
-// FIXME move to gui. make selectedLfo and filterModeHeld a property with setter and getter
-void setLfo(byte number) {
-	if (number != selectedLfoLast) {
-		selectedLfo = selectedLfoLast = number;
-		preset_data.set_leds(lastPot, selectedLfo, filterModeHeld);
-	}
-}
 
 /// Sets a lot of global variables and returns sid's parameters after lfo'ing them.
 ParamsAfterLfo lfoTick() {
@@ -483,26 +474,4 @@ ParamsAfterLfo lfoTick() {
 	}
 
 	return result;
-}
-
-void lastMovedPot(byte number) {
-	lastPot = number;
-	preset_data.set_leds(lastPot, selectedLfo, filterModeHeld);
-}
-
-void chain() {
-	if (lastPot != 20) {
-		preset_data.lfo_map[selectedLfo][lastPot] = !preset_data.lfo_map[selectedLfo][lastPot];
-
-		lastMovedPot(lastPot);
-	}
-}
-
-void clearLfo() {
-
-	for (int i = 0; i < 20; i++) {
-		preset_data.lfo_map[selectedLfo][i] = 0;
-	}
-	digit(0, 10);
-	digit(1, 11);
 }

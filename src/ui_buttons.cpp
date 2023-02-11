@@ -6,6 +6,7 @@
 #include "lfo.h"
 #include "arp.h"
 #include "util.hpp"
+#include "ui_vars.h"
 
 static bool saveEngaged;
 static byte midiSetup = 0;
@@ -123,22 +124,22 @@ void buttChanged(byte number, bool value) {
 			case LFO_CHAIN1:
 				lfoButtPressed = true;
 				selectedLfo = 0;
-				if ((lastPot != 9) && (lastPot != 10)) {
-					chain();
+				if (lastPot != 9 && lastPot != 10 && lastPot != 20) {
+					preset_data.lfo_map[selectedLfo][lastPot] = !preset_data.lfo_map[selectedLfo][lastPot];
 				}
 				break;
 			case LFO_CHAIN2:
 				lfoButtPressed = true;
 				selectedLfo = 1;
-				if ((lastPot != 11) && (lastPot != 12)) {
-					chain();
+				if (lastPot != 11 && lastPot != 12 && lastPot != 20) {
+					preset_data.lfo_map[selectedLfo][lastPot] = !preset_data.lfo_map[selectedLfo][lastPot];
 				}
 				break;
 			case LFO_CHAIN3:
 				lfoButtPressed = true;
 				selectedLfo = 2;
-				if ((lastPot != 13) && (lastPot != 14)) {
-					chain();
+				if (lastPot != 13 && lastPot != 14 && lastPot != 20) {
+					preset_data.lfo_map[selectedLfo][lastPot] = !preset_data.lfo_map[selectedLfo][lastPot];
 				}
 				break;
 
@@ -221,6 +222,7 @@ void buttChanged(byte number, bool value) {
 							} else {
 								saveBounce = 1600;
 								save();
+								saveMode = false;
 							}
 						}
 					}
@@ -254,6 +256,7 @@ void buttChanged(byte number, bool value) {
 							} else {
 								saveBounce = 1600;
 								save();
+								saveMode = false;
 							}
 						}
 					}
@@ -299,7 +302,8 @@ void buttChanged(byte number, bool value) {
 							preset_data.arp_mode = 0;
 							sendNoteOff(lastNote, 127, masterChannelOut);
 						}
-						showArp();
+						arp_mode_changed();
+						// FIXME display new arp mode in the gui for some time.
 					}
 				} else if (midiSetup == 3) {
 					midiSetup = 0;

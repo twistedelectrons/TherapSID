@@ -1,3 +1,6 @@
+2023-02-11:
+	- Applying aftertouch does no longer set the UI's current lfo to 1.
+
 2023-02-01:
 	- Changed paraphonic UI behavior: ADSR[2,3] in the preset are not changed/overridden any more
 	  when moving a knob.

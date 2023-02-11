@@ -2,6 +2,7 @@
 #include <stddef.h>
 
 void panic(int num7seg, int numvoice);
+void trace(int num7seg, int numvoice);
 
 #define DEBUG // TODO
 

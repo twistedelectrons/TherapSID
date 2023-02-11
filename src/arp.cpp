@@ -10,42 +10,10 @@ static byte scrubNote, scrubNoteLast;
 
 static int arp_note; // FIXME FIXME FIXME this is never used. send note_on/off to the voice manager instead!
 
-void showArp() {
+void arp_mode_changed() {
 	arpRound = 0;
 	arpCounter = 0;
 	arpNote = 0;
-
-	// don't get in the way of startup preset display
-	if (millis() > 2000)
-		frozen = 500;
-
-	switch (preset_data.arp_mode) {
-
-		case 0: // OFF
-			digit(0, 0);
-			digit(1, 12);
-			break;
-
-		case 1: // UP
-			digit(0, 13);
-			digit(1, 14);
-			break;
-
-		case 2: // DOWN
-			digit(0, 15);
-			digit(1, 0);
-			break;
-
-		case 3: // UP/DOWN
-			digit(0, 13);
-			digit(1, 15);
-			break;
-
-		case 4: // UP/DOWN
-			digit(0, 16);
-			digit(1, 15);
-			break;
-	}
 }
 
 void arpSteptrigger(int number) {
