@@ -233,4 +233,4 @@ void Sid::send(size_t index, int data) {
 }
 
 
-Sid sid_chips[2] = {Sid(_BV(6)), Sid(_BV(2))};
+Sid sid_chips[2] = {Sid(6), Sid(2)};
