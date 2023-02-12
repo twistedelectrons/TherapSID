@@ -3,3 +3,6 @@ firmware.syx
 *.pyc
 compile_commands.json
 .cache
+.build
+.compile_commands.json
+.compile_commands.tmp
