@@ -110,29 +110,29 @@ void UiDisplayController::show_changed(int value) {
 	if (value > 99)
 		value = 99;
 
-	temp_7seg(value / 10, value % 10, 1000);
+	temp_7seg(value / 10, value % 10, 250);
 }
 
 void UiDisplayController::show_arp_mode(int arp_mode) {
 	switch (arp_mode) {
 		case 0: // OFF
-			temp_7seg(0, 12, 2000);
+			temp_7seg(0, 12, 500);
 			break;
 
 		case 1: // UP
-			temp_7seg(13, 13, 2000);
+			temp_7seg(13, 14, 500);
 			break;
 
 		case 2: // DOWN
-			temp_7seg(15, 0, 2000);
+			temp_7seg(15, 0, 500);
 			break;
 
 		case 3: // UP/DOWN
-			temp_7seg(13, 15, 2000);
+			temp_7seg(13, 15, 500);
 			break;
 
 		case 4: // UP/DOWN
-			temp_7seg(16, 15, 2000);
+			temp_7seg(16, 15, 500);
 			break;
 	}
 }
@@ -177,7 +177,7 @@ void UiDisplayController::update_7seg(int preset_number, const Preset& preset, c
 		const auto& ol = old_preset.lfo[i];
 
 		if (l.speed != ol.speed)
-			show_changed(l.speed / 1.3f);
+			show_changed(scale100(l.speed / 1.3f));
 
 		if (l.depth != ol.depth)
 			show_changed(scale100(l.depth));
@@ -190,7 +190,7 @@ void UiDisplayController::update_7seg(int preset_number, const Preset& preset, c
 		show_changed(preset.resonance_base);
 
 	if (preset.arp_speed_base != old_preset.arp_speed_base)
-		show_changed(scale100((1023 - preset.arp_speed_base) << 2));
+		show_changed(scale100(1023 - 4 * preset.arp_speed_base));
 
 	if (preset.arp_range_base != old_preset.arp_range_base)
 		show_changed(preset.arp_range_base);
