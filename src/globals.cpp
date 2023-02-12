@@ -7,7 +7,7 @@ bool lfoNewRand[3];
 
 int loadTimer;
 
-const byte version = 2;
+const byte version = 3;
 const byte versionDecimal = 0;
 
 bool fatShow = false;
