@@ -1,9 +1,7 @@
 #include "globals.h"
 #include "ui_leds.h"
 #include "preset.h"
-#include "sid.h"
 #include "midi.h"
-#include "lfo.h"
 #include "arp.h"
 #include "util.hpp"
 #include "ui_vars.h"
@@ -326,7 +324,7 @@ void buttChanged(byte number, bool value) {
 							preset_data.arp_mode = 0;
 							sendNoteOff(lastNote, 127, masterChannelOut);
 						}
-						arp_mode_changed();
+						reset_arp();
 						// FIXME display new arp mode in the gui for some time.
 					}
 				} else if (midiSetup == 3) {

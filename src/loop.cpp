@@ -1,10 +1,8 @@
 #include "globals.h"
-#include "display.h"
 #include "arp.h"
 #include "midi.h"
 #include "mux.h"
 #include "preset.h"
-#include "ui_leds.h"
 #include "lfo.h"
 #include "sid.h"
 #include "ui.h"
@@ -104,7 +102,6 @@ void loop() {
 			load(preset);
 			// trace(53, 222);
 			loadedAfterStartup = true;
-			ledNumber(preset);
 		}
 	}
 

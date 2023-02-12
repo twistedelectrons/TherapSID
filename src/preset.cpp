@@ -5,7 +5,6 @@
 #include "ui_leds.h"
 #include "isr.h"
 #include "preset.h"
-#include "lfo.h"
 #include "midi.h"
 #include "util.hpp"
 

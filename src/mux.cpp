@@ -1,7 +1,6 @@
 #include <Arduino.h>
 #include <digitalWriteFast.h>
 
-#include "globals.h"
 #include "mux.h"
 #include "ui_pots.h"
 #include "ui_buttons.h"

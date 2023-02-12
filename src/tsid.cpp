@@ -1,14 +1,11 @@
 #include "globals.h"
 #include "display.h"
-#include "arp.h"
 #include "midi.h"
 #include "mux.h"
 #include "boot.h"
 #include "isr.h"
-#include "preset.h"
 #include "sid.h"
 #include "ui_leds.h"
-#include "lfo.h"
 
 /*
  *

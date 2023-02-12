@@ -1,5 +1,4 @@
 #include "globals.h"
-#include "ui_leds.h"
 #include "lfo.h"
 #include "arp.h"
 #include "midi.h"

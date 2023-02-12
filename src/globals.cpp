@@ -7,9 +7,6 @@ bool lfoNewRand[3];
 
 int loadTimer;
 
-const byte version = 3;
-const byte versionDecimal = 0;
-
 bool fatShow = false;
 // LIMIT PW
 float bend, bend1, bend2, bend3;
@@ -63,5 +60,4 @@ bool saveMode;
 int saveModeTimer;
 byte lastNote = 0;
 int arpStepBase;
-int dotTimer;
 bool showPresetNumber; // when high we show preset number once

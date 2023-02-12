@@ -1,3 +1,4 @@
+#pragma once
 #include <Arduino.h>
 #include "preset.h"
 #include "voice_state.hpp"
@@ -9,8 +10,6 @@ extern Glide glide[6];
 extern bool sendLfo;
 extern bool sendArp;
 extern bool lfoNewRand[3];
-extern const byte version;
-extern const byte versionDecimal;
 extern float bend, bend1, bend2, bend3; // TODO reactivate bend1-bend3
 extern bool sync;
 extern bool cvActive[3];

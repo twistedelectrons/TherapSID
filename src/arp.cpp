@@ -1,7 +1,6 @@
 #include "globals.h"
 #include "midi.h"
 #include "arp.h"
-#include "ui_leds.h"
 
 static byte arpNotes[128];
 static int arpNote;
@@ -10,7 +9,7 @@ static byte scrubNote, scrubNoteLast;
 
 static int arp_note; // FIXME FIXME FIXME this is never used. send note_on/off to the voice manager instead!
 
-void arp_mode_changed() {
+void reset_arp() {
 	arpRound = 0;
 	arpCounter = 0;
 	arpNote = 0;

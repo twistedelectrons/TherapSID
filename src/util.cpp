@@ -1,5 +1,4 @@
 #include "util.hpp"
-#include "globals.h"
 #include "ui_leds.h"
 
 void panic(int num7seg, int numvoice) {

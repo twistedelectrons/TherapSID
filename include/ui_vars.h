@@ -1,3 +1,4 @@
+#pragma once
 #include <Arduino.h>
 
 extern bool fatShow;              // UI
@@ -16,7 +17,6 @@ extern bool lfoButtPressed;       // UI
 extern int lfoButtTimer;          // UI
 extern bool saveMode;             // UI
 extern int saveModeTimer;         // UI
-extern int dotTimer;              // UI
 extern bool showPresetNumber;     // UI // when high we show preset number once
 
 extern bool filterModeHeld; // UI // FIXME: need to update LEDs when changing this

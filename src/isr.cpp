@@ -1,7 +1,4 @@
 #include "globals.h"
-#include "sid.h"
-#include "lfo.h"
-#include "ui_leds.h"
 #include "isr.h"
 #include "ui.h"
 

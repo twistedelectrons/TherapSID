@@ -68,13 +68,7 @@ void ui_loop() {
 		preset_data.paraphonic = !preset_data.paraphonic;
 	}
 
-	if (dotTimer) {
-		dotTimer--;
-		if (!dotTimer) {
-			mydisplay.setLed(0, 7, 6, 0);
-			mydisplay.setLed(0, 7, 7, 0);
-		}
-	}
+	dotTick();
 
 	if (jumble) {
 		load(1);

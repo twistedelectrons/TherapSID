@@ -5,10 +5,8 @@
 #include "ui_leds.h"
 #include "midi.h"
 #include "arp.h"
-#include "sid.h"
-#include "lfo.h"
 #include "ui_pots.h"
-#include "voice_allocation.hpp"
+#include "voice_state.hpp"
 #include "midi_pedal.hpp"
 
 static byte mStatus;
