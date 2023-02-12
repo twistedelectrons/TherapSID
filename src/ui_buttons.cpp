@@ -1,5 +1,4 @@
 #include "globals.h"
-#include "ui_leds.h"
 #include "preset.h"
 #include "midi.h"
 #include "arp.h"
@@ -7,7 +6,6 @@
 #include "ui_vars.h"
 
 static bool saveEngaged;
-static byte midiSetup = 0;
 static bool arpModeHeld;
 static bool assignmentChanged;
 
@@ -57,7 +55,7 @@ static void shapeButtPressed(uint8_t voice, PresetVoice::Shape shape) {
 	if (voice >= 3)
 		panic(2, 1);
 
-	if (!filterModeHeld) {
+	if (!ui_state.filterModeHeld) {
 		preset_data.voice[voice].toggle_shape(shape);
 		// FIXME this needs deduplication of non-updates.
 		sendMidiButt(37 + 4 * voice + 0, preset_data.voice[voice].reg_control & PresetVoice::PULSE);
@@ -76,7 +74,6 @@ static void shapeButtPressed(uint8_t voice, PresetVoice::Shape shape) {
 
 void buttChanged(byte number, bool value) {
 	if (!value) {
-		// ledNumber(number);
 		//  PRESSED
 		switch (number) {
 			case RECT1:
@@ -145,97 +142,94 @@ void buttChanged(byte number, bool value) {
 
 			case LFO_CHAIN1:
 				lfoButtPressed = true;
-				selectedLfo = 0;
-				if (lastPot != 9 && lastPot != 10 && lastPot != 20) {
-					preset_data.lfo_map[selectedLfo][lastPot] = !preset_data.lfo_map[selectedLfo][lastPot];
+				ui_state.selectedLfo = 0;
+				if (ui_state.lastPot != 9 && ui_state.lastPot != 10 && ui_state.lastPot != 20) {
+					preset_data.lfo_map[ui_state.selectedLfo][ui_state.lastPot] =
+					    !preset_data.lfo_map[ui_state.selectedLfo][ui_state.lastPot];
 				}
 				break;
 			case LFO_CHAIN2:
 				lfoButtPressed = true;
-				selectedLfo = 1;
-				if (lastPot != 11 && lastPot != 12 && lastPot != 20) {
-					preset_data.lfo_map[selectedLfo][lastPot] = !preset_data.lfo_map[selectedLfo][lastPot];
+				ui_state.selectedLfo = 1;
+				if (ui_state.lastPot != 11 && ui_state.lastPot != 12 && ui_state.lastPot != 20) {
+					preset_data.lfo_map[ui_state.selectedLfo][ui_state.lastPot] =
+					    !preset_data.lfo_map[ui_state.selectedLfo][ui_state.lastPot];
 				}
 				break;
 			case LFO_CHAIN3:
 				lfoButtPressed = true;
-				selectedLfo = 2;
-				if (lastPot != 13 && lastPot != 14 && lastPot != 20) {
-					preset_data.lfo_map[selectedLfo][lastPot] = !preset_data.lfo_map[selectedLfo][lastPot];
+				ui_state.selectedLfo = 2;
+				if (ui_state.lastPot != 13 && ui_state.lastPot != 14 && ui_state.lastPot != 20) {
+					preset_data.lfo_map[ui_state.selectedLfo][ui_state.lastPot] =
+					    !preset_data.lfo_map[ui_state.selectedLfo][ui_state.lastPot];
 				}
 				break;
 
 			case LFO_RECT:
-				if (preset_data.lfo[selectedLfo].shape != 1) {
-					preset_data.lfo[selectedLfo].shape = 1;
+				if (preset_data.lfo[ui_state.selectedLfo].shape != 1) {
+					preset_data.lfo[ui_state.selectedLfo].shape = 1;
 				} else {
-					preset_data.lfo[selectedLfo].shape = 0;
+					preset_data.lfo[ui_state.selectedLfo].shape = 0;
 				}
 				break;
 			case LFO_SAW:
-				if (preset_data.lfo[selectedLfo].shape != 2) {
-					preset_data.lfo[selectedLfo].shape = 2;
+				if (preset_data.lfo[ui_state.selectedLfo].shape != 2) {
+					preset_data.lfo[ui_state.selectedLfo].shape = 2;
 				} else {
-					preset_data.lfo[selectedLfo].shape = 0;
+					preset_data.lfo[ui_state.selectedLfo].shape = 0;
 				}
 				break;
 			case LFO_TRI:
-				if (preset_data.lfo[selectedLfo].shape != 3) {
-					preset_data.lfo[selectedLfo].shape = 3;
+				if (preset_data.lfo[ui_state.selectedLfo].shape != 3) {
+					preset_data.lfo[ui_state.selectedLfo].shape = 3;
 				} else {
-					preset_data.lfo[selectedLfo].shape = 0;
+					preset_data.lfo[ui_state.selectedLfo].shape = 0;
 				}
 				break;
 			case LFO_NOISE:
-				if (preset_data.lfo[selectedLfo].shape != 4) {
-					preset_data.lfo[selectedLfo].shape = 4;
+				if (preset_data.lfo[ui_state.selectedLfo].shape != 4) {
+					preset_data.lfo[ui_state.selectedLfo].shape = 4;
 				} else {
-					preset_data.lfo[selectedLfo].shape = 0;
+					preset_data.lfo[ui_state.selectedLfo].shape = 0;
 				}
 				break;
 			case LFO_ENV3:
-				if (preset_data.lfo[selectedLfo].shape != 5) {
-					preset_data.lfo[selectedLfo].shape = 5;
+				if (preset_data.lfo[ui_state.selectedLfo].shape != 5) {
+					preset_data.lfo[ui_state.selectedLfo].shape = 5;
 				} else {
-					preset_data.lfo[selectedLfo].shape = 0;
+					preset_data.lfo[ui_state.selectedLfo].shape = 0;
 				}
 
 				break;
 
 			case ARP_MODE:
 				arpModeHeld = true;
-				if (midiSetup) {
-					midiSetup = 3;
-					digit(99, 0);
-					digit(99, 1);
+				if (ui_state.midiSetup) {
+					ui_state.midiSetup = 3;
 				}
 				break;
 
 			case RETRIG:
-				preset_data.lfo[selectedLfo].retrig = !preset_data.lfo[selectedLfo].retrig;
+				preset_data.lfo[ui_state.selectedLfo].retrig = !preset_data.lfo[ui_state.selectedLfo].retrig;
 				break;
 			case LOOP:
-				preset_data.lfo[selectedLfo].looping = !preset_data.lfo[selectedLfo].looping;
+				preset_data.lfo[ui_state.selectedLfo].looping = !preset_data.lfo[ui_state.selectedLfo].looping;
 				break;
 
 			case PRESET_UP:
-				if (midiSetup > 0) {
-					if ((midiSetup == 1) && (masterChannel < 16)) {
+				if (ui_state.midiSetup > 0) {
+					if ((ui_state.midiSetup == 1) && (masterChannel < 16)) {
 						masterChannel++;
 						saveChannels();
-						ledNumber(masterChannel);
 					}
-					if ((midiSetup == 2) && (masterChannelOut < 16)) {
+					if ((ui_state.midiSetup == 2) && (masterChannelOut < 16)) {
 						masterChannelOut++;
 						saveChannels();
-						ledNumber(masterChannelOut);
 					}
 				} else {
 					if (arpModeHeld) {
-						midiSetup = 1;
-						ledNumber(masterChannel);
+						ui_state.midiSetup = 1;
 					} else {
-						saveModeTimer = 0;
 						presetUp = true;
 						if (presetDown) {
 							if (!saveMode) {
@@ -253,23 +247,19 @@ void buttChanged(byte number, bool value) {
 
 			case PRESET_DOWN:
 
-				if (midiSetup > 0) {
-					if ((midiSetup == 1) && (masterChannel > 1)) {
+				if (ui_state.midiSetup > 0) {
+					if ((ui_state.midiSetup == 1) && (masterChannel > 1)) {
 						masterChannel--;
 						saveChannels();
-						ledNumber(masterChannel);
 					}
-					if ((midiSetup == 2) && (masterChannelOut > 1)) {
+					if ((ui_state.midiSetup == 2) && (masterChannelOut > 1)) {
 						masterChannelOut--;
 						saveChannels();
-						ledNumber(masterChannelOut);
 					}
 				} else {
 					if (arpModeHeld) {
-						midiSetup = 2;
-						ledNumber(masterChannelOut);
+						ui_state.midiSetup = 2;
 					} else {
-						saveModeTimer = 0;
 						presetDown = true;
 						if (presetUp) {
 							if (!saveMode) {
@@ -293,7 +283,7 @@ void buttChanged(byte number, bool value) {
 
 			case FILTER_MODE:
 				assignmentChanged = false;
-				filterModeHeld = true;
+				ui_state.filterModeHeld = true;
 
 				break;
 		}
@@ -317,7 +307,7 @@ void buttChanged(byte number, bool value) {
 			case ARP_MODE:
 				arpModeHeld = false;
 				arpModeCounter = 0;
-				if (!midiSetup) {
+				if (!ui_state.midiSetup) {
 					if (!preset_data.paraphonic) {
 						preset_data.arp_mode++;
 						if (preset_data.arp_mode > 4) {
@@ -325,17 +315,14 @@ void buttChanged(byte number, bool value) {
 							sendNoteOff(lastNote, 127, masterChannelOut);
 						}
 						reset_arp();
-						// FIXME display new arp mode in the gui for some time.
 					}
-				} else if (midiSetup == 3) {
-					midiSetup = 0;
-					digit(0, 99);
-					digit(1, 99);
+				} else if (ui_state.midiSetup == 3) {
+					ui_state.midiSetup = 0;
 				}
 				break;
 
 			case PRESET_UP:
-				if (!midiSetup) {
+				if (!ui_state.midiSetup) {
 					presetUp = false;
 					presetScrollSpeed = 10000;
 					if ((!saveBounce) && (!loadTimer) && (!scrolled)) {
@@ -343,17 +330,15 @@ void buttChanged(byte number, bool value) {
 						if (preset > 99) {
 							preset = 1;
 						}
-						ledNumber(preset);
 					} else {
 						saveEngaged = false;
 					}
-					saveModeTimer = 0;
 				}
 				scrolled = false;
 				break;
 
 			case PRESET_DOWN:
-				if (!midiSetup) {
+				if (!ui_state.midiSetup) {
 					presetDown = false;
 					presetScrollSpeed = 10000;
 					if ((!saveBounce) && (!loadTimer) && (!scrolled)) {
@@ -361,11 +346,9 @@ void buttChanged(byte number, bool value) {
 						if (preset < 1) {
 							preset = 99;
 						}
-						ledNumber(preset);
 					} else {
 						saveEngaged = false;
 					}
-					saveModeTimer = 0;
 				}
 				scrolled = false;
 				break;
@@ -385,10 +368,8 @@ void buttChanged(byte number, bool value) {
 				} else {
 					fatChanged = false;
 				}
-				filterModeHeld = false;
+				ui_state.filterModeHeld = false;
 				break;
 		}
 	}
-
-	preset_data.set_leds(lastPot, selectedLfo, filterModeHeld);
 }

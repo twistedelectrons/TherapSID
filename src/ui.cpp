@@ -2,65 +2,18 @@
 
 #include "ui_vars.h"
 #include "ui_leds.h"
+#include "ui_controller.h"
 #include "preset.h"
 #include "display.h"
 #include "globals.h"
 
 static int presetScrollTimer;
-static bool saveModeFlash;
 
-// FIXME use
-void show_arp_mode() {
-	// don't get in the way of startup preset display
-	if (millis() > 2000)
-		frozen = 500;
-
-	switch (preset_data.arp_mode) {
-		case 0: // OFF
-			digit(0, 0);
-			digit(1, 12);
-			break;
-
-		case 1: // UP
-			digit(0, 13);
-			digit(1, 14);
-			break;
-
-		case 2: // DOWN
-			digit(0, 15);
-			digit(1, 0);
-			break;
-
-		case 3: // UP/DOWN
-			digit(0, 13);
-			digit(1, 15);
-			break;
-
-		case 4: // UP/DOWN
-			digit(0, 16);
-			digit(1, 15);
-			break;
-	}
-}
+static UiDisplayController ui_display_controller;
 
 void ui_loop() {
 
-	if (saveModeTimer > 2000) {
-		saveModeTimer = 0;
-		saveModeFlash = !saveModeFlash;
-		if (saveModeFlash) {
-			digit(0, 99);
-			digit(1, 99);
-		} else {
-			ledNumber(preset);
-		}
-	}
-
-	if (fatShow) {
-		digit(0, 12);
-		digit(1, (int)preset_data.fat_mode + 1);
-		fatShow = false;
-	}
+	ui_display_controller.update(preset, preset_data, ui_state);
 
 	if (shape1PressedTimer > 10000) {
 		shape1Pressed = false;
@@ -86,11 +39,6 @@ void ui_loop() {
 	if (frozen) {
 		frozen--;
 	}
-
-	if (showPresetNumber) {
-		ledNumber(preset);
-		showPresetNumber = false;
-	}
 }
 
 void ui_tick() {
@@ -110,18 +58,13 @@ void ui_tick() {
 	if (loadTimer)
 		loadTimer--;
 
-	if (filterModeHeld) {
+	if (ui_state.filterModeHeld) {
 		arpModeCounter++;
 		if (arpModeCounter > 25000) {
 			fatChanged = true;
 			arpModeCounter = 0;
 			preset_data.fat_mode = static_cast<FatMode>(((int)preset_data.fat_mode + 1) % 4);
-			fatShow = true;
 		}
-	}
-
-	if (saveMode) {
-		saveModeTimer++;
 	}
 
 	if (presetUp || presetDown) {
@@ -136,7 +79,6 @@ void ui_tick() {
 				if (preset > 99) {
 					preset = 1;
 				}
-				showPresetNumber = true;
 				scrolled = true;
 			}
 		} else if (!presetUp && presetDown) {
@@ -150,7 +92,6 @@ void ui_tick() {
 				if (preset < 1) {
 					preset = 99;
 				}
-				showPresetNumber = true;
 				scrolled = true;
 			}
 		}
@@ -161,10 +102,9 @@ void ui_tick() {
 		if (lfoButtTimer == 6000) {
 
 			for (int i = 0; i < 20; i++) {
-				preset_data.lfo_map[selectedLfo][i] = 0;
+				preset_data.lfo_map[ui_state.selectedLfo][i] = 0;
 			}
-			digit(0, 10);
-			digit(1, 11);
+			ui_display_controller.temp_7seg(10, 11, 2000);
 
 			lfoButtTimer = 0;
 			lfoButtPressed = false;

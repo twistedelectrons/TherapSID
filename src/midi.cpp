@@ -99,7 +99,6 @@ static void HandleControlChange(byte channel, byte data1, byte data2) {
 			static const PresetVoice::Shape mapping[] = {PresetVoice::PULSE, PresetVoice::TRI, PresetVoice::SAW,
 			                                             PresetVoice::NOISE};
 			preset_data.voice[offset / 4].set_shape(mapping[offset % 4], data2);
-			// preset_data.set_leds(lastPot, selectedLfo, filterModeHeld); FIXME
 		} else {
 			switch (data1) {
 				case 49: // sync1
@@ -193,7 +192,6 @@ static void HandleControlChange(byte channel, byte data1, byte data2) {
 					}
 					break; // arp send
 			}
-			// preset_data.set_leds(lastPot, selectedLfo, filterModeHeld); FIXME
 		}
 	}
 }
@@ -388,7 +386,6 @@ void midiRead() {
 							if (preset > 99) {
 								preset = 1;
 							}
-							ledNumber(preset);
 						}
 						mData = 255;
 						break; // PC

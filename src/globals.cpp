@@ -1,4 +1,7 @@
 #include "globals.h"
+#include "ui_vars.h"
+
+UiState ui_state;
 
 bool sendLfo = false;
 bool sendArp = false;
@@ -7,7 +10,6 @@ bool lfoNewRand[3];
 
 int loadTimer;
 
-bool fatShow = false;
 // LIMIT PW
 float bend, bend1, bend2, bend3;
 bool sync;
@@ -31,7 +33,6 @@ bool fatChanged = true;
 bool resetDown;
 byte selectedLfo;
 byte lfoClockSpeedPending[3];
-bool filterModeHeld;
 
 int lfoTune1, lfoTune2, lfoTune3, lfoTune4, lfoTune5, lfoTune6, lfoTune7, lfoTune8, lfoTune9;
 
@@ -57,7 +58,5 @@ byte envState;
 int env;
 int a4, d4, s4, r4;
 bool saveMode;
-int saveModeTimer;
 byte lastNote = 0;
 int arpStepBase;
-bool showPresetNumber; // when high we show preset number once

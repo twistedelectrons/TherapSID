@@ -74,6 +74,5 @@ struct Preset {
 	FilterMode filter_mode = FilterMode::LOWPASS;
 	FatMode fat_mode = FatMode::UNISONO;
 
-	void set_leds(int lastPot, int selectedLfo, bool show_filter_assign);
 	uint16_t fatten_pitch(uint16_t pitch) const;
 };

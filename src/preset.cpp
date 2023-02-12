@@ -1,12 +1,11 @@
 #include <EEPROM.h>
 #include <TimerOne.h>
 
-#include "globals.h"
-#include "ui_leds.h"
 #include "isr.h"
 #include "preset.h"
 #include "midi.h"
 #include "util.hpp"
+#include "globals.h"
 
 /*
 
@@ -40,7 +39,6 @@ static FatMode uint2FatMode(uint8_t i) {
 	}
 }
 
-
 uint16_t Preset::fatten_pitch(uint16_t pitch) const {
 	switch (fat_mode) {
 		case FatMode::UNISONO:
@@ -58,78 +56,6 @@ uint16_t Preset::fatten_pitch(uint16_t pitch) const {
 		default:
 			return pitch;
 	}
-}
-
-void Preset::set_leds(int lastPot, int selectedLfo, bool show_filter_assign) {
-	assert(lastPot <= 20);
-	assert(selectedLfo < 3);
-
-	if (!show_filter_assign) {
-		for (int i = 0; i < 3; i++) {
-			ledSet(4 * i + 1, voice[paraphonic ? 0 : i].reg_control & PresetVoice::PULSE);
-			ledSet(4 * i + 2, voice[paraphonic ? 0 : i].reg_control & PresetVoice::TRI);
-			ledSet(4 * i + 3, voice[paraphonic ? 0 : i].reg_control & PresetVoice::SAW);
-			ledSet(4 * i + 4, voice[paraphonic ? 0 : i].reg_control & PresetVoice::NOISE);
-		}
-	} else {
-		for (int i = 0; i < 3; i++)
-			for (int k = 0; k < 4; k++)
-				ledSet(4 * i + 1 + k, voice[paraphonic ? 0 : i].filter_enabled);
-	}
-
-	// FIXME this should probably depend on paraphonic
-	ledSet(16, bitRead(voice[0].reg_control, 1));
-	ledSet(17, bitRead(voice[0].reg_control, 2));
-	ledSet(18, bitRead(voice[1].reg_control, 1));
-	ledSet(19, bitRead(voice[1].reg_control, 2));
-	ledSet(20, bitRead(voice[2].reg_control, 1));
-	ledSet(21, bitRead(voice[2].reg_control, 2));
-
-	switch (filter_mode) {
-		case FilterMode::LOWPASS:
-			ledSet(27, true);
-			ledSet(28, false);
-			ledSet(29, false);
-			break;
-		case FilterMode::BANDPASS:
-			ledSet(27, false);
-			ledSet(28, true);
-			ledSet(29, false);
-			break;
-		case FilterMode::HIGHPASS:
-			ledSet(27, false);
-			ledSet(28, false);
-			ledSet(29, true);
-			break;
-		case FilterMode::NOTCH:
-			ledSet(27, true);
-			ledSet(28, false);
-			ledSet(29, true);
-			break;
-		case FilterMode::OFF:
-			ledSet(27, false);
-			ledSet(28, false);
-			ledSet(29, false);
-			break;
-	}
-
-	if (lastPot != 20) {
-		// lastPot != none
-		ledSet(13, preset_data.lfo_map[0][lastPot]);
-		ledSet(14, preset_data.lfo_map[1][lastPot]);
-		ledSet(15, preset_data.lfo_map[2][lastPot]);
-	} else {
-		// lastPot == none
-		ledSet(13, 0);
-		ledSet(14, 0);
-		ledSet(15, 0);
-	}
-
-	for (int shape = 1; shape <= 5; shape++) {
-		ledSet(21 + shape, preset_data.lfo[selectedLfo].shape == shape);
-	}
-	ledSet(30, preset_data.lfo[selectedLfo].retrig);
-	ledSet(31, preset_data.lfo[selectedLfo].looping);
 }
 
 static int writeIndex;
@@ -626,8 +552,6 @@ void load(byte number) {
 
 	if (jumble)
 		preset_data.arp_mode = 0;
-
-	// preset_data.set_leds(lastPot, selectedLfo, filterModeHeld); FIXME
 
 	Timer1.initialize(100);      //
 	Timer1.attachInterrupt(isr); // attach the service routine here
