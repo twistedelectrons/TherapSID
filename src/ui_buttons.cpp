@@ -6,7 +6,6 @@
 #include "ui_vars.h"
 
 static bool saveEngaged;
-static bool arpModeHeld;
 static bool assignmentChanged;
 
 enum Button {

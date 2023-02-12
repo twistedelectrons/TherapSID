@@ -25,5 +25,6 @@ extern bool saveMode;             // UI
 
 extern int arpModeCounter;
 extern int loadTimer;
+extern bool arpModeHeld;
 
 extern UiState ui_state;

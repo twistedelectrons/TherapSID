@@ -58,7 +58,7 @@ void ui_tick() {
 	if (loadTimer)
 		loadTimer--;
 
-	if (ui_state.arpModeHeld) {
+	if (arpModeHeld) {
 		arpModeCounter++;
 		if (arpModeCounter > 16000) {
 			fatChanged = true;
