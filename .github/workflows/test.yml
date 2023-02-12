@@ -1,0 +1,13 @@
+name: build
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    name: Run unit tests
+    runs-on: ubuntu-22.04
+    steps:
+      - run: sudo apt-get update
+      - run: sudo apt-get install make build-essential
+      - uses: actions/checkout@v2
+      - run: make test
