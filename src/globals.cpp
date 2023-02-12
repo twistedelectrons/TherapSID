@@ -29,7 +29,7 @@ bool presetUp, presetDown;
 byte preset = 1;
 int presetLast = 1;
 byte lastPot = 20;
-bool fatChanged = true;
+bool fatChanged = false;
 bool resetDown;
 byte selectedLfo;
 byte lfoClockSpeedPending[3];
