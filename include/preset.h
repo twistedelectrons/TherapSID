@@ -94,7 +94,6 @@ inline FatMode uint2FatMode(uint8_t i) { // FIXME
 }
 
 
-// FIXME move to preset.h
 struct Preset {
 	PresetVoice voice[3];
 
