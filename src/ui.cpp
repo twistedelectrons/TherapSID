@@ -60,7 +60,7 @@ void ui_tick() {
 
 	if (ui_state.arpModeHeld) {
 		arpModeCounter++;
-		if (arpModeCounter > 25000) {
+		if (arpModeCounter > 16000) {
 			fatChanged = true;
 			arpModeCounter = 0;
 			preset_data.fat_mode = static_cast<FatMode>(((int)preset_data.fat_mode + 1) % 4);
