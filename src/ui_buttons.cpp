@@ -6,7 +6,7 @@
 #include "ui_vars.h"
 
 static bool saveEngaged;
-static bool assignmentChanged;
+static bool filterAssignmentChanged = false;
 
 enum Button {
 	RECT1 = 2,
@@ -67,7 +67,7 @@ static void shapeButtPressed(uint8_t voice, PresetVoice::Shape shape) {
 		}
 	} else {
 		preset_data.voice[voice].filter_enabled ^= 1;
-		assignmentChanged = true;
+		filterAssignmentChanged = true;
 	}
 }
 
@@ -203,6 +203,7 @@ void buttChanged(byte number, bool value) {
 
 			case ARP_MODE:
 				arpModeHeld = true;
+				fatChanged = false;
 				if (ui_state.midiSetup) {
 					ui_state.midiSetup = 3;
 				}
@@ -281,7 +282,7 @@ void buttChanged(byte number, bool value) {
 				break;
 
 			case FILTER_MODE:
-				assignmentChanged = false;
+				filterAssignmentChanged = false;
 				ui_state.filterModeHeld = true;
 
 				break;
@@ -306,7 +307,7 @@ void buttChanged(byte number, bool value) {
 			case ARP_MODE:
 				arpModeHeld = false;
 				arpModeCounter = 0;
-				if (!ui_state.midiSetup) {
+				if (!ui_state.midiSetup && !fatChanged) {
 					if (!preset_data.paraphonic) {
 						preset_data.arp_mode++;
 						if (preset_data.arp_mode > 4) {
@@ -357,15 +358,11 @@ void buttChanged(byte number, bool value) {
 				break;
 
 			case FILTER_MODE:
-				if (!fatChanged) {
-					if (!assignmentChanged) {
-						// TODO ugh
-						preset_data.filter_mode =
-						    static_cast<FilterMode>((static_cast<int>(preset_data.filter_mode) + 1) % 5);
-						sendCC(55, map((int)preset_data.filter_mode, 0, 4, 0, 1023));
-					}
-				} else {
-					fatChanged = false;
+				if (!filterAssignmentChanged) {
+					// TODO ugh
+					preset_data.filter_mode =
+					    static_cast<FilterMode>((static_cast<int>(preset_data.filter_mode) + 1) % 5);
+					sendCC(55, map((int)preset_data.filter_mode, 0, 4, 0, 1023));
 				}
 				ui_state.filterModeHeld = false;
 				break;
