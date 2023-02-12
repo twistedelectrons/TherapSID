@@ -112,7 +112,7 @@ const int envMap2[] = {
 };
 
 // interrupt service route to animate things (LFO arp etc)
-// called at 10kHz frequency (probably slower) // FIXME figure out the actual frequency.
+// called at 10kHz frequency (probably slower)
 void isr() {
 	ui_tick();
 

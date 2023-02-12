@@ -76,6 +76,7 @@ void ui_loop() {
 	}
 
 	if ((!saveMode) && (presetLast != preset)) {
+		loadTimer = 800;
 		load(preset);
 		presetLast = preset;
 		EEPROM.update(3999, presetLast);

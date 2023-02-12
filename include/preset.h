@@ -54,23 +54,7 @@ struct PresetLfo {
 
 enum class FilterMode { LOWPASS, BANDPASS, HIGHPASS, NOTCH, OFF };
 
-inline FilterMode uint2FilterMode(uint8_t i) { // FIXME
-	if (i < 5) {
-		return static_cast<FilterMode>(i);
-	} else {
-		return FilterMode::OFF;
-	}
-}
-
 enum class FatMode { UNISONO, OCTAVE_UP, DETUNE_SLIGHT, DETUNE_MUCH };
-
-inline FatMode uint2FatMode(uint8_t i) { // FIXME
-	if (i < 4) {
-		return static_cast<FatMode>(i);
-	} else {
-		return FatMode::UNISONO;
-	}
-}
 
 struct Preset {
 	PresetVoice voice[3];

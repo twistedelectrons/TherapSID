@@ -24,6 +24,23 @@ MEMORY MAPPING
 
 */
 
+static FilterMode uint2FilterMode(uint8_t i) {
+	if (i < 5) {
+		return static_cast<FilterMode>(i);
+	} else {
+		return FilterMode::OFF;
+	}
+}
+
+static FatMode uint2FatMode(uint8_t i) {
+	if (i < 4) {
+		return static_cast<FatMode>(i);
+	} else {
+		return FatMode::UNISONO;
+	}
+}
+
+
 uint16_t Preset::fatten_pitch(uint16_t pitch) const {
 	switch (fat_mode) {
 		case FatMode::UNISONO:
@@ -296,8 +313,6 @@ void save() {
 void load(byte number) {
 	// TODO: reset held := 0 and arpCount
 	lfo[0] = lfo[1] = lfo[2] = 0;
-
-	// loadTimer = 800; // FIXME remove whole variable?
 
 	arpCounter = 0;
 	Serial1.end();
