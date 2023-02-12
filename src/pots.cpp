@@ -44,7 +44,6 @@ static void setSelectedLfo(byte number) {
 	}
 }
 
-
 void movedPot(byte number, int value, bool isMidi) {
 	if (!saveMode) {
 		if (!isMidi) {

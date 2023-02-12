@@ -13,7 +13,7 @@ static int lfoSpeedLfo1, lfoSpeedLfo2, lfoSpeedLfo3, lfoSpeedLfo4, lfoSpeedLfo5,
     lfoDepthLfo2, lfoDepthLfo3, lfoDepthLfo4, lfoDepthLfo5, lfoDepthLfo6;
 static int pw1Lfo1, pw1Lfo2, pw1Lfo3, pw2Lfo1, pw2Lfo2, pw2Lfo3, pw3Lfo1, pw3Lfo2, pw3Lfo3;
 static byte resLfo1, resLfo2, resLfo3;
-static int lfoDepth[3] = {0,0,0};
+static int lfoDepth[3] = {0, 0, 0};
 static byte lfoLast[3];
 
 static const bool limitPw = true;
@@ -462,7 +462,7 @@ ParamsAfterLfo lfoTick() {
 	}
 
 	result.pulsewidth[2] = pw3;
-	
+
 	byte temp;
 	for (int i = 0; i < 3; i++) {
 		temp = map(lfo[i], 0, 255, 0, lfoDepth[i]) >> 3;

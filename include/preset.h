@@ -7,12 +7,7 @@ void load(byte number);
 void saveChannels();
 
 struct PresetVoice {
-	enum Shape {
-		NOISE = 1<<7,
-		PULSE = 1<<6,
-		SAW = 1<<5,
-		TRI = 1<<4
-	};
+	enum Shape { NOISE = 1 << 7, PULSE = 1 << 6, SAW = 1 << 5, TRI = 1 << 4 };
 
 	byte attack = 0, decay = 0, sustain = 0, release = 0;
 
@@ -33,8 +28,7 @@ struct PresetVoice {
 			if (shape == NOISE) {
 				// If the noise waveform has been turned on, disable the other three.
 				reg_control &= ~(TRI | SAW | PULSE);
-			}
-			else {
+			} else {
 				// If one of the other three waveforms was enabled, make sure to disable noise.
 				reg_control &= ~NOISE;
 			}
@@ -47,9 +41,7 @@ struct PresetVoice {
 			toggle_shape(shape);
 	}
 
-	uint8_t shape() const {
-		return reg_control & (TRI | SAW | PULSE | NOISE);
-	}
+	uint8_t shape() const { return reg_control & (TRI | SAW | PULSE | NOISE); }
 };
 
 struct PresetLfo {
@@ -60,39 +52,25 @@ struct PresetLfo {
 	byte shape;
 };
 
-enum class FilterMode {
-	LOWPASS,
-	BANDPASS,
-	HIGHPASS,
-	NOTCH,
-	OFF
-};
+enum class FilterMode { LOWPASS, BANDPASS, HIGHPASS, NOTCH, OFF };
 
 inline FilterMode uint2FilterMode(uint8_t i) { // FIXME
 	if (i < 5) {
 		return static_cast<FilterMode>(i);
-	}
-	else {
+	} else {
 		return FilterMode::OFF;
 	}
 }
 
-enum class FatMode {
-	UNISONO,
-	OCTAVE_UP,
-	DETUNE_SLIGHT,
-	DETUNE_MUCH
-};
+enum class FatMode { UNISONO, OCTAVE_UP, DETUNE_SLIGHT, DETUNE_MUCH };
 
 inline FatMode uint2FatMode(uint8_t i) { // FIXME
 	if (i < 4) {
 		return static_cast<FatMode>(i);
-	}
-	else {
+	} else {
 		return FatMode::UNISONO;
 	}
 }
-
 
 struct Preset {
 	PresetVoice voice[3];
@@ -115,4 +93,3 @@ struct Preset {
 	void set_leds(int lastPot, int selectedLfo, bool show_filter_assign);
 	uint16_t fatten_pitch(uint16_t pitch) const;
 };
-

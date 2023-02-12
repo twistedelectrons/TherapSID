@@ -43,7 +43,7 @@ void trace(int num7seg, int numvoice) {
 	}
 
 	int blink = 1;
-	for (int i=0; i<6; i++) {
+	for (int i = 0; i < 6; i++) {
 		ledSet(27, blink);
 		ledSet(28, blink);
 		ledSet(29, blink);

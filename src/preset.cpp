@@ -25,7 +25,6 @@ MEMORY MAPPING
 
 */
 
-
 uint16_t Preset::fatten_pitch(uint16_t pitch) const {
 	switch (fat_mode) {
 		case FatMode::UNISONO:
@@ -33,8 +32,7 @@ uint16_t Preset::fatten_pitch(uint16_t pitch) const {
 		case FatMode::OCTAVE_UP:
 			if (pitch < 0xffff / 2) {
 				return pitch * 2;
-			}
-			else {
+			} else {
 				return pitch;
 			}
 		case FatMode::DETUNE_SLIGHT:
@@ -51,17 +49,16 @@ void Preset::set_leds(int lastPot, int selectedLfo, bool show_filter_assign) {
 	assert(selectedLfo < 3);
 
 	if (!show_filter_assign) {
-		for (int i=0; i<3; i++) {
-			ledSet(4*i+1, voice[paraphonic ? 0 : i].reg_control & PresetVoice::PULSE);
-			ledSet(4*i+2, voice[paraphonic ? 0 : i].reg_control & PresetVoice::TRI);
-			ledSet(4*i+3, voice[paraphonic ? 0 : i].reg_control & PresetVoice::SAW);
-			ledSet(4*i+4, voice[paraphonic ? 0 : i].reg_control & PresetVoice::NOISE);
+		for (int i = 0; i < 3; i++) {
+			ledSet(4 * i + 1, voice[paraphonic ? 0 : i].reg_control & PresetVoice::PULSE);
+			ledSet(4 * i + 2, voice[paraphonic ? 0 : i].reg_control & PresetVoice::TRI);
+			ledSet(4 * i + 3, voice[paraphonic ? 0 : i].reg_control & PresetVoice::SAW);
+			ledSet(4 * i + 4, voice[paraphonic ? 0 : i].reg_control & PresetVoice::NOISE);
 		}
-	}
-	else {
-		for (int i=0; i<3; i++)
-			for (int k=0; k<4; k++) 
-				ledSet(4*i+1+k, voice[paraphonic ? 0 : i].filter_enabled);
+	} else {
+		for (int i = 0; i < 3; i++)
+			for (int k = 0; k < 4; k++)
+				ledSet(4 * i + 1 + k, voice[paraphonic ? 0 : i].filter_enabled);
 	}
 
 	// FIXME this should probably depend on paraphonic
@@ -72,7 +69,7 @@ void Preset::set_leds(int lastPot, int selectedLfo, bool show_filter_assign) {
 	ledSet(20, bitRead(voice[2].reg_control, 1));
 	ledSet(21, bitRead(voice[2].reg_control, 2));
 
-	switch(filter_mode) {
+	switch (filter_mode) {
 		case FilterMode::LOWPASS:
 			ledSet(27, true);
 			ledSet(28, false);
@@ -100,22 +97,19 @@ void Preset::set_leds(int lastPot, int selectedLfo, bool show_filter_assign) {
 			break;
 	}
 
-
 	if (lastPot != 20) {
 		// lastPot != none
 		ledSet(13, preset_data.lfo_map[0][lastPot]);
 		ledSet(14, preset_data.lfo_map[1][lastPot]);
 		ledSet(15, preset_data.lfo_map[2][lastPot]);
-	}
-	else {
+	} else {
 		// lastPot == none
 		ledSet(13, 0);
 		ledSet(14, 0);
 		ledSet(15, 0);
 	}
 
-
-	for (int shape = 1; shape<=5; shape++) {
+	for (int shape = 1; shape <= 5; shape++) {
 		ledSet(21 + shape, preset_data.lfo[selectedLfo].shape == shape);
 	}
 	ledSet(30, preset_data.lfo[selectedLfo].retrig);
@@ -600,7 +594,6 @@ void load(byte number) {
 	preset_data.filter_mode = uint2FilterMode((temp >> 3) & 0x7);
 	bitWrite(preset_data.arp_range_base, 0, bitRead(temp, 6));
 	bitWrite(preset_data.arp_range_base, 1, bitRead(temp, 7));
-
 
 	temp = ready();
 	preset_data.resonance_base = temp & 0x0F;

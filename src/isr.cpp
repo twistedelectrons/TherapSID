@@ -174,11 +174,11 @@ void isr() {
 	// cvGate
 	gate = (PINA & _BV(7)) == 0;
 	if (gate != gateLast) {
-		gateLast = gate;
-		bitWrite(sid[4], 0, gate);
-		bitWrite(sid[11], 0, gate);
-		bitWrite(sid[18], 0, gate);
-		held = 0;
+	    gateLast = gate;
+	    bitWrite(sid[4], 0, gate);
+	    bitWrite(sid[11], 0, gate);
+	    bitWrite(sid[18], 0, gate);
+	    held = 0;
 	}
 	*/
 
@@ -191,11 +191,10 @@ void isr() {
 	// glides
 	// in monophonic mode, we glide only while the old note is still held down.
 	bool skip_glide = !preset_data.paraphonic && voice_state.n_held_keys() <= 1;
-	for (int i=0; i<6; i++) {
+	for (int i = 0; i < 6; i++) {
 		int voice_idx = preset_data.paraphonic ? 0 : (i % 3); // FIXME this is not nice
 		glide[i].glide_tick(skip_glide ? 0 : preset_data.voice[voice_idx].glide);
 	}
-
 
 	// LFO
 	for (int i = 0; i < 3; i++) {

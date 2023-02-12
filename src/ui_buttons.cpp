@@ -26,7 +26,7 @@ enum Button {
 	TRI3 = 9,
 	SAW3 = 5,
 	NOISE3 = 13,
-	
+
 	SYNC1 = 11,
 	RING1 = 3,
 	SYNC2 = 16,
@@ -56,21 +56,21 @@ enum Button {
 };
 
 static void shapeButtPressed(uint8_t voice, PresetVoice::Shape shape) {
-	if (voice >= 3) panic(2, 1);
+	if (voice >= 3)
+		panic(2, 1);
 
 	if (!filterModeHeld) {
 		preset_data.voice[voice].toggle_shape(shape);
 		// FIXME this needs deduplication of non-updates.
-		sendMidiButt(37 + 4*voice + 0, preset_data.voice[voice].reg_control & PresetVoice::PULSE);
-		sendMidiButt(37 + 4*voice + 1, preset_data.voice[voice].reg_control & PresetVoice::TRI);
-		sendMidiButt(37 + 4*voice + 2, preset_data.voice[voice].reg_control & PresetVoice::SAW);
-		sendMidiButt(37 + 4*voice + 3, preset_data.voice[voice].reg_control & PresetVoice::NOISE);
+		sendMidiButt(37 + 4 * voice + 0, preset_data.voice[voice].reg_control & PresetVoice::PULSE);
+		sendMidiButt(37 + 4 * voice + 1, preset_data.voice[voice].reg_control & PresetVoice::TRI);
+		sendMidiButt(37 + 4 * voice + 2, preset_data.voice[voice].reg_control & PresetVoice::SAW);
+		sendMidiButt(37 + 4 * voice + 3, preset_data.voice[voice].reg_control & PresetVoice::NOISE);
 
 		if (voice == 0) {
 			shape1Pressed = true;
 		}
-	}
-	else {
+	} else {
 		preset_data.voice[voice].filter_enabled ^= 1;
 		assignmentChanged = true;
 	}
@@ -81,18 +81,42 @@ void buttChanged(byte number, bool value) {
 		// ledNumber(number);
 		//  PRESSED
 		switch (number) {
-			case RECT1: shapeButtPressed(0, PresetVoice::PULSE); break;
-			case TRI1: shapeButtPressed(0, PresetVoice::TRI); break;
-			case SAW1: shapeButtPressed(0, PresetVoice::SAW); break;
-			case NOISE1: shapeButtPressed(0, PresetVoice::NOISE); break;
-			case RECT2: shapeButtPressed(1, PresetVoice::PULSE); break;
-			case TRI2: shapeButtPressed(1, PresetVoice::TRI); break;
-			case SAW2: shapeButtPressed(1, PresetVoice::SAW); break;
-			case NOISE2: shapeButtPressed(1, PresetVoice::NOISE); break;
-			case RECT3: shapeButtPressed(2, PresetVoice::PULSE); break;
-			case TRI3: shapeButtPressed(2, PresetVoice::TRI); break;
-			case SAW3: shapeButtPressed(2, PresetVoice::SAW); break;
-			case NOISE3: shapeButtPressed(2, PresetVoice::NOISE); break;
+			case RECT1:
+				shapeButtPressed(0, PresetVoice::PULSE);
+				break;
+			case TRI1:
+				shapeButtPressed(0, PresetVoice::TRI);
+				break;
+			case SAW1:
+				shapeButtPressed(0, PresetVoice::SAW);
+				break;
+			case NOISE1:
+				shapeButtPressed(0, PresetVoice::NOISE);
+				break;
+			case RECT2:
+				shapeButtPressed(1, PresetVoice::PULSE);
+				break;
+			case TRI2:
+				shapeButtPressed(1, PresetVoice::TRI);
+				break;
+			case SAW2:
+				shapeButtPressed(1, PresetVoice::SAW);
+				break;
+			case NOISE2:
+				shapeButtPressed(1, PresetVoice::NOISE);
+				break;
+			case RECT3:
+				shapeButtPressed(2, PresetVoice::PULSE);
+				break;
+			case TRI3:
+				shapeButtPressed(2, PresetVoice::TRI);
+				break;
+			case SAW3:
+				shapeButtPressed(2, PresetVoice::SAW);
+				break;
+			case NOISE3:
+				shapeButtPressed(2, PresetVoice::NOISE);
+				break;
 
 			case SYNC1:
 				preset_data.voice[0].reg_control ^= 2;
@@ -291,7 +315,7 @@ void buttChanged(byte number, bool value) {
 				lfoButtPressed = false;
 				lfoButtTimer = 0;
 				break;
-			
+
 			case ARP_MODE:
 				arpModeHeld = false;
 				arpModeCounter = 0;
@@ -356,9 +380,8 @@ void buttChanged(byte number, bool value) {
 				if (!fatChanged) {
 					if (!assignmentChanged) {
 						// TODO ugh
-						preset_data.filter_mode = static_cast<FilterMode>(
-							(static_cast<int>(preset_data.filter_mode) + 1) % 5
-						);
+						preset_data.filter_mode =
+						    static_cast<FilterMode>((static_cast<int>(preset_data.filter_mode) + 1) % 5);
 						sendCC(55, map((int)preset_data.filter_mode, 0, 4, 0, 1023));
 					}
 				} else {

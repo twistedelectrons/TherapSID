@@ -98,8 +98,9 @@ static void HandleControlChange(byte channel, byte data1, byte data2) {
 			movedPot(mapping[data1], data2 << 3, true);
 		} else if (37 <= data1 && data1 <= 48) {
 			int offset = data1 - 37;
-			static const PresetVoice::Shape mapping[] = { PresetVoice::PULSE, PresetVoice::TRI, PresetVoice::SAW, PresetVoice::NOISE };
-			preset_data.voice[offset/4].set_shape(mapping[offset % 4], data2);
+			static const PresetVoice::Shape mapping[] = {PresetVoice::PULSE, PresetVoice::TRI, PresetVoice::SAW,
+			                                             PresetVoice::NOISE};
+			preset_data.voice[offset / 4].set_shape(mapping[offset % 4], data2);
 			// preset_data.set_leds(lastPot, selectedLfo, filterModeHeld); FIXME
 		} else {
 			switch (data1) {

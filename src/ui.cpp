@@ -75,7 +75,7 @@ void ui_loop() {
 			mydisplay.setLed(0, 7, 7, 0);
 		}
 	}
-	
+
 	if (jumble) {
 		load(1);
 		jumble = 0;
@@ -112,7 +112,6 @@ void ui_tick() {
 		}
 	}
 
-	
 	if (loadTimer)
 		loadTimer--;
 

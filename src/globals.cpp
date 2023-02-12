@@ -36,18 +36,13 @@ byte selectedLfo;
 byte lfoClockSpeedPending[3];
 bool filterModeHeld;
 
-int lfoTune1, lfoTune2, lfoTune3, lfoTune4, lfoTune5, lfoTune6, lfoTune7, lfoTune8,
-    lfoTune9;
+int lfoTune1, lfoTune2, lfoTune3, lfoTune4, lfoTune5, lfoTune6, lfoTune7, lfoTune8, lfoTune9;
 
-float lfoFine1, lfoFine2, lfoFine3, lfoFine4, lfoFine5, lfoFine6, lfoFine7, lfoFine8,
-    lfoFine9;
-
-
+float lfoFine1, lfoFine2, lfoFine3, lfoFine4, lfoFine5, lfoFine6, lfoFine7, lfoFine8, lfoFine9;
 
 Preset preset_data;
 VoiceState<6> voice_state;
 Glide glide[6];
-
 
 int frozen;
 bool jumble;

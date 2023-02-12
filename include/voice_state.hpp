@@ -1,6 +1,6 @@
 #include "voice_allocation.hpp"
 
-const long ONE_FP = 1L<<16;
+const long ONE_FP = 1L << 16;
 
 struct Glide {
 	int destination_pitch;
@@ -13,25 +13,19 @@ struct Glide {
 				glide_counter = 0;
 				current_pitch_fp += (destination_pitch * ONE_FP - current_pitch_fp) / glide;
 			}
-		}
-		else {
+		} else {
 			current_pitch_fp = destination_pitch * ONE_FP;
 		}
 	}
 
-private:
+  private:
 	int glide_counter = 0;
 	long current_pitch_fp = 0;
 };
 
+enum class VoiceStateEvent { FIRST_NOTE_ON, LAST_NOTE_OFF, NEUTRAL };
 
-enum class VoiceStateEvent {
-	FIRST_NOTE_ON,
-	LAST_NOTE_OFF,
-	NEUTRAL
-};
-
-template<size_t N_OPERATORS> struct VoiceState {
+template <size_t N_OPERATORS> struct VoiceState {
 	void set_n_individual_voices(int n) {
 		if (n_individual_voices == n)
 			return;
@@ -39,7 +33,7 @@ template<size_t N_OPERATORS> struct VoiceState {
 		n_individual_voices = n;
 		n_usable_operators = (N_OPERATORS / n) * n;
 
-		for (size_t i=0; i<N_OPERATORS; i++) {
+		for (size_t i = 0; i < N_OPERATORS; i++) {
 			mono_tracker[i].clear();
 		}
 		mono_note_tracker.clear();
@@ -63,7 +57,7 @@ template<size_t N_OPERATORS> struct VoiceState {
 			if (!had_active_note) {
 				return VoiceStateEvent::FIRST_NOTE_ON;
 			}
-		} else {             // paraphonic mode
+		} else { // paraphonic mode
 			voice_allocator.note_on(note, velocity);
 		}
 		return VoiceStateEvent::NEUTRAL;
@@ -80,23 +74,18 @@ template<size_t N_OPERATORS> struct VoiceState {
 			if (mono_note_tracker.has_active_note()) {
 				mono_note = mono_note_tracker.active_note()->note;
 				return VoiceStateEvent::NEUTRAL;
-			}
-			else {
+			} else {
 				return VoiceStateEvent::LAST_NOTE_OFF;
 			}
-		} else {             // paraphonic mode
+		} else { // paraphonic mode
 			voice_allocator.note_off(note);
 			return VoiceStateEvent::NEUTRAL;
 		}
 	}
 
-	void note_on_individual(int voice, int note) {
-		mono_tracker[voice].note_on(note, 64);
-	}
+	void note_on_individual(int voice, int note) { mono_tracker[voice].note_on(note, 64); }
 
-	void note_off_individual(int voice, int note) {
-		mono_tracker[voice].note_off(note);
-	}
+	void note_off_individual(int voice, int note) { mono_tracker[voice].note_off(note); }
 
 	int key(int oper) const {
 		if (oper >= n_usable_operators) {
@@ -107,16 +96,13 @@ template<size_t N_OPERATORS> struct VoiceState {
 			auto individual = mono_tracker[oper].active_note();
 			if (individual.has_value()) {
 				return individual->note;
-			}
-			else {
+			} else {
 				return mono_note;
 			}
-		}
-		else {
+		} else {
 			int voice = oper % n_individual_voices;
 			return voice_allocator.get_voices()[voice].note;
 		}
-
 	}
 	bool gate(int oper) const {
 		if (oper >= n_usable_operators) {
@@ -125,8 +111,7 @@ template<size_t N_OPERATORS> struct VoiceState {
 
 		if (n_individual_voices == 1) {
 			return mono_tracker[oper].has_active_note() || mono_note_tracker.has_active_note();
-		}
-		else {
+		} else {
 			int voice = oper % n_individual_voices;
 			return voice_allocator.get_voices()[voice].playing;
 		}
@@ -135,16 +120,16 @@ template<size_t N_OPERATORS> struct VoiceState {
 	bool held_key(int key) const { return _held_keys[key]; }
 	int n_held_keys() const { return _n_held_keys; }
 
-	private:
-		int n_individual_voices = N_OPERATORS;
-		int n_usable_operators = N_OPERATORS;
+  private:
+	int n_individual_voices = N_OPERATORS;
+	int n_usable_operators = N_OPERATORS;
 
-		uint8_t mono_note = 0;
+	uint8_t mono_note = 0;
 
-		MonoNoteTracker<16> mono_tracker[N_OPERATORS];
-		PolyVoiceAllocator<3> voice_allocator;
-		MonoNoteTracker<16> mono_note_tracker;
+	MonoNoteTracker<16> mono_tracker[N_OPERATORS];
+	PolyVoiceAllocator<3> voice_allocator;
+	MonoNoteTracker<16> mono_note_tracker;
 
-		bool _held_keys[128] = {false};
-		int _n_held_keys = 0;
+	bool _held_keys[128] = {false};
+	int _n_held_keys = 0;
 };

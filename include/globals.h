@@ -18,15 +18,10 @@ extern bool gate;
 extern int lfoStep[3];
 extern byte lfo[3];
 
-inline bool arping() {
-	return preset_data.arp_speed_base << 4 > 4000;
-}
-
-
+inline bool arping() { return preset_data.arp_speed_base << 4 > 4000; }
 
 extern byte lfoClockSpeedPending[3];
-extern int lfoTune1, lfoTune2, lfoTune3, lfoTune4, lfoTune5, lfoTune6, lfoTune7, lfoTune8,
-    lfoTune9;
+extern int lfoTune1, lfoTune2, lfoTune3, lfoTune4, lfoTune5, lfoTune6, lfoTune7, lfoTune8, lfoTune9;
 extern float lfoFine1, lfoFine2, lfoFine3, lfoFine4, lfoFine5, lfoFine6, lfoFine7, lfoFine8, lfoFine9;
 extern bool jumble;
 extern byte masterChannel;
