@@ -2,12 +2,12 @@
 #include <TimerOne.h>
 
 #include "globals.h"
-#include "leds.h"
+#include "ui_leds.h"
 #include "midi.h"
 #include "arp.h"
 #include "sid.h"
 #include "lfo.h"
-#include "pots.h"
+#include "ui_pots.h"
 #include "voice_allocation.hpp"
 #include "midi_pedal.hpp"
 

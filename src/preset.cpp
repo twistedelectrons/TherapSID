@@ -2,7 +2,7 @@
 #include <TimerOne.h>
 
 #include "globals.h"
-#include "leds.h"
+#include "ui_leds.h"
 #include "isr.h"
 #include "preset.h"
 #include "lfo.h"

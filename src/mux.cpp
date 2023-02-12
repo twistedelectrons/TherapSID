@@ -3,8 +3,8 @@
 
 #include "globals.h"
 #include "mux.h"
-#include "pots.h"
-#include "buttons.h"
+#include "ui_pots.h"
+#include "ui_buttons.h"
 
 static byte muxChannel;
 static int pot;

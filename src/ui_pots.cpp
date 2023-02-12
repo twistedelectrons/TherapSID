@@ -1,6 +1,6 @@
 #include "globals.h"
-#include "pots.h"
-#include "leds.h"
+#include "ui_pots.h"
+#include "ui_leds.h"
 #include "lfo.h"
 #include "midi.h"
 #include "ui_vars.h"

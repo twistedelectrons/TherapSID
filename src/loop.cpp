@@ -4,7 +4,7 @@
 #include "midi.h"
 #include "mux.h"
 #include "preset.h"
-#include "leds.h"
+#include "ui_leds.h"
 #include "lfo.h"
 #include "sid.h"
 #include "ui.h"

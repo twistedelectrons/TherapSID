@@ -1,5 +1,5 @@
 #include "globals.h"
-#include "leds.h"
+#include "ui_leds.h"
 #include "sid.h"
 
 // COMS WITH SID CHIP

@@ -1,6 +1,6 @@
 #include "util.hpp"
 #include "globals.h"
-#include "leds.h"
+#include "ui_leds.h"
 
 void panic(int num7seg, int numvoice) {
 	digit(0, num7seg / 10);

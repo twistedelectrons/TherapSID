@@ -7,7 +7,7 @@
 #include "isr.h"
 #include "preset.h"
 #include "sid.h"
-#include "leds.h"
+#include "ui_leds.h"
 #include "lfo.h"
 
 /*

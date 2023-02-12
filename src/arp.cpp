@@ -1,7 +1,7 @@
 #include "globals.h"
 #include "midi.h"
 #include "arp.h"
-#include "leds.h"
+#include "ui_leds.h"
 
 static byte arpNotes[128];
 static int arpNote;

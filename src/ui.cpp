@@ -1,7 +1,7 @@
 #include <EEPROM.h>
 
 #include "ui_vars.h"
-#include "leds.h"
+#include "ui_leds.h"
 #include "preset.h"
 #include "display.h"
 #include "globals.h"
