@@ -237,14 +237,11 @@ void save() {
 }
 
 void load(byte number) {
-	// TODO: reset held := 0 and arpCount
 	lfo[0] = lfo[1] = lfo[2] = 0;
 
 	arpCounter = 0;
 	Serial1.end();
 	Timer1.stop(); //
-
-	// sidReset(); TODO is that really needed? i'd rather get rid of this.
 
 	writeIndex = number * 40;
 	byte temp;
