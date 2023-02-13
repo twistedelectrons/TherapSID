@@ -87,9 +87,9 @@ void UiDisplayController::update_leds(const Preset& p, const UiState& ui_state) 
 
 	if (ui_state.lastPot != POT_NONE) {
 		// lastPot != none
-		set_led(13, p.lfo_map[0][ui_state.lastPot]);
-		set_led(14, p.lfo_map[1][ui_state.lastPot]);
-		set_led(15, p.lfo_map[2][ui_state.lastPot]);
+		set_led(13, p.lfo[0].mapping[ui_state.lastPot]);
+		set_led(14, p.lfo[1].mapping[ui_state.lastPot]);
+		set_led(15, p.lfo[2].mapping[ui_state.lastPot]);
 	} else {
 		// lastPot == none
 		set_led(13, false);

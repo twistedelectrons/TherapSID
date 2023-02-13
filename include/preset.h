@@ -50,6 +50,7 @@ struct PresetLfo {
 	bool retrig;
 	bool looping;
 	byte shape;
+	bool mapping[20];
 };
 
 enum class FilterMode { LOWPASS, BANDPASS, HIGHPASS, NOTCH, OFF };
@@ -67,7 +68,6 @@ struct Preset {
 	byte arp_mode = 0;
 
 	PresetLfo lfo[3];
-	bool lfo_map[3][20]; // FIXME put this into PresetLfo
 
 	byte resonance_base;
 	int cutoff;

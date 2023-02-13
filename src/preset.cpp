@@ -132,73 +132,73 @@ void save() {
 	writey(preset_data.lfo[0].depth >> 2);
 	writey(preset_data.lfo[1].depth >> 2);
 	writey(preset_data.lfo[2].depth >> 2); // 27
-	bitWrite(temp, 0, preset_data.lfo_map[0][0]);
-	bitWrite(temp, 1, preset_data.lfo_map[0][1]);
-	bitWrite(temp, 2, preset_data.lfo_map[0][2]);
-	bitWrite(temp, 3, preset_data.lfo_map[0][3]);
-	bitWrite(temp, 4, preset_data.lfo_map[0][4]);
-	bitWrite(temp, 5, preset_data.lfo_map[0][5]);
-	bitWrite(temp, 6, preset_data.lfo_map[0][6]);
-	bitWrite(temp, 7, preset_data.lfo_map[0][7]);
+	bitWrite(temp, 0, preset_data.lfo[0].mapping[0]);
+	bitWrite(temp, 1, preset_data.lfo[0].mapping[1]);
+	bitWrite(temp, 2, preset_data.lfo[0].mapping[2]);
+	bitWrite(temp, 3, preset_data.lfo[0].mapping[3]);
+	bitWrite(temp, 4, preset_data.lfo[0].mapping[4]);
+	bitWrite(temp, 5, preset_data.lfo[0].mapping[5]);
+	bitWrite(temp, 6, preset_data.lfo[0].mapping[6]);
+	bitWrite(temp, 7, preset_data.lfo[0].mapping[7]);
 	writey(temp);
-	bitWrite(temp, 0, preset_data.lfo_map[0][8]);
-	bitWrite(temp, 1, preset_data.lfo_map[0][9]);
-	bitWrite(temp, 2, preset_data.lfo_map[0][10]);
-	bitWrite(temp, 3, preset_data.lfo_map[0][11]);
-	bitWrite(temp, 4, preset_data.lfo_map[0][12]);
-	bitWrite(temp, 5, preset_data.lfo_map[0][13]);
-	bitWrite(temp, 6, preset_data.lfo_map[0][14]);
-	bitWrite(temp, 7, preset_data.lfo_map[0][15]);
+	bitWrite(temp, 0, preset_data.lfo[0].mapping[8]);
+	bitWrite(temp, 1, preset_data.lfo[0].mapping[9]);
+	bitWrite(temp, 2, preset_data.lfo[0].mapping[10]);
+	bitWrite(temp, 3, preset_data.lfo[0].mapping[11]);
+	bitWrite(temp, 4, preset_data.lfo[0].mapping[12]);
+	bitWrite(temp, 5, preset_data.lfo[0].mapping[13]);
+	bitWrite(temp, 6, preset_data.lfo[0].mapping[14]);
+	bitWrite(temp, 7, preset_data.lfo[0].mapping[15]);
 	writey(temp);
-	bitWrite(temp, 0, preset_data.lfo_map[0][16]);
-	bitWrite(temp, 1, preset_data.lfo_map[0][17]);
-	bitWrite(temp, 2, preset_data.lfo_map[0][18]);
-	bitWrite(temp, 3, preset_data.lfo_map[0][19]);
-	bitWrite(temp, 4, preset_data.lfo_map[1][0]);
-	bitWrite(temp, 5, preset_data.lfo_map[1][1]);
-	bitWrite(temp, 6, preset_data.lfo_map[1][2]);
-	bitWrite(temp, 7, preset_data.lfo_map[1][3]);
+	bitWrite(temp, 0, preset_data.lfo[0].mapping[16]);
+	bitWrite(temp, 1, preset_data.lfo[0].mapping[17]);
+	bitWrite(temp, 2, preset_data.lfo[0].mapping[18]);
+	bitWrite(temp, 3, preset_data.lfo[0].mapping[19]);
+	bitWrite(temp, 4, preset_data.lfo[1].mapping[0]);
+	bitWrite(temp, 5, preset_data.lfo[1].mapping[1]);
+	bitWrite(temp, 6, preset_data.lfo[1].mapping[2]);
+	bitWrite(temp, 7, preset_data.lfo[1].mapping[3]);
 	writey(temp); // 30
-	bitWrite(temp, 0, preset_data.lfo_map[1][4]);
-	bitWrite(temp, 1, preset_data.lfo_map[1][5]);
-	bitWrite(temp, 2, preset_data.lfo_map[1][6]);
-	bitWrite(temp, 3, preset_data.lfo_map[1][7]);
-	bitWrite(temp, 4, preset_data.lfo_map[1][8]);
-	bitWrite(temp, 5, preset_data.lfo_map[1][9]);
-	bitWrite(temp, 6, preset_data.lfo_map[1][10]);
-	bitWrite(temp, 7, preset_data.lfo_map[1][11]);
+	bitWrite(temp, 0, preset_data.lfo[1].mapping[4]);
+	bitWrite(temp, 1, preset_data.lfo[1].mapping[5]);
+	bitWrite(temp, 2, preset_data.lfo[1].mapping[6]);
+	bitWrite(temp, 3, preset_data.lfo[1].mapping[7]);
+	bitWrite(temp, 4, preset_data.lfo[1].mapping[8]);
+	bitWrite(temp, 5, preset_data.lfo[1].mapping[9]);
+	bitWrite(temp, 6, preset_data.lfo[1].mapping[10]);
+	bitWrite(temp, 7, preset_data.lfo[1].mapping[11]);
 	writey(temp); //
-	bitWrite(temp, 0, preset_data.lfo_map[1][12]);
-	bitWrite(temp, 1, preset_data.lfo_map[1][13]);
-	bitWrite(temp, 2, preset_data.lfo_map[1][14]);
-	bitWrite(temp, 3, preset_data.lfo_map[1][15]);
-	bitWrite(temp, 4, preset_data.lfo_map[1][16]);
-	bitWrite(temp, 5, preset_data.lfo_map[1][17]);
-	bitWrite(temp, 6, preset_data.lfo_map[1][18]);
-	bitWrite(temp, 7, preset_data.lfo_map[1][19]);
+	bitWrite(temp, 0, preset_data.lfo[1].mapping[12]);
+	bitWrite(temp, 1, preset_data.lfo[1].mapping[13]);
+	bitWrite(temp, 2, preset_data.lfo[1].mapping[14]);
+	bitWrite(temp, 3, preset_data.lfo[1].mapping[15]);
+	bitWrite(temp, 4, preset_data.lfo[1].mapping[16]);
+	bitWrite(temp, 5, preset_data.lfo[1].mapping[17]);
+	bitWrite(temp, 6, preset_data.lfo[1].mapping[18]);
+	bitWrite(temp, 7, preset_data.lfo[1].mapping[19]);
 	writey(temp); //
-	bitWrite(temp, 0, preset_data.lfo_map[2][0]);
-	bitWrite(temp, 1, preset_data.lfo_map[2][1]);
-	bitWrite(temp, 2, preset_data.lfo_map[2][2]);
-	bitWrite(temp, 3, preset_data.lfo_map[2][3]);
-	bitWrite(temp, 4, preset_data.lfo_map[2][4]);
-	bitWrite(temp, 5, preset_data.lfo_map[2][5]);
-	bitWrite(temp, 6, preset_data.lfo_map[2][6]);
-	bitWrite(temp, 7, preset_data.lfo_map[2][7]);
+	bitWrite(temp, 0, preset_data.lfo[2].mapping[0]);
+	bitWrite(temp, 1, preset_data.lfo[2].mapping[1]);
+	bitWrite(temp, 2, preset_data.lfo[2].mapping[2]);
+	bitWrite(temp, 3, preset_data.lfo[2].mapping[3]);
+	bitWrite(temp, 4, preset_data.lfo[2].mapping[4]);
+	bitWrite(temp, 5, preset_data.lfo[2].mapping[5]);
+	bitWrite(temp, 6, preset_data.lfo[2].mapping[6]);
+	bitWrite(temp, 7, preset_data.lfo[2].mapping[7]);
 	writey(temp); //
-	bitWrite(temp, 0, preset_data.lfo_map[2][8]);
-	bitWrite(temp, 1, preset_data.lfo_map[2][9]);
-	bitWrite(temp, 2, preset_data.lfo_map[2][10]);
-	bitWrite(temp, 3, preset_data.lfo_map[2][11]);
-	bitWrite(temp, 4, preset_data.lfo_map[2][12]);
-	bitWrite(temp, 5, preset_data.lfo_map[2][13]);
-	bitWrite(temp, 6, preset_data.lfo_map[2][14]);
-	bitWrite(temp, 7, preset_data.lfo_map[2][15]);
+	bitWrite(temp, 0, preset_data.lfo[2].mapping[8]);
+	bitWrite(temp, 1, preset_data.lfo[2].mapping[9]);
+	bitWrite(temp, 2, preset_data.lfo[2].mapping[10]);
+	bitWrite(temp, 3, preset_data.lfo[2].mapping[11]);
+	bitWrite(temp, 4, preset_data.lfo[2].mapping[12]);
+	bitWrite(temp, 5, preset_data.lfo[2].mapping[13]);
+	bitWrite(temp, 6, preset_data.lfo[2].mapping[14]);
+	bitWrite(temp, 7, preset_data.lfo[2].mapping[15]);
 	writey(temp); //
-	bitWrite(temp, 0, preset_data.lfo_map[2][16]);
-	bitWrite(temp, 1, preset_data.lfo_map[2][17]);
-	bitWrite(temp, 2, preset_data.lfo_map[2][18]);
-	bitWrite(temp, 3, preset_data.lfo_map[2][19]);
+	bitWrite(temp, 0, preset_data.lfo[2].mapping[16]);
+	bitWrite(temp, 1, preset_data.lfo[2].mapping[17]);
+	bitWrite(temp, 2, preset_data.lfo[2].mapping[18]);
+	bitWrite(temp, 3, preset_data.lfo[2].mapping[19]);
 	bitWrite(temp, 4, bitRead(preset_data.lfo[0].shape, 0));
 	bitWrite(temp, 5, bitRead(preset_data.lfo[0].shape, 1));
 	bitWrite(temp, 6, bitRead(preset_data.lfo[0].shape, 2));
@@ -417,80 +417,80 @@ void load(byte number) {
 	preset_data.lfo[2].depth = ready() << 2;
 
 	temp = ready();
-	preset_data.lfo_map[0][0] = bitRead(temp, 0);
-	preset_data.lfo_map[0][1] = bitRead(temp, 1);
-	preset_data.lfo_map[0][2] = bitRead(temp, 2);
-	preset_data.lfo_map[0][3] = bitRead(temp, 3);
-	preset_data.lfo_map[0][4] = bitRead(temp, 4);
-	preset_data.lfo_map[0][5] = bitRead(temp, 5);
-	preset_data.lfo_map[0][6] = bitRead(temp, 6);
-	preset_data.lfo_map[0][7] = bitRead(temp, 7);
+	preset_data.lfo[0].mapping[0] = bitRead(temp, 0);
+	preset_data.lfo[0].mapping[1] = bitRead(temp, 1);
+	preset_data.lfo[0].mapping[2] = bitRead(temp, 2);
+	preset_data.lfo[0].mapping[3] = bitRead(temp, 3);
+	preset_data.lfo[0].mapping[4] = bitRead(temp, 4);
+	preset_data.lfo[0].mapping[5] = bitRead(temp, 5);
+	preset_data.lfo[0].mapping[6] = bitRead(temp, 6);
+	preset_data.lfo[0].mapping[7] = bitRead(temp, 7);
 
 	temp = ready();
-	preset_data.lfo_map[0][8] = bitRead(temp, 0);
-	preset_data.lfo_map[0][9] = bitRead(temp, 1);
-	preset_data.lfo_map[0][10] = bitRead(temp, 2);
-	preset_data.lfo_map[0][11] = bitRead(temp, 3);
-	preset_data.lfo_map[0][12] = bitRead(temp, 4);
-	preset_data.lfo_map[0][13] = bitRead(temp, 5);
-	preset_data.lfo_map[0][14] = bitRead(temp, 6);
-	preset_data.lfo_map[0][15] = bitRead(temp, 7);
+	preset_data.lfo[0].mapping[8] = bitRead(temp, 0);
+	preset_data.lfo[0].mapping[9] = bitRead(temp, 1);
+	preset_data.lfo[0].mapping[10] = bitRead(temp, 2);
+	preset_data.lfo[0].mapping[11] = bitRead(temp, 3);
+	preset_data.lfo[0].mapping[12] = bitRead(temp, 4);
+	preset_data.lfo[0].mapping[13] = bitRead(temp, 5);
+	preset_data.lfo[0].mapping[14] = bitRead(temp, 6);
+	preset_data.lfo[0].mapping[15] = bitRead(temp, 7);
 
 	temp = ready();
-	preset_data.lfo_map[0][16] = bitRead(temp, 0);
-	preset_data.lfo_map[0][17] = bitRead(temp, 1);
-	preset_data.lfo_map[0][18] = bitRead(temp, 2);
-	preset_data.lfo_map[0][19] = bitRead(temp, 3);
-	preset_data.lfo_map[1][0] = bitRead(temp, 4);
-	preset_data.lfo_map[1][1] = bitRead(temp, 5);
-	preset_data.lfo_map[1][2] = bitRead(temp, 6);
-	preset_data.lfo_map[1][3] = bitRead(temp, 7);
+	preset_data.lfo[0].mapping[16] = bitRead(temp, 0);
+	preset_data.lfo[0].mapping[17] = bitRead(temp, 1);
+	preset_data.lfo[0].mapping[18] = bitRead(temp, 2);
+	preset_data.lfo[0].mapping[19] = bitRead(temp, 3);
+	preset_data.lfo[1].mapping[0] = bitRead(temp, 4);
+	preset_data.lfo[1].mapping[1] = bitRead(temp, 5);
+	preset_data.lfo[1].mapping[2] = bitRead(temp, 6);
+	preset_data.lfo[1].mapping[3] = bitRead(temp, 7);
 
 	temp = ready();
-	preset_data.lfo_map[1][4] = bitRead(temp, 0);
-	preset_data.lfo_map[1][5] = bitRead(temp, 1);
-	preset_data.lfo_map[1][6] = bitRead(temp, 2);
-	preset_data.lfo_map[1][7] = bitRead(temp, 3);
-	preset_data.lfo_map[1][8] = bitRead(temp, 4);
-	preset_data.lfo_map[1][9] = bitRead(temp, 5);
-	preset_data.lfo_map[1][10] = bitRead(temp, 6);
-	preset_data.lfo_map[1][11] = bitRead(temp, 7);
+	preset_data.lfo[1].mapping[4] = bitRead(temp, 0);
+	preset_data.lfo[1].mapping[5] = bitRead(temp, 1);
+	preset_data.lfo[1].mapping[6] = bitRead(temp, 2);
+	preset_data.lfo[1].mapping[7] = bitRead(temp, 3);
+	preset_data.lfo[1].mapping[8] = bitRead(temp, 4);
+	preset_data.lfo[1].mapping[9] = bitRead(temp, 5);
+	preset_data.lfo[1].mapping[10] = bitRead(temp, 6);
+	preset_data.lfo[1].mapping[11] = bitRead(temp, 7);
 
 	temp = ready();
-	preset_data.lfo_map[1][12] = bitRead(temp, 0);
-	preset_data.lfo_map[1][13] = bitRead(temp, 1);
-	preset_data.lfo_map[1][14] = bitRead(temp, 2);
-	preset_data.lfo_map[1][15] = bitRead(temp, 3);
-	preset_data.lfo_map[1][16] = bitRead(temp, 4);
-	preset_data.lfo_map[1][17] = bitRead(temp, 5);
-	preset_data.lfo_map[1][18] = bitRead(temp, 6);
-	preset_data.lfo_map[1][19] = bitRead(temp, 7);
+	preset_data.lfo[1].mapping[12] = bitRead(temp, 0);
+	preset_data.lfo[1].mapping[13] = bitRead(temp, 1);
+	preset_data.lfo[1].mapping[14] = bitRead(temp, 2);
+	preset_data.lfo[1].mapping[15] = bitRead(temp, 3);
+	preset_data.lfo[1].mapping[16] = bitRead(temp, 4);
+	preset_data.lfo[1].mapping[17] = bitRead(temp, 5);
+	preset_data.lfo[1].mapping[18] = bitRead(temp, 6);
+	preset_data.lfo[1].mapping[19] = bitRead(temp, 7);
 
 	temp = ready();
-	preset_data.lfo_map[2][0] = bitRead(temp, 0);
-	preset_data.lfo_map[2][1] = bitRead(temp, 1);
-	preset_data.lfo_map[2][2] = bitRead(temp, 2);
-	preset_data.lfo_map[2][3] = bitRead(temp, 3);
-	preset_data.lfo_map[2][4] = bitRead(temp, 4);
-	preset_data.lfo_map[2][5] = bitRead(temp, 5);
-	preset_data.lfo_map[2][6] = bitRead(temp, 6);
-	preset_data.lfo_map[2][7] = bitRead(temp, 7);
+	preset_data.lfo[2].mapping[0] = bitRead(temp, 0);
+	preset_data.lfo[2].mapping[1] = bitRead(temp, 1);
+	preset_data.lfo[2].mapping[2] = bitRead(temp, 2);
+	preset_data.lfo[2].mapping[3] = bitRead(temp, 3);
+	preset_data.lfo[2].mapping[4] = bitRead(temp, 4);
+	preset_data.lfo[2].mapping[5] = bitRead(temp, 5);
+	preset_data.lfo[2].mapping[6] = bitRead(temp, 6);
+	preset_data.lfo[2].mapping[7] = bitRead(temp, 7);
 
 	temp = ready();
-	preset_data.lfo_map[2][8] = bitRead(temp, 0);
-	preset_data.lfo_map[2][9] = bitRead(temp, 1);
-	preset_data.lfo_map[2][10] = bitRead(temp, 2);
-	preset_data.lfo_map[2][11] = bitRead(temp, 3);
-	preset_data.lfo_map[2][12] = bitRead(temp, 4);
-	preset_data.lfo_map[2][13] = bitRead(temp, 5);
-	preset_data.lfo_map[2][14] = bitRead(temp, 6);
-	preset_data.lfo_map[2][15] = bitRead(temp, 7);
+	preset_data.lfo[2].mapping[8] = bitRead(temp, 0);
+	preset_data.lfo[2].mapping[9] = bitRead(temp, 1);
+	preset_data.lfo[2].mapping[10] = bitRead(temp, 2);
+	preset_data.lfo[2].mapping[11] = bitRead(temp, 3);
+	preset_data.lfo[2].mapping[12] = bitRead(temp, 4);
+	preset_data.lfo[2].mapping[13] = bitRead(temp, 5);
+	preset_data.lfo[2].mapping[14] = bitRead(temp, 6);
+	preset_data.lfo[2].mapping[15] = bitRead(temp, 7);
 
 	temp = ready();
-	preset_data.lfo_map[2][16] = bitRead(temp, 0);
-	preset_data.lfo_map[2][17] = bitRead(temp, 1);
-	preset_data.lfo_map[2][18] = bitRead(temp, 2);
-	preset_data.lfo_map[2][19] = bitRead(temp, 3);
+	preset_data.lfo[2].mapping[16] = bitRead(temp, 0);
+	preset_data.lfo[2].mapping[17] = bitRead(temp, 1);
+	preset_data.lfo[2].mapping[18] = bitRead(temp, 2);
+	preset_data.lfo[2].mapping[19] = bitRead(temp, 3);
 	bitWrite(preset_data.lfo[0].shape, 0, bitRead(temp, 4));
 	bitWrite(preset_data.lfo[0].shape, 1, bitRead(temp, 5));
 	bitWrite(preset_data.lfo[0].shape, 2, bitRead(temp, 6));
@@ -499,20 +499,20 @@ void load(byte number) {
 	if (jumble) {
 		for (int i = 0; i < 20; i++) {
 
-			preset_data.lfo_map[0][i] = 0;
-			preset_data.lfo_map[1][i] = 0;
-			preset_data.lfo_map[2][i] = 0;
+			preset_data.lfo[0].mapping[i] = 0;
+			preset_data.lfo[1].mapping[i] = 0;
+			preset_data.lfo[2].mapping[i] = 0;
 		}
 
 		for (int i = 0; i < 20; i++) {
 			if (random(20) > 15) {
-				preset_data.lfo_map[0][random(19)] = 1;
+				preset_data.lfo[0].mapping[random(19)] = 1;
 			}
 			if (random(20) > 15) {
-				preset_data.lfo_map[1][random(19)] = 1;
+				preset_data.lfo[1].mapping[random(19)] = 1;
 			}
 			if (random(20) > 15) {
-				preset_data.lfo_map[2][random(19)] = 1;
+				preset_data.lfo[2].mapping[random(19)] = 1;
 			}
 		}
 	}

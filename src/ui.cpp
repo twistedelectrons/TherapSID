@@ -102,7 +102,7 @@ void ui_tick() {
 		if (lfoButtTimer == 6000) {
 
 			for (int i = 0; i < 20; i++) {
-				preset_data.lfo_map[ui_state.selectedLfo][i] = 0;
+				preset_data.lfo[ui_state.selectedLfo].mapping[i] = 0;
 			}
 			ui_display_controller.temp_7seg(10, 11, 500);
 

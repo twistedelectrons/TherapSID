@@ -143,24 +143,24 @@ void buttChanged(byte number, bool value) {
 				lfoButtPressed = true;
 				ui_state.selectedLfo = 0;
 				if (ui_state.lastPot != 9 && ui_state.lastPot != 10 && ui_state.lastPot != 20) {
-					preset_data.lfo_map[ui_state.selectedLfo][ui_state.lastPot] =
-					    !preset_data.lfo_map[ui_state.selectedLfo][ui_state.lastPot];
+					preset_data.lfo[ui_state.selectedLfo].mapping[ui_state.lastPot] =
+					    !preset_data.lfo[ui_state.selectedLfo].mapping[ui_state.lastPot];
 				}
 				break;
 			case LFO_CHAIN2:
 				lfoButtPressed = true;
 				ui_state.selectedLfo = 1;
 				if (ui_state.lastPot != 11 && ui_state.lastPot != 12 && ui_state.lastPot != 20) {
-					preset_data.lfo_map[ui_state.selectedLfo][ui_state.lastPot] =
-					    !preset_data.lfo_map[ui_state.selectedLfo][ui_state.lastPot];
+					preset_data.lfo[ui_state.selectedLfo].mapping[ui_state.lastPot] =
+					    !preset_data.lfo[ui_state.selectedLfo].mapping[ui_state.lastPot];
 				}
 				break;
 			case LFO_CHAIN3:
 				lfoButtPressed = true;
 				ui_state.selectedLfo = 2;
 				if (ui_state.lastPot != 13 && ui_state.lastPot != 14 && ui_state.lastPot != 20) {
-					preset_data.lfo_map[ui_state.selectedLfo][ui_state.lastPot] =
-					    !preset_data.lfo_map[ui_state.selectedLfo][ui_state.lastPot];
+					preset_data.lfo[ui_state.selectedLfo].mapping[ui_state.lastPot] =
+					    !preset_data.lfo[ui_state.selectedLfo].mapping[ui_state.lastPot];
 				}
 				break;
 
