@@ -21,4 +21,5 @@ class UiDisplayController {
 	int last_changed_counter = 0;
 	int last_changed_digit0 = 99, last_changed_digit1 = 99;
 	int old_digit0 = -1, old_digit1 = -1;
+	int old_preset_number = -1;
 };

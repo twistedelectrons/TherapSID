@@ -13,8 +13,6 @@ static UiDisplayController ui_display_controller;
 
 void ui_loop() {
 
-	ui_display_controller.update(preset, preset_data, ui_state);
-
 	if (shape1PressedTimer > 10000) {
 		shape1Pressed = false;
 		shape1PressedTimer = 0;
@@ -39,6 +37,9 @@ void ui_loop() {
 	if (frozen) {
 		frozen--;
 	}
+	
+	ui_display_controller.update(preset, preset_data, ui_state);
+
 }
 
 void ui_tick() {

@@ -7,9 +7,11 @@
 #include "ui_controller.h"
 
 static const int POT_NONE = 20;
+static const int DONTCARE = 123;
 
 static int scaleFine(int input) {
 	input = map(input, 0, 1023, -51, 51);
+
 	return (input);
 }
 
@@ -193,7 +195,13 @@ void UiDisplayController::update_7seg(int preset_number, const Preset& preset, c
 	if (preset.arp_range_base != old_preset.arp_range_base)
 		show_changed(preset.arp_range_base);
 
+	if (old_preset_number != preset_number) {
+		// un-show whatever what was show_changed() before.
+		temp_7seg(DONTCARE, DONTCARE, 0);
+	}
+
 	old_preset = preset;
+	old_preset_number = preset_number;
 
 	int digit0, digit1;
 	switch (ui_state.midiSetup) {
