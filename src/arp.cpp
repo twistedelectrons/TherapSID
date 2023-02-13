@@ -14,7 +14,6 @@ void reset_arp() {
 }
 
 void arpSteptrigger(int number) {
-
 	if (number > 255) {
 		number = 255;
 	} else if (number < 1) {
@@ -33,7 +32,7 @@ void arpSteptrigger(int number) {
 	// multiply by range
 	int arpCountTotal = arpCount + (arpRange * arpCount);
 
-	int arpCountTarget = map(number, 0, 255, 0, arpCountTotal - 1);
+	int arpCountTarget = map(number, 0, 256, 0, arpCountTotal);
 
 	scrubNote = 0;
 	while (arpCountTarget >= arpCount) {
