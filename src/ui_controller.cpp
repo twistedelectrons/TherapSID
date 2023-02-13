@@ -6,8 +6,6 @@
 #include "globals.h"
 #include "ui_controller.h"
 
-// FIXME if saveMode, then flash the display
-
 static const int POT_NONE = 20;
 
 static int scaleFine(int input) {
@@ -212,13 +210,18 @@ void UiDisplayController::update_7seg(int preset_number, const Preset& preset, c
 			digit1 = 99;
 			break;
 		default:
-			if (last_changed_counter) {
+			if (last_changed_counter && !ui_state.saveMode) {
 				last_changed_counter--;
 				digit0 = last_changed_digit0;
 				digit1 = last_changed_digit1;
 			} else {
-				digit0 = preset_number / 10;
-				digit1 = preset_number % 10;
+				if (!ui_state.saveMode || millis() % 512 > 256) {
+					digit0 = preset_number / 10;
+					digit1 = preset_number % 10;
+				} else {
+					digit0 = 99;
+					digit1 = 99;
+				}
 			}
 	}
 

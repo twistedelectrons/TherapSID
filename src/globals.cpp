@@ -57,7 +57,6 @@ byte arpCount;
 byte envState;
 int env;
 int a4, d4, s4, r4;
-bool saveMode;
 byte lastNote = 0;
 int arpStepBase;
 

@@ -232,13 +232,13 @@ void buttChanged(byte number, bool value) {
 					} else {
 						presetUp = true;
 						if (presetDown) {
-							if (!saveMode) {
-								saveMode = true;
+							if (!ui_state.saveMode) {
+								ui_state.saveMode = true;
 								saveBounce = 1600;
 							} else {
 								saveBounce = 1600;
 								save();
-								saveMode = false;
+								ui_state.saveMode = false;
 							}
 						}
 					}
@@ -262,13 +262,13 @@ void buttChanged(byte number, bool value) {
 					} else {
 						presetDown = true;
 						if (presetUp) {
-							if (!saveMode) {
-								saveMode = true;
+							if (!ui_state.saveMode) {
+								ui_state.saveMode = true;
 								saveBounce = 1600;
 							} else {
 								saveBounce = 1600;
 								save();
-								saveMode = false;
+								ui_state.saveMode = false;
 							}
 						}
 					}

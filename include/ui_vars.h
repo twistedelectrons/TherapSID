@@ -6,6 +6,7 @@ struct UiState {
 	byte lastPot;
 	byte selectedLfo;
 	byte midiSetup = 0;
+	bool saveMode;
 };
 
 extern bool scrolled;             // UI
@@ -21,7 +22,6 @@ extern bool resetDown;            // UI
 extern int frozen;                // UI
 extern bool lfoButtPressed;       // UI
 extern int lfoButtTimer;          // UI
-extern bool saveMode;             // UI
 
 extern int arpModeCounter;
 extern int loadTimer;

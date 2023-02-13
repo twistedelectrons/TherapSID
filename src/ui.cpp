@@ -28,7 +28,7 @@ void ui_loop() {
 		jumble = 0;
 	}
 
-	if ((!saveMode) && (presetLast != preset)) {
+	if (!ui_state.saveMode && presetLast != preset) {
 		loadTimer = 800;
 		load(preset);
 		presetLast = preset;

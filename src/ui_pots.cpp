@@ -15,7 +15,7 @@ static byte octScale(int value) {
 }
 
 void movedPot(byte number, int value, bool isMidi) {
-	if (!saveMode) {
+	if (!ui_state.saveMode) {
 		if (!isMidi) {
 			ui_state.lastPot = 20; // unselect
 		}
