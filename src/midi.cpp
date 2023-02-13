@@ -127,49 +127,6 @@ static void HandleControlChange(byte channel, byte data1, byte data2) {
 					pedal_adapter.set_pedal(channel, data2 >= 64);
 					break;
 
-				case 60:
-					// preset_data.lfo[selectedLfo].shape = data2 ? 1 : 0; // FIXME
-					sendControlChange(61, 0);
-					sendControlChange(62, 0);
-					sendControlChange(63, 0);
-					sendControlChange(65, 0);
-					break; // lfo shape1
-				case 61:
-					// preset_data.lfo[selectedLfo].shape = data2 ? 2 : 0; // FIXME
-					sendControlChange(60, 0);
-					sendControlChange(62, 0);
-					sendControlChange(63, 0);
-					sendControlChange(65, 0);
-					break; // lfo shape2
-				case 62:
-					// preset_data.lfo[selectedLfo].shape = data2 ? 3 : 0; // FIXME
-					sendControlChange(61, 0);
-					sendControlChange(60, 0);
-					sendControlChange(63, 0);
-					sendControlChange(65, 0);
-					break; // lfo shape3
-				case 63:
-					// preset_data.lfo[selectedLfo].shape = data2 ? 4 : 0; // FIXME
-					sendControlChange(61, 0);
-					sendControlChange(62, 0);
-					sendControlChange(60, 0);
-					sendControlChange(65, 0);
-					break; // lfo shape4
-				case 65:
-					// preset_data.lfo[selectedLfo].shape = data2 ? 5 : 0; // FIXME
-					sendControlChange(61, 0);
-					sendControlChange(62, 0);
-					sendControlChange(63, 0);
-					sendControlChange(60, 0);
-					break; // lfo shape5
-
-				case 66:
-					// preset_data.lfo[selectedLfo].retrig = !!data2; // FIXME
-					break; // lfo retrigger
-				case 67:
-					// preset_data.lfo[selectedLfo].looping = !!data2; // FIXME
-					break; // lfo loop
-
 				case 68:
 					if (data2) {
 						sendLfo = true;
