@@ -294,7 +294,7 @@ void movedPot(byte number, int value, bool isMidi) {
 					sendCC(34, value);
 					ui_state.lastPot = 17;
 				}
-				if (voice_state.n_held_keys() > 1) { // TODO why >, not >=?
+				if (voice_state.n_held_keys() >= 1) {
 					arpStepBase = value >> 2;
 				}
 				break; // ARP SCRUB
