@@ -384,7 +384,7 @@ ParamsAfterLfo lfoTick() {
 		arpStepLfo3 = 0;
 	}
 
-	if (voice_state.n_held_keys() > 0 && !preset_data.arp_mode) {
+	if (voice_state.n_held_keys() > 0 && preset_data.arp_mode) {
 		arpStep = arpStepBase + arpStepLfo1 + arpStepLfo2 + arpStepLfo3;
 		if (arpStep > 255) {
 			arpStep = 255;
