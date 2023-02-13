@@ -18,7 +18,7 @@ extern bool cvActive[3];
 extern int lfoStep[3];
 extern byte lfo[3];
 
-inline bool arping() { return preset_data.arp_speed_base << 4 > 4000; }
+inline bool arping() { return preset_data.arp_speed_base < 250; }
 
 extern byte lfoClockSpeedPending[3];
 extern int lfoTune1, lfoTune2, lfoTune3, lfoTune4, lfoTune5, lfoTune6, lfoTune7, lfoTune8, lfoTune9;
