@@ -112,14 +112,14 @@ const int envMap2[] = {
 };
 
 // interrupt service route to animate things (LFO arp etc)
-// called at 10kHz frequency (probably slower)
+// called at 10kHz frequency
 void isr() {
 	ui_tick();
 
 	// ENV
 	switch (envState) {
 		case 1:
-			if (a4 == 0) { // FIXME get rid of a4
+			if (a4 == 0) {
 				env = 255;
 				envState = 2;
 			} else {
@@ -177,7 +177,8 @@ void isr() {
 	// in monophonic mode, we glide only while the old note is still held down.
 	bool skip_glide = !preset_data.paraphonic && voice_state.n_held_keys() <= 1;
 	for (int i = 0; i < 6; i++) {
-		int voice_idx = preset_data.paraphonic ? 0 : (i % 3); // FIXME this is not nice
+		// FIXME this should be read from a mapping array and not be computed here.
+		int voice_idx = preset_data.paraphonic ? 0 : (i < 3 ? i : (i-3));
 		glide[i].glide_tick(skip_glide ? 0 : preset_data.voice[voice_idx].glide);
 	}
 

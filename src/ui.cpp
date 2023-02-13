@@ -37,9 +37,8 @@ void ui_loop() {
 	if (frozen) {
 		frozen--;
 	}
-	
-	ui_display_controller.update(preset, preset_data, ui_state);
 
+	ui_display_controller.update(preset, preset_data, ui_state);
 }
 
 void ui_tick() {

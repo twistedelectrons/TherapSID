@@ -56,7 +56,6 @@ static void shapeButtPressed(uint8_t voice, PresetVoice::Shape shape) {
 
 	if (!ui_state.filterModeHeld) {
 		preset_data.voice[voice].toggle_shape(shape);
-		// FIXME this needs deduplication of non-updates.
 		sendMidiButt(37 + 4 * voice + 0, preset_data.voice[voice].reg_control & PresetVoice::PULSE);
 		sendMidiButt(37 + 4 * voice + 1, preset_data.voice[voice].reg_control & PresetVoice::TRI);
 		sendMidiButt(37 + 4 * voice + 2, preset_data.voice[voice].reg_control & PresetVoice::SAW);
