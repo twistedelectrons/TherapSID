@@ -35,9 +35,6 @@ static void HandleNoteOff(byte channel, byte note);
 static MidiPedalAdapter pedal_adapter(HandleNoteOn, HandleNoteOff);
 
 static void HandleNoteOn(byte channel, byte note, byte velocity) {
-	if (gate) // FIXME maybe this should be handled differently
-		return;
-
 	if (note < 12 || note >= 107)
 		return;
 

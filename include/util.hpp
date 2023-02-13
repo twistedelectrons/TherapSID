@@ -36,7 +36,7 @@ template <typename T> class optional {
 
 	optional<T>& operator=(optional<T> const& other) {
 		this->has_value_ = true;
-		this->value_ = other->value_;
+		this->value_ = other.value_;
 		return *this;
 	}
 

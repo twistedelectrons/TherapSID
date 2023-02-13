@@ -1,5 +1,6 @@
 #include "globals.h"
 #include "ui_vars.h"
+#include "util.hpp"
 
 UiState ui_state;
 
@@ -17,7 +18,6 @@ bool sync;
 int arpModeCounter;
 bool cvActive[3];
 bool scrolled;
-bool gate;
 bool shape1Pressed;
 int shape1PressedTimer;
 int lfoStep[3], resetDownTimer;
@@ -62,3 +62,5 @@ byte lastNote = 0;
 int arpStepBase;
 
 bool arpModeHeld;
+byte arp_output_note;
+optional<byte> control_voltage_note;

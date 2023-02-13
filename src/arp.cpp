@@ -7,8 +7,6 @@ static int arpNote;
 static bool arpPendulum;
 static byte scrubNote, scrubNoteLast;
 
-static int arp_note; // FIXME FIXME FIXME this is never used. send note_on/off to the voice manager instead!
-
 void reset_arp() {
 	arpRound = 0;
 	arpCounter = 0;
@@ -48,9 +46,9 @@ void arpSteptrigger(int number) {
 	scrubNote += arpNotes[arpCountTarget];
 
 	if ((scrubNote) && (scrubNote != scrubNoteLast)) {
-		scrubNoteLast = arp_note = scrubNote;
+		scrubNoteLast = arp_output_note = scrubNote;
 		if (sendArp)
-			midiOut(arp_note);
+			midiOut(arp_output_note);
 	}
 }
 
@@ -104,9 +102,9 @@ void arpTick() {
 							}
 						}
 					}
-					arp_note = arpNote + (arpRound * 12);
+					arp_output_note = arpNote + (arpRound * 12);
 					if (sendArp)
-						midiOut(arp_note);
+						midiOut(arp_output_note);
 					break;
 
 				case 2:
@@ -123,9 +121,9 @@ void arpTick() {
 							}
 						}
 					}
-					arp_note = arpNote + (arpRound * 12);
+					arp_output_note = arpNote + (arpRound * 12);
 					if (sendArp)
-						midiOut(arp_note);
+						midiOut(arp_output_note);
 					break;
 
 				case 3:
@@ -143,9 +141,9 @@ void arpTick() {
 									}
 								}
 							}
-							arp_note = arpNote + (arpRound * 12);
+							arp_output_note = arpNote + (arpRound * 12);
 							if (sendArp)
-								midiOut(arp_note);
+								midiOut(arp_output_note);
 							break;
 
 						case 1:
@@ -161,9 +159,9 @@ void arpTick() {
 									}
 								}
 							}
-							arp_note = arpNote + (arpRound * 12);
+							arp_output_note = arpNote + (arpRound * 12);
 							if (sendArp)
-								midiOut(arp_note);
+								midiOut(arp_output_note);
 							break;
 					}
 					break;

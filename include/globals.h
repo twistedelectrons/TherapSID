@@ -3,6 +3,8 @@
 #include "preset.h"
 #include "voice_state.hpp"
 
+template <typename T> class optional;
+
 extern Preset preset_data;
 extern VoiceState<6> voice_state;
 extern Glide glide[6];
@@ -13,7 +15,6 @@ extern bool lfoNewRand[3];
 extern float bend, bend1, bend2, bend3; // TODO reactivate bend1-bend3
 extern bool sync;
 extern bool cvActive[3];
-extern bool gate;
 extern int lfoStep[3];
 extern byte lfo[3];
 
@@ -38,3 +39,6 @@ extern int arpStepBase;
 extern int lfoSpeed[3];
 
 extern byte preset;
+
+extern byte arp_output_note;
+extern optional<byte> control_voltage_note;

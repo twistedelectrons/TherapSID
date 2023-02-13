@@ -167,18 +167,6 @@ void isr() {
 			break; // RELEASE
 	}
 
-	/* FIXME: redo CV/gate functionality
-	// cvGate
-	gate = (PINA & _BV(7)) == 0;
-	if (gate != gateLast) {
-	    gateLast = gate;
-	    bitWrite(sid[4], 0, gate);
-	    bitWrite(sid[11], 0, gate);
-	    bitWrite(sid[18], 0, gate);
-	    held = 0;
-	}
-	*/
-
 	if (!sync) {
 		// ARP
 		if (preset_data.arp_mode && arping() && voice_state.n_held_keys() > 0) {

@@ -42,8 +42,17 @@ static void calculatePitch() {
 
 	for (int oper = 0; oper < 6; oper++) {
 		int voice_knob_idx = preset_data.paraphonic ? 0 : (oper % 3);
+		int key;
+		if (preset_data.arp_mode) {
+			key = arp_output_note;
+		} else if (control_voltage_note.has_value()) {
+			key = *control_voltage_note;
+		} else {
+			key = voice_state.key(oper);
+		}
+
 		glide[oper].destination_pitch =
-		    calc_pitch(voice_state.key(oper) + preset_data.voice[voice_knob_idx].tune_base + lfo_tune[voice_knob_idx],
+		    calc_pitch(key + preset_data.voice[voice_knob_idx].tune_base + lfo_tune[voice_knob_idx],
 		               preset_data.voice[voice_knob_idx].fine_base + lfo_fine[voice_knob_idx] + bend / 0.9);
 	}
 }
@@ -116,9 +125,12 @@ void loop() {
 	}
 	// trace(41, 444);
 
-	if (gate && !preset_data.paraphonic) {
+	bool control_voltage_gate = (PINA & _BV(7)) == 0;
+	if (control_voltage_gate && !preset_data.paraphonic) {
 		mux(15);
-		// key = map(analogRead(A2), 0, 1023, 12, 72); // FIXME FIXME FIXME reenable CV input
+		control_voltage_note = map(analogRead(A2), 0, 1023, 12, 72);
+	} else {
+		control_voltage_note = nullopt;
 	}
 
 	// CV
