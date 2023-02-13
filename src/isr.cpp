@@ -178,7 +178,7 @@ void isr() {
 	bool skip_glide = !preset_data.paraphonic && voice_state.n_held_keys() <= 1;
 	for (int i = 0; i < 6; i++) {
 		// FIXME this should be read from a mapping array and not be computed here.
-		int voice_idx = preset_data.paraphonic ? 0 : (i < 3 ? i : (i-3));
+		int voice_idx = preset_data.paraphonic ? 0 : (i < 3 ? i : (i - 3));
 		glide[i].glide_tick(skip_glide ? 0 : preset_data.voice[voice_idx].glide);
 	}
 
