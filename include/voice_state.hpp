@@ -92,6 +92,14 @@ template <size_t N_OPERATORS> struct VoiceState {
 
 	void note_off_individual(int voice, int note) { mono_tracker[voice].note_off(note); }
 
+	int has_individual_override(int oper) {
+		if (n_individual_voices == 1) {
+			return mono_tracker[oper].has_active_note();
+		} else {
+			return false;
+		}
+	}
+
 	int key(int oper) const {
 		if (oper >= n_usable_operators) {
 			return 0;

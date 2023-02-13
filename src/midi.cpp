@@ -71,10 +71,13 @@ static void HandleNoteOn(byte channel, byte note, byte velocity) {
 	} else if (!preset_data.paraphonic && masterChannel == 1 && (channel == 2 || channel == 3 || channel == 4)) {
 		auto voice = channel - 2;
 
-		if (velocity)
+		if (velocity) {
 			voice_state.note_on_individual(voice, note);
-		else
+			voice_state.note_on_individual(voice + 3, note);
+		} else {
 			voice_state.note_off_individual(voice, note);
+			voice_state.note_off_individual(voice + 3, note);
+		}
 	}
 	leftDot();
 }

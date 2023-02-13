@@ -40,8 +40,11 @@ static void calculatePitch() {
 	float lfo_fine[3] = {lfoFine1 + lfoFine2 + lfoFine3, lfoFine4 + lfoFine5 + lfoFine6,
 	                     lfoFine7 + lfoFine8 + lfoFine9};
 
+	float bends[3] = {bend1, bend2, bend3};
+
 	for (int oper = 0; oper < 6; oper++) {
-		int voice_knob_idx = preset_data.paraphonic ? 0 : (oper % 3);
+		int oper_mod3 = oper < 3 ? oper : (oper - 3);
+		int voice_knob_idx = preset_data.paraphonic ? 0 : oper_mod3;
 		int key;
 		if (preset_data.arp_mode) {
 			key = arp_output_note;
@@ -51,9 +54,11 @@ static void calculatePitch() {
 			key = voice_state.key(oper);
 		}
 
+		float my_bend = voice_state.has_individual_override(oper) ? bends[oper_mod3] : bend;
+
 		glide[oper].destination_pitch =
 		    calc_pitch(key + preset_data.voice[voice_knob_idx].tune_base + lfo_tune[voice_knob_idx],
-		               preset_data.voice[voice_knob_idx].fine_base + lfo_fine[voice_knob_idx] + bend / 0.9);
+		               preset_data.voice[voice_knob_idx].fine_base + lfo_fine[voice_knob_idx] + my_bend / 0.9);
 	}
 }
 void setSidRegisters(Preset const& preset, ParamsAfterLfo const& params_after_lfo) {
