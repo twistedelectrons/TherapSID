@@ -1,27 +1,31 @@
 #pragma once
 #include "voice_allocation.hpp"
 
-const long ONE_FP = 1L << 16;
-
 struct Glide {
 	int destination_pitch;
-	int current_pitch() const { return current_pitch_fp / ONE_FP; }
+	int current_pitch() const { return current_pitch_; }
 
-	void glide_tick(int glide) {
+	void glide_tick(uint8_t glide) {
 		if (glide) {
 			glide_counter++;
 			if (glide_counter >= glide) {
 				glide_counter = 0;
-				current_pitch_fp += (destination_pitch * ONE_FP - current_pitch_fp) / glide;
+				current_pitch_ += (destination_pitch - current_pitch_) / glide;
+
+				// nudge towards destination_pitch because of above imperfect integer division
+				if (current_pitch_ < destination_pitch)
+					current_pitch_++;
+				else if (current_pitch_ > destination_pitch)
+					current_pitch_--;
 			}
 		} else {
-			current_pitch_fp = destination_pitch * ONE_FP;
+			current_pitch_ = destination_pitch;
 		}
 	}
 
   private:
-	int glide_counter = 0;
-	long current_pitch_fp = 0;
+	uint8_t glide_counter = 0;
+	int current_pitch_ = 0;
 };
 
 enum class VoiceStateEvent { FIRST_NOTE_ON, LAST_NOTE_OFF, NEUTRAL };
