@@ -73,7 +73,8 @@ void setSidRegisters(Preset const& preset, ParamsAfterLfo const& params_after_lf
 			auto pitch = glide[oper].current_pitch();
 			sid_chips[i].set_freq(v, i == 0 ? pitch : preset.fatten_pitch(pitch));
 
-			sid_chips[i].set_reg_control(v, preset.voice[pv].reg_control | (voice_state.gate(oper) ? 1 : 0));
+			auto gate = voice_state.gate(oper) || control_voltage_note.has_value();
+			sid_chips[i].set_reg_control(v, preset.voice[pv].reg_control | (gate ? 0x01 : 0x00));
 		}
 
 		// disable voice->filter routing if voice is off or filter is off.
