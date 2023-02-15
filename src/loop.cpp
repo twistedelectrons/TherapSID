@@ -109,27 +109,21 @@ void setSidRegisters(Preset const& preset, ParamsAfterLfo const& params_after_lf
 }
 
 void loop() {
-	// trace(41, 111);
 	//  load the first preset after all the butts and pots have been scanned
 	if (!loadedAfterStartup) {
 		if (millis() > 1400) {
-			// trace(53, 111);
 			load(preset);
-			// trace(53, 222);
 			loadedAfterStartup = true;
 		}
 	}
 
 	ui_loop();
-	// trace(41, 222);
 
 	midiRead();
-	// trace(41, 333);
 	if (arpCounter >= arpSpeed + 100) {
 		arpCounter = 0;
 		arpTick();
 	}
-	// trace(41, 444);
 
 	bool control_voltage_gate = (PINA & _BV(7)) == 0;
 	if (control_voltage_gate && !preset_data.paraphonic) {
@@ -161,17 +155,11 @@ void loop() {
 	} else {
 		cvActive[2] = false;
 	}
-	// trace(41, 555);
 
 	readMux();
-	// trace(41, 666);
 
 	voice_state.set_n_individual_voices(preset_data.paraphonic ? 3 : 1);
-	// trace(41, 777);
 	ParamsAfterLfo params_after_lfo = lfoTick();
-	// trace(41, 888);
 	calculatePitch();
-	// trace(41, 999);
 	setSidRegisters(preset_data, params_after_lfo);
-	// trace(41, 909);
 }
