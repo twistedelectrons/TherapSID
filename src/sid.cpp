@@ -86,7 +86,7 @@ Sid::Sid(int chip_enable_bit) : chip_enable_bit(chip_enable_bit) {
 	registers[FILTER_CUTOFF_LO] = 0xFF;
 	registers[FILTER_CUTOFF_HI] = 0xFF;
 	registers[FILTER_RESONANCE_ROUTING] = 0xFF;
-	registers[FILTER_MODE_VOLUME] = 0x11; // Filter off full vol
+	registers[FILTER_MODE_VOLUME] = 0x0F; // Filter off full vol
 }
 
 void Sid::set_pulsewidth(int voice, uint16_t pulsewidth) {
