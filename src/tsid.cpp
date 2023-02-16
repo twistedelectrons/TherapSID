@@ -1,15 +1,11 @@
 #include "globals.h"
 #include "display.h"
-#include "arp.h"
 #include "midi.h"
 #include "mux.h"
 #include "boot.h"
 #include "isr.h"
-#include "preset.h"
 #include "sid.h"
-#include "leds.h"
-#include "paraphonic.h"
-#include "lfo.h"
+#include "ui_leds.h"
 
 /*
  *
@@ -47,9 +43,7 @@ void setup() {
 
 	Serial.begin(31250);
 
-	filterEnabled[0] = filterEnabled[1] = filterEnabled[2] = 1;
-
-	arpSpeedBase = 100;
+	preset_data.arp_speed_base = 100;
 
 	// let sid chip wake up
 	DDRD |= _BV(2); // SID1
@@ -95,8 +89,6 @@ void setup() {
 	pinMode(A7, INPUT);
 	digitalWrite(A7, HIGH); // gate
 
-	destiPitch1 = destiPitch2 = destiPitch3 = 1;
-
 	// turns on display
 	mydisplay.shutdown(0, false);
 	mydisplay.setIntensity(0, 1); // 15 = brightest
@@ -110,13 +102,12 @@ void setup() {
 	Timer1.attachInterrupt(isr); // attach the service routine here
 
 	DDRC = B11111000;
-	sid[24] = B00010001; // Filter off full vol
-	sid[23] = B11111111;
 
-	presetLast = EEPROM.read(3999);
-	if (presetLast > 98)
-		presetLast = 1;
-	preset = presetLast;
+	int preset_tmp;
+	preset_tmp = EEPROM.read(3999);
+	if (preset_tmp > 98)
+		preset_tmp = 1;
+	preset = preset_tmp;
 
 	masterChannel = EEPROM.read(3998);
 	if (masterChannel > 16) {
@@ -137,19 +128,6 @@ void setup() {
 	} else {
 		sendArp = true;
 	}
-
-	if (fatMode > 3) {
-		fatMode = 0;
-	}
-	if (fatMode == 2) {
-		fat = 15;
-	} else if (fatMode == 3) {
-		fat = 30;
-	}
-
-	sidPitch(0, 0);
-	sidPitch(1, 0);
-	sidPitch(2, 0);
 
 	setupMux();
 }

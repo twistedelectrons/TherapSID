@@ -1,13 +1,8 @@
 #include "globals.h"
-#include "sid.h"
-#include "lfo.h"
-#include "leds.h"
 #include "isr.h"
+#include "ui.h"
 
-static int presetScrollTimer;
 static int envCounter;
-static bool gateLast;
-static byte glideCounter1, glideCounter2, glideCounter3;
 static int lfoCounter[3];
 static int env2;
 
@@ -117,20 +112,9 @@ const int envMap2[] = {
 };
 
 // interrupt service route to animate things (LFO arp etc)
+// called at 10kHz frequency
 void isr() {
-
-	if (shape1Pressed) {
-		shape1PressedTimer++;
-	}
-
-	if (resetDown) {
-		resetDownTimer++;
-		if (resetDownTimer > 16000) {
-			resetDown = 0;
-			resetDownTimer = 0;
-			jumble = 1;
-		}
-	}
+	ui_tick();
 
 	// ENV
 	switch (envState) {
@@ -183,149 +167,23 @@ void isr() {
 			break; // RELEASE
 	}
 
-	if (loadTimer)
-		loadTimer--;
-
-	if (filterModeHeld) {
-		arpModeCounter++;
-		if (arpModeCounter > 25000) {
-			fatChanged = true;
-			arpModeCounter = 0;
-			fatMode++;
-			if (fatMode > 3) {
-				fatMode = 0;
-			}
-			fatShow = true;
-			updateFatMode();
-		}
-	}
-
-	// cvGate
-	gate = (PINA & _BV(7)) == 0;
-	if (gate != gateLast) {
-		gateLast = gate;
-		bitWrite(sid[4], 0, gate);
-		bitWrite(sid[11], 0, gate);
-		bitWrite(sid[18], 0, gate);
-		held = 0;
-	}
-
-	if (saveMode) {
-		saveModeTimer++;
-	}
-
 	if (!sync) {
 		// ARP
-		if ((arpMode) && (arping) && (held)) {
+		if (preset_data.arp_mode && arping() && voice_state.n_held_keys() > 0) {
 			arpCounter++;
 		}
 	}
-	if ((presetUp) || (presetDown)) {
-
-		if ((presetUp) && (!presetDown)) {
-			presetScrollTimer += 4;
-			if (presetScrollTimer > presetScrollSpeed) {
-				presetScrollTimer = 0;
-				if (presetScrollSpeed > 1001) {
-					presetScrollSpeed -= 1000;
-				}
-				preset++;
-				if (preset > 99) {
-					preset = 1;
-				}
-				showPresetNumber = true;
-				scrolled = true;
-			}
-		} else if ((!presetUp) && (presetDown)) {
-			presetScrollTimer += 4;
-			if (presetScrollTimer > presetScrollSpeed) {
-				presetScrollTimer = 0;
-				if (presetScrollSpeed > 1001) {
-					presetScrollSpeed -= 1000;
-				}
-				preset--;
-				if (preset < 1) {
-					preset = 99;
-				}
-				showPresetNumber = true;
-				scrolled = true;
-			}
-		}
-	}
-
-	if (lfoButtPressed) {
-		lfoButtTimer++;
-		if (lfoButtTimer == 6000) {
-			clearLfo();
-			lfoButtTimer = 0;
-			lfoButtPressed = false;
-		}
-	} // delete LFO stuff
-
 	// glides
-	if (((!pa) && (glide1) && (held > 1)) || ((glide1) && (pa))) {
-		glideCounter1++;
-		if (glideCounter1 >= glide1) {
-			glideCounter1 = 0;
-			if (pitch1 < destiPitch1) {
-				pitch1 += ((destiPitch1 - pitch1) / glide1) + 1;
-				if (pitch1 > destiPitch1) {
-					pitch1 = destiPitch1;
-				}
-			} else if (pitch1 > destiPitch1) {
-				pitch1 -= ((pitch1 - destiPitch1) / glide1) + 1;
-				if (pitch1 < destiPitch1) {
-					pitch1 = destiPitch1;
-				}
-			}
-		}
-	} else {
-		pitch1 = destiPitch1;
-	}
-
-	if (((!pa) && (glide2) && (held > 1)) || ((glide2) && (pa))) {
-		glideCounter2++;
-		if (glideCounter2 >= glide2) {
-			glideCounter2 = 0;
-			if (pitch2 < destiPitch2) {
-				pitch2 += ((destiPitch2 - pitch2) / glide2) + 1;
-				if (pitch2 > destiPitch2) {
-					pitch2 = destiPitch2;
-				}
-			} else if (pitch2 > destiPitch2) {
-				pitch2 -= ((pitch2 - destiPitch2) / glide2) + 1;
-				if (pitch2 < destiPitch2) {
-					pitch2 = destiPitch2;
-				}
-			}
-		}
-	} else {
-		pitch2 = destiPitch2;
-	}
-
-	if (((!pa) && (glide3) && (held > 1)) || ((glide3) && (pa))) {
-		glideCounter3++;
-		if (glideCounter3 >= glide3) {
-			glideCounter3 = 0;
-			if (pitch3 < destiPitch3) {
-				pitch3 += ((destiPitch3 - pitch3) / glide3) + 1;
-				if (pitch3 > destiPitch3) {
-					pitch3 = destiPitch3;
-				}
-			} else if (pitch3 > destiPitch3) {
-				pitch3 -= ((pitch3 - destiPitch3) / glide3) + 1;
-				if (pitch3 < destiPitch3) {
-					pitch3 = destiPitch3;
-				}
-			}
-		}
-	} else {
-		pitch3 = destiPitch3;
+	// in monophonic mode, we glide only while the old note is still held down.
+	bool skip_glide = !preset_data.paraphonic && voice_state.n_held_keys() <= 1;
+	for (int i = 0; i < 6; i++) {
+		// FIXME this should be read from a mapping array and not be computed here.
+		int voice_idx = preset_data.paraphonic ? 0 : (i < 3 ? i : (i - 3));
+		glide[i].glide_tick(skip_glide ? 0 : preset_data.voice[voice_idx].glide);
 	}
 
 	// LFO
 	for (int i = 0; i < 3; i++) {
-
 		if (!sync) {
 			lfoCounter[i] += lfoSpeed[i];
 			if (lfoCounter[i] >= 4000) {
@@ -333,8 +191,7 @@ void isr() {
 				lfoStep[i]++;
 
 				if (lfoStep[i] > 254) {
-
-					if (looping[i]) {
+					if (preset_data.lfo[i].looping) {
 						lfoStep[i] = 0;
 					} else {
 						lfoStep[i] = 255;

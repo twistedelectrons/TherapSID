@@ -1,6 +1,12 @@
-#include "globals.h"
-#include "leds.h"
+#include "ui_leds.h"
 #include "boot.h"
+#include "version.h"
+
+void showVersion() {
+	digit(1, versionDecimal);
+	digit(0, version);
+	leftDot();
+}
 
 // boot animation
 static byte del = 20; // sets the animation speed
