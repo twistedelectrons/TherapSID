@@ -16,10 +16,10 @@ static int scaleFine(int input) {
 }
 
 static byte scale100(int input) {
-	input = map(input, 0, 1023, 0, 101);
+	input = map(input, 0, 1023, 0, 100);
 	if (input > 99)
 		input = 99;
-	return (input);
+	return input;
 }
 
 void UiDisplayController::temp_7seg(int digit0, int digit1, int time) {

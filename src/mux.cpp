@@ -6,12 +6,12 @@
 #include "ui_buttons.h"
 
 static byte muxChannel;
-static int pot;
 static bool butt;
 static bool buttLast[33];
 static int potLast[42];
 
 const int POT_MAX = sizeof(potLast) / sizeof(*potLast); // number of array entries
+const int HYSTERESIS = 3;
 
 void setupMux() {
 
@@ -21,10 +21,10 @@ void setupMux() {
 
 	for (int i = 0; i < 16; i++) {
 		mux(i);
-		potLast[i] = ((analogRead(A0) + analogRead(A0)) / 2) >> 3;
-		potLast[i + 16] = ((analogRead(A1) + analogRead(A1)) / 2) >> 3;
+		potLast[i] = analogRead(A0);
+		potLast[i + 16] = analogRead(A1);
 		if (i + 32 < POT_MAX)
-			potLast[i + 32] = ((analogRead(A2) + analogRead(A2)) / 2) >> 3;
+			potLast[i + 32] = analogRead(A2);
 	}
 }
 void readMux() {
@@ -36,28 +36,28 @@ void readMux() {
 	mux(muxChannel);
 
 	// pots
-	pot = ((analogRead(A0) + analogRead(A0)) / 2) >> 3;
+	int pot = analogRead(A0);
 
-	if ((pot > potLast[muxChannel] + 1) || (pot < potLast[muxChannel] - 1)) {
+	if ((pot > potLast[muxChannel] + HYSTERESIS) || (pot < potLast[muxChannel] - HYSTERESIS)) {
 		potLast[muxChannel] = pot;
-		movedPot(muxChannel, pot << 3, 0);
+		movedPot(muxChannel, pot, 0);
 	}
 
 	mux(muxChannel);
-	pot = ((analogRead(A1) + analogRead(A1)) / 2) >> 3;
+	pot = analogRead(A1);
 
-	if ((pot > potLast[muxChannel + 16] + 1) || (pot < potLast[muxChannel + 16] - 1)) {
+	if ((pot > potLast[muxChannel + 16] + HYSTERESIS) || (pot < potLast[muxChannel + 16] - HYSTERESIS)) {
 		potLast[muxChannel + 16] = pot;
-		movedPot(muxChannel + 16, pot << 3, 0);
+		movedPot(muxChannel + 16, pot, 0);
 	}
 
 	if ((muxChannel == 0) || (muxChannel == 4) || (muxChannel == 9)) {
 		mux(muxChannel);
-		pot = ((analogRead(A2) + analogRead(A2)) / 2) >> 3;
+		pot = analogRead(A2);
 
-		if ((pot > potLast[muxChannel + 32] + 1) || (pot < potLast[muxChannel + 32] - 1)) {
+		if ((pot > potLast[muxChannel + 32] + HYSTERESIS) || (pot < potLast[muxChannel + 32] - HYSTERESIS)) {
 			potLast[muxChannel + 32] = pot;
-			movedPot(muxChannel + 32, pot << 3, 0);
+			movedPot(muxChannel + 32, pot, 0);
 		}
 	}
 
