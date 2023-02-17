@@ -88,7 +88,7 @@ void save() {
 	writey(preset_data.voice[1].reg_control);
 	writey(preset_data.voice[2].reg_control);
 	temp = 0;
-	temp |= ((int)preset_data.fat_mode) & 0x3;
+	temp |= ((int)preset_data.fat_mode) & 0x7;
 
 	writey(temp);
 	writey(preset_data.voice[0].fine_base * 255);
@@ -314,7 +314,7 @@ void load(byte number) {
 	}
 
 	temp = ready();
-	preset_data.fat_mode = uint2FatMode(temp & 0x3);
+	preset_data.fat_mode = uint2FatMode(temp & 0x7);
 
 	preset_data.voice[0].fine_base = ready();
 	preset_data.voice[0].fine_base /= 255;

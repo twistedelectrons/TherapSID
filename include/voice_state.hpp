@@ -42,6 +42,7 @@ template <size_t N_OPERATORS> struct VoiceState {
 			mono_tracker[i].clear();
 		}
 		mono_note_tracker.clear();
+		voice_allocator.set_max_voices(n);
 		voice_allocator.clear();
 	}
 
@@ -112,6 +113,9 @@ template <size_t N_OPERATORS> struct VoiceState {
 			} else {
 				return mono_note;
 			}
+		} else if (n_individual_voices == 2) {
+			int voice = oper / 3;
+			return voice_allocator.get_voices()[voice].note;
 		} else {
 			int voice = oper % n_individual_voices;
 			return voice_allocator.get_voices()[voice].note;
@@ -124,6 +128,9 @@ template <size_t N_OPERATORS> struct VoiceState {
 
 		if (n_individual_voices == 1) {
 			return mono_tracker[oper].has_active_note() || mono_note_tracker.has_active_note();
+		} else if (n_individual_voices == 2) {
+			int voice = oper / 3;
+			return voice_allocator.get_voices()[voice].playing;
 		} else {
 			int voice = oper % n_individual_voices;
 			return voice_allocator.get_voices()[voice].playing;
@@ -140,7 +147,7 @@ template <size_t N_OPERATORS> struct VoiceState {
 	uint8_t mono_note = 0;
 
 	MonoNoteTracker<16> mono_tracker[N_OPERATORS];
-	PolyVoiceAllocator<3> voice_allocator;
+	PolyVoiceAllocator<6> voice_allocator;
 	MonoNoteTracker<16> mono_note_tracker;
 
 	bool _held_keys[128] = {false};

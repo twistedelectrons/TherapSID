@@ -55,7 +55,7 @@ struct PresetLfo {
 
 enum class FilterMode { LOWPASS, BANDPASS, HIGHPASS, NOTCH, OFF };
 
-enum class FatMode { UNISONO, OCTAVE_UP, DETUNE_SLIGHT, DETUNE_MUCH };
+enum class FatMode { UNISONO, OCTAVE_UP, DETUNE_SLIGHT, DETUNE_MUCH, MORE_VOICES, PARA_2OP };
 
 struct Preset {
 	PresetVoice voice[3];

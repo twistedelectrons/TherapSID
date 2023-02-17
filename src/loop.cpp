@@ -44,7 +44,7 @@ static void calculatePitch() {
 
 	for (int oper = 0; oper < 6; oper++) {
 		int oper_mod3 = oper < 3 ? oper : (oper - 3);
-		int voice_knob_idx = preset_data.paraphonic ? 0 : oper_mod3;
+		int voice_knob_idx = voice_index[oper];
 		int key;
 		if (preset_data.arp_mode) {
 			key = arp_output_note;
@@ -64,8 +64,9 @@ static void calculatePitch() {
 void setSidRegisters(Preset const& preset, ParamsAfterLfo const& params_after_lfo) {
 	for (int i = 0; i < 2; i++) {
 		for (int v = 0; v < 3; v++) {
-			int pv = preset_data.paraphonic ? 0 : v;
 			int oper = v + 3 * i;
+			int pv = voice_index[oper];
+
 			sid_chips[i].set_attack_decay(v, preset.voice[pv].attack, preset.voice[pv].decay);
 			sid_chips[i].set_sustain_release(v, preset.voice[pv].sustain, preset.voice[pv].release);
 			sid_chips[i].set_pulsewidth(v, params_after_lfo.pulsewidth[pv]);
@@ -158,7 +159,29 @@ void loop() {
 
 	readMux();
 
-	voice_state.set_n_individual_voices(preset_data.paraphonic ? 3 : 1);
+	static byte voice_index_000000[6] = {0, 0, 0, 0, 0, 0};
+	static byte voice_index_000111[6] = {0, 0, 0, 1, 1, 1};
+	static byte voice_index_012012[6] = {0, 1, 2, 0, 1, 2};
+	if (!preset_data.paraphonic) {
+		if (preset_data.fat_mode == FatMode::MORE_VOICES) {
+			voice_state.set_n_individual_voices(2);
+			voice_index = voice_index_012012;
+		} else {
+			voice_state.set_n_individual_voices(1);
+			voice_index = voice_index_012012;
+		}
+	} else {
+		if (preset_data.fat_mode == FatMode::MORE_VOICES) {
+			voice_state.set_n_individual_voices(6);
+			voice_index = voice_index_000000;
+		} else if (preset_data.fat_mode == FatMode::PARA_2OP) {
+			voice_state.set_n_individual_voices(3);
+			voice_index = voice_index_000111;
+		} else {
+			voice_state.set_n_individual_voices(3);
+			voice_index = voice_index_000000;
+		}
+	}
 	ParamsAfterLfo params_after_lfo = lfoTick();
 	calculatePitch();
 	setSidRegisters(preset_data, params_after_lfo);

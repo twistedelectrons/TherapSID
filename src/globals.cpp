@@ -63,3 +63,6 @@ int arpStepBase;
 bool arpModeHeld;
 byte arp_output_note;
 optional<byte> control_voltage_note;
+
+// voice_index[operator] tells you the preset's voice to read the operator's settings from.
+byte* voice_index; // array of size 6, set depending on preset.paraphonic
