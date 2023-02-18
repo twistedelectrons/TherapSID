@@ -42,6 +42,8 @@ struct PresetVoice {
 	}
 
 	uint8_t shape() const { return reg_control & (TRI | SAW | PULSE | NOISE); }
+
+	bool wants_filter() const { return filter_enabled && shape() != 0; }
 };
 
 struct PresetLfo {

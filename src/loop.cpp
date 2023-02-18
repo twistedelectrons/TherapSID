@@ -81,9 +81,9 @@ void setSidRegisters(Preset const& preset, ParamsAfterLfo const& params_after_lf
 		// disable voice->filter routing if voice is off or filter is off.
 		sid_chips[i].set_resonance_and_filter_enable(
 		    params_after_lfo.resonance,
-		    preset.voice[0].filter_enabled && preset.filter_mode != FilterMode::OFF && preset.voice[0].shape() != 0,
-		    preset.voice[1].filter_enabled && preset.filter_mode != FilterMode::OFF && preset.voice[1].shape() != 0,
-		    preset.voice[2].filter_enabled && preset.filter_mode != FilterMode::OFF && preset.voice[2].shape() != 0,
+		    preset.voice[voice_index[3 * i + 0]].wants_filter() && preset.filter_mode != FilterMode::OFF,
+		    preset.voice[voice_index[3 * i + 1]].wants_filter() && preset.filter_mode != FilterMode::OFF,
+		    preset.voice[voice_index[3 * i + 2]].wants_filter() && preset.filter_mode != FilterMode::OFF,
 		    preset.filter_mode != FilterMode::OFF);
 		sid_chips[i].set_filter_cutoff(params_after_lfo.cutoff);
 
