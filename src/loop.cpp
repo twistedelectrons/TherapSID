@@ -127,7 +127,7 @@ void loop() {
 	}
 
 	bool control_voltage_gate = (PINA & _BV(7)) == 0;
-	if (control_voltage_gate && !preset_data.paraphonic) {
+	if (control_voltage_gate && !preset_data.is_polyphonic()) {
 		mux(15);
 		control_voltage_note = map(analogRead(A2), 0, 1023, 12, 72);
 	} else {

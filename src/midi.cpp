@@ -68,7 +68,7 @@ static void HandleNoteOn(byte channel, byte note, byte velocity) {
 			default:
 				break;
 		}
-	} else if (!preset_data.paraphonic && masterChannel == 1 && (channel == 2 || channel == 3 || channel == 4)) {
+	} else if (!preset_data.is_polyphonic() && masterChannel == 1 && (channel == 2 || channel == 3 || channel == 4)) {
 		auto voice = channel - 2;
 
 		if (velocity) {

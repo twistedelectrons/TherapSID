@@ -77,4 +77,5 @@ struct Preset {
 	FatMode fat_mode = FatMode::UNISONO;
 
 	uint16_t fatten_pitch(uint16_t pitch) const;
+	bool is_polyphonic() const { return paraphonic || fat_mode == FatMode::MORE_VOICES; }
 };
