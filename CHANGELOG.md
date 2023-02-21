@@ -8,7 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased 2.1] - TODO
 
 ### Added
-- 2 and 6 voice polyphonic modes (via F5 and F6 fat mode).
+- 2 and 6 voice polyphonic modes (via F5 fat mode).
+- 3-voice 2-operator polyphonic mode (via F6 fat mode in paraphonic mode).
 
 ### Fixed
 
