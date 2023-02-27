@@ -60,7 +60,7 @@ template <size_t N> class PolyVoiceAllocator {
 		max_voices = value;
 		next_slot %= max_voices;
 
-		for (int i = max_voices; i < N; i++) {
+		for (auto i = max_voices; i < N; i++) {
 			voices[i].playing = false;
 		}
 	}

@@ -37,25 +37,33 @@ void UiDisplayController::update_leds(const Preset& p, const UiState& ui_state) 
 	assert(ui_state.lastPot <= 20);
 	assert(ui_state.selectedLfo < 3);
 
+	int n_unisono_voices;
+	if (!p.paraphonic)
+		n_unisono_voices = 3;
+	else if (p.fat_mode != FatMode::PARA_2OP)
+		n_unisono_voices = 1;
+	else
+		n_unisono_voices = 2;
+
 	if (!ui_state.filterModeHeld) {
 		for (int i = 0; i < 3; i++) {
-			set_led(4 * i + 1, p.voice[p.paraphonic ? 0 : i].reg_control & PresetVoice::PULSE);
-			set_led(4 * i + 2, p.voice[p.paraphonic ? 0 : i].reg_control & PresetVoice::TRI);
-			set_led(4 * i + 3, p.voice[p.paraphonic ? 0 : i].reg_control & PresetVoice::SAW);
-			set_led(4 * i + 4, p.voice[p.paraphonic ? 0 : i].reg_control & PresetVoice::NOISE);
+			set_led(4 * i + 1, i < n_unisono_voices && p.voice[i].reg_control & PresetVoice::PULSE);
+			set_led(4 * i + 2, i < n_unisono_voices && p.voice[i].reg_control & PresetVoice::TRI);
+			set_led(4 * i + 3, i < n_unisono_voices && p.voice[i].reg_control & PresetVoice::SAW);
+			set_led(4 * i + 4, i < n_unisono_voices && p.voice[i].reg_control & PresetVoice::NOISE);
 		}
 	} else {
 		for (int i = 0; i < 3; i++)
 			for (int k = 0; k < 4; k++)
-				set_led(4 * i + 1 + k, p.voice[p.paraphonic ? 0 : i].filter_enabled);
+				set_led(4 * i + 1 + k, i < n_unisono_voices && p.voice[i].filter_enabled);
 	}
 
-	set_led(16, bitRead(p.voice[p.paraphonic ? 0 : 0].reg_control, 1));
-	set_led(17, bitRead(p.voice[p.paraphonic ? 0 : 0].reg_control, 2));
-	set_led(18, bitRead(p.voice[p.paraphonic ? 0 : 1].reg_control, 1));
-	set_led(19, bitRead(p.voice[p.paraphonic ? 0 : 1].reg_control, 2));
-	set_led(20, bitRead(p.voice[p.paraphonic ? 0 : 2].reg_control, 1));
-	set_led(21, bitRead(p.voice[p.paraphonic ? 0 : 2].reg_control, 2));
+	set_led(16, 0 < n_unisono_voices && bitRead(p.voice[0].reg_control, 1));
+	set_led(17, 0 < n_unisono_voices && bitRead(p.voice[0].reg_control, 2));
+	set_led(18, 1 < n_unisono_voices && bitRead(p.voice[1].reg_control, 1));
+	set_led(19, 1 < n_unisono_voices && bitRead(p.voice[1].reg_control, 2));
+	set_led(20, 2 < n_unisono_voices && bitRead(p.voice[2].reg_control, 1));
+	set_led(21, 2 < n_unisono_voices && bitRead(p.voice[2].reg_control, 2));
 
 	switch (p.filter_mode) {
 		case FilterMode::LOWPASS:

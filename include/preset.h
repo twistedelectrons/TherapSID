@@ -42,6 +42,8 @@ struct PresetVoice {
 	}
 
 	uint8_t shape() const { return reg_control & (TRI | SAW | PULSE | NOISE); }
+
+	bool wants_filter() const { return filter_enabled && shape() != 0; }
 };
 
 struct PresetLfo {
@@ -55,7 +57,7 @@ struct PresetLfo {
 
 enum class FilterMode { LOWPASS, BANDPASS, HIGHPASS, NOTCH, OFF };
 
-enum class FatMode { UNISONO, OCTAVE_UP, DETUNE_SLIGHT, DETUNE_MUCH };
+enum class FatMode { UNISONO, OCTAVE_UP, DETUNE_SLIGHT, DETUNE_MUCH, MORE_VOICES, PARA_2OP };
 
 struct Preset {
 	PresetVoice voice[3];
@@ -75,4 +77,5 @@ struct Preset {
 	FatMode fat_mode = FatMode::UNISONO;
 
 	uint16_t fatten_pitch(uint16_t pitch) const;
+	bool is_polyphonic() const { return paraphonic || fat_mode == FatMode::MORE_VOICES; }
 };

@@ -63,7 +63,10 @@ void ui_tick() {
 		if (arpModeCounter > 16000) {
 			fatChanged = true;
 			arpModeCounter = 0;
-			preset_data.fat_mode = static_cast<FatMode>(((int)preset_data.fat_mode + 1) % 4);
+			if (preset_data.paraphonic)
+				preset_data.fat_mode = static_cast<FatMode>(((int)preset_data.fat_mode + 1) % 6);
+			else
+				preset_data.fat_mode = static_cast<FatMode>(((int)preset_data.fat_mode + 1) % 5);
 		}
 	}
 
