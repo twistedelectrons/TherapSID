@@ -63,7 +63,7 @@ static void HandleNoteOn(byte channel, byte note, byte velocity) {
 				clockCount = preset_data.arp_rate;
 
 				if (preset_data.arp_mode)
-					arpReset(note);
+					arpReset();
 				break;
 			default:
 				break;
@@ -242,7 +242,7 @@ void sendNoteOff(byte note, byte velocity, byte channel) {
 	if (!thru) {
 		Serial.write(127 + channel);
 		Serial.write(note);
-		Serial.write(1);
+		Serial.write(velocity);
 	}
 }
 
@@ -250,7 +250,7 @@ void sendNoteOn(byte note, byte velocity, byte channel) {
 	if (!thru) {
 		Serial.write(143 + channel);
 		Serial.write(note);
-		Serial.write(1);
+		Serial.write(velocity);
 	}
 }
 

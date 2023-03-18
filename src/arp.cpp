@@ -51,7 +51,7 @@ void arpSteptrigger(int number) {
 	}
 }
 
-void arpReset(byte note) {
+void arpReset() {
 
 	switch (preset_data.arp_mode) {
 

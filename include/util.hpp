@@ -32,7 +32,7 @@ template <typename T> class optional {
 		has_value_ = true;
 	}
 
-	optional(nullopt_t _ignored) { has_value_ = false; }
+	optional(nullopt_t) { has_value_ = false; }
 
 	optional<T>& operator=(optional<T> const& other) {
 		this->has_value_ = other.has_value_;
