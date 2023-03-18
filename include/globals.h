@@ -8,7 +8,9 @@ template <typename T> class optional;
 extern Preset preset_data;
 extern VoiceState<6> voice_state;
 extern Glide glide[6];
-
+extern byte settings;
+extern byte aftertouch;
+extern bool aftertouchToLfo;
 extern bool sendLfo;
 extern bool sendArp;
 extern bool lfoNewRand[3];
@@ -17,6 +19,10 @@ extern bool sync;
 extern bool cvActive[3];
 extern int lfoStep[3];
 extern byte lfo[3];
+extern int velocityToLfo;
+extern bool modToLfo;
+extern byte velocityLast;
+extern byte modWheelLast;
 
 inline bool arping() { return preset_data.arp_speed_base < 250; }
 
