@@ -20,7 +20,6 @@ static float lfoStepF[3];
 static byte lfoClockSpeed[3];
 static int clockCount;
 static bool thru;
-static byte velocityLast;
 
 static int dumpCounter = 0;
 static byte dump;
@@ -49,8 +48,9 @@ static void HandleNoteOn(byte channel, byte note, byte velocity) {
 	}
 
 	if (channel == masterChannel) {
-		if (velocity)
+		if (velocity) {
 			velocityLast = velocity;
+		}
 
 		switch (voice_state.note_on(note, velocity)) {
 			case VoiceStateEvent::LAST_NOTE_OFF:
@@ -86,12 +86,45 @@ static void HandleNoteOff(byte channel, byte note) { HandleNoteOn(channel, note,
 
 static void HandleControlChange(byte channel, byte data1, byte data2) {
 	leftDot();
-	if (channel == masterChannel) {
+
+	if ((channel == 16) && (data1 == 85)) {
+		if (data2) {
+			EEPROM.update(3994, 1);
+			modToLfo = 1;
+		} else {
+			EEPROM.update(3994, 0);
+			modToLfo = 0;
+		}
+	} // mod wheel -> lfo depth1
+	else if ((channel == 16) && (data1 == 86)) {
+		if (data2) {
+			EEPROM.update(3993, 1);
+			aftertouchToLfo = 1;
+		} else {
+			EEPROM.update(3993, 0);
+			aftertouchToLfo = 0;
+		}
+	} // aftertouch -> lfo depth2
+	else if ((channel == 16) && (data1 == 87)) {
+		if (data2) {
+			EEPROM.update(3992, 1);
+			velocityToLfo = 1;
+		} else {
+			EEPROM.update(3992, 0);
+			velocityToLfo = 0;
+		}
+	} // velocity -> lfo depth3
+
+	else if (channel == masterChannel) {
 		if (data1 == 59)
 			data1 = 32;
 
+		if (data1 == 1) {
+			modWheelLast = data2;
+		}
+
 		if (1 <= data1 && data1 <= 36) {
-			int mapping[] = {-1, 12, 4,  6,  14, 1,  5, 15, 13, 16, 24, 26, 17, 27, 22, 25, 23, 20, 30,
+			int mapping[] = {-1, -1, 4,  6,  14, 1,  5, 15, 13, 16, 24, 26, 17, 27, 22, 25, 23, 20, 30,
 			                 21, 31, 19, 29, 18, 28, 3, 11, 12, 10, 9,  36, 2,  8,  0,  7,  41, 32};
 			movedPot(mapping[data1], data2 << 3, true);
 		} else if (37 <= data1 && data1 <= 48) {
@@ -140,6 +173,16 @@ static void HandleControlChange(byte channel, byte data1, byte data2) {
 					}
 					break; // lfo send
 				case 69:
+					if (data2) {
+						sendArp = true;
+						EEPROM.update(3995, 0);
+					} else {
+						sendArp = false;
+						EEPROM.update(3995, 1);
+					}
+					break; // arp send
+
+				case 85:
 					if (data2) {
 						sendArp = true;
 						EEPROM.update(3995, 0);
@@ -334,7 +377,9 @@ void midiRead() {
 						mData = 255;
 						break; // bend
 					case 5:
-						preset_data.lfo[1].depth = input << 3;
+						if (bitRead(settings, 1)) {
+							aftertouch = input;
+						}
 						mData = 255;
 						break; // AT
 					case 6:

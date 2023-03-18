@@ -20,6 +20,15 @@ MEMORY MAPPING
 3996 SEND LFO
 3995 SEND ARP
 
+ OPTIONS
+set via the online webmidi tool
+twisted-electrons.com/tool
+
+3994:Mod Wheel -> LFO1 depth
+3993:AfterTouch -> LFO2 depth
+3992:Velocity -> LFO3 depth
+
+
 
 */
 

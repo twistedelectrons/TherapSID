@@ -129,5 +129,25 @@ void setup() {
 		sendArp = true;
 	}
 
+	if (EEPROM.read(3994) > 0) {
+		modToLfo = true;
+	} else {
+		modToLfo = false;
+	}
+
+	if (EEPROM.read(3993) > 0) {
+		aftertouchToLfo = true;
+	} else {
+		aftertouchToLfo = false;
+	}
+
+	if (EEPROM.read(3992) > 0) {
+		velocityToLfo = true;
+	} else {
+		velocityToLfo = false;
+	}
+
 	setupMux();
+
+	sidReset(); // present sustained Note at startup
 }

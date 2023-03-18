@@ -6,16 +6,19 @@ UiState ui_state;
 
 bool sendLfo = false;
 bool sendArp = false;
-
+byte settings;
 bool lfoNewRand[3];
-
+byte aftertouch;      // latest read afterTouch value
+bool aftertouchToLfo; // option to assign aftertouch to LFO depth 2
 int loadTimer;
 
 // LIMIT PW
 float bend, bend1, bend2, bend3;
 bool sync;
-
+int velocityToLfo;
 int arpModeCounter;
+bool modToLfo;
+byte modWheelLast;
 bool cvActive[3];
 bool scrolled;
 bool shape1Pressed;
@@ -25,6 +28,7 @@ int lfoSpeed[3];
 int presetScrollSpeed = 10000;
 int saveBounce;
 byte lfo[3];
+byte velocityLast;
 bool presetUp, presetDown;
 byte preset = 1;
 int presetLast = 1;
@@ -55,6 +59,7 @@ int arpRange;
 int arpRound;
 byte arpCount;
 byte envState;
+
 int env;
 int a4, d4, s4, r4;
 byte lastNote = 0;

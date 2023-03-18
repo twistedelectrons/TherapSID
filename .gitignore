@@ -6,3 +6,5 @@ compile_commands.json
 .build
 .compile_commands.json
 .compile_commands.tmp
+.vscode
+.DS_Store

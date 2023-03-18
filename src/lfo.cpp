@@ -101,16 +101,24 @@ ParamsAfterLfo lfoTick() {
 	}
 
 	lfoDepth[0] = preset_data.lfo[0].depth + lfoDepthLfo1 + lfoDepthLfo2;
+	if (modToLfo)
+		lfoDepth[0] += (modWheelLast << 3);
 	if (lfoDepth[0] > 1023) {
 		lfoDepth[0] = 1023;
 	}
 
 	lfoDepth[1] = preset_data.lfo[1].depth + lfoDepthLfo3 + lfoDepthLfo4;
+	if (aftertouchToLfo)
+		lfoDepth[1] += (aftertouch << 3);
+
 	if (lfoDepth[1] > 1023) {
 		lfoDepth[1] = 1023;
 	}
 
 	lfoDepth[2] = preset_data.lfo[2].depth + lfoDepthLfo5 + lfoDepthLfo6;
+	if (velocityToLfo) {
+		lfoDepth[2] += velocityLast << 3;
+	}
 	if (lfoDepth[2] > 1023) {
 		lfoDepth[2] = 1023;
 	}

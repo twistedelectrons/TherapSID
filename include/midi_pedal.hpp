@@ -7,7 +7,7 @@ typedef void (*note_off_callback_t)(uint8_t, uint8_t);
 class MidiPedalAdapter {
   public:
 	MidiPedalAdapter(note_on_callback_t note_on_callback, note_off_callback_t note_off_callback)
-	    : held_lo{0}, held_hi{0}, pedal_down(false), note_on_callback(note_on_callback),
+	    : held_lo{0}, held_hi{0}, pedal_down{0}, note_on_callback(note_on_callback),
 	      note_off_callback(note_off_callback) {}
 
 	void set_pedal(uint8_t channel, bool pedal_down) {
@@ -26,7 +26,7 @@ class MidiPedalAdapter {
 			held_hi[channel] = 0;
 		}
 
-		this->pedal_down = pedal_down;
+		this->pedal_down[channel] = pedal_down;
 	}
 
 	void note_on(uint8_t channel, uint8_t note, uint8_t velocity) {
@@ -44,7 +44,7 @@ class MidiPedalAdapter {
 	}
 
 	void note_off(uint8_t channel, uint8_t note) {
-		if (!pedal_down) {
+		if (!pedal_down[channel]) {
 			if (note < 64)
 				held_lo[channel] &= ~(1 << note);
 			else
@@ -58,7 +58,7 @@ class MidiPedalAdapter {
 	uint64_t held_lo[16];
 	uint64_t held_hi[16];
 
-	bool pedal_down;
+	bool pedal_down[16];
 
 	note_on_callback_t note_on_callback;
 	note_off_callback_t note_off_callback;
