@@ -339,12 +339,12 @@ void midiRead() {
 						break; // AT
 					case 6:
 						if (mChannel == masterChannel) {
-							preset = mData + 1;
+							preset = input + 1;
 							if (preset > 99) {
 								preset = 1;
 							}
 						}
-						mData = 255;
+						mData = 0;
 						break; // PC
 				}
 			} // data
