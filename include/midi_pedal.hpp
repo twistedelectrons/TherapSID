@@ -11,7 +11,7 @@ class MidiPedalAdapter {
 	      note_off_callback(note_off_callback) {}
 
 	void set_pedal(uint8_t channel, bool pedal_down) {
-		if (this->pedal_down && !pedal_down) {
+		if (this->pedal_down[channel] && !pedal_down) {
 			for (int i = 0; i < 64; i++) {
 				if (held_lo[channel] & (1 << i)) {
 					note_off_callback(channel, i);
