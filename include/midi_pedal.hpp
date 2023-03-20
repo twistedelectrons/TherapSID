@@ -13,13 +13,15 @@ class MidiPedalAdapter {
 	void set_pedal(uint8_t channel, bool pedal_down) {
 		if (this->pedal_down[channel] && !pedal_down) {
 			for (int i = 0; i < 64; i++) {
-				if (held_lo[channel] & (1 << i)) {
-					note_off_callback(channel, i);
+				if (held_lo[channel] & (1ULL << i)) {
+					if (!held_Finger_lo[channel])
+						note_off_callback(channel, i);
 				}
 			}
 			for (int i = 0; i < 64; i++) {
-				if (held_hi[channel] & (1 << i)) {
-					note_off_callback(channel, i + 64);
+				if (held_hi[channel] & (1ULL << i)) {
+					if (!held_Finger_hi[channel])
+						note_off_callback(channel, i + 64);
 				}
 			}
 			held_lo[channel] = 0;
@@ -35,10 +37,11 @@ class MidiPedalAdapter {
 			return;
 		}
 
-		if (note < 64)
-			held_lo[channel] |= 1 << note;
-		else
-			held_hi[channel] |= 1 << (note - 64);
+		if (note < 64){
+			held_lo[channel] |= 1ULL << note;
+		held_Finger_lo[channel] |= 1ULL << note;
+	}else {held_hi[channel] |= 1ULL << (note - 64);
+		held_Finger_hi[channel] |= 1ULL << (note - 64);}
 
 		note_on_callback(channel, note, velocity);
 	}
@@ -46,17 +49,26 @@ class MidiPedalAdapter {
 	void note_off(uint8_t channel, uint8_t note) {
 		if (!pedal_down[channel]) {
 			if (note < 64)
-				held_lo[channel] &= ~(1 << note);
+				held_lo[channel] &= ~(1ULL << note);
 			else
-				held_hi[channel] &= ~(1 << (note - 64));
+				held_hi[channel] &= ~(1ULL << (note - 64));
 
 			note_off_callback(channel, note);
+		} else {
+
+			if (note < 64)
+				held_Finger_lo[channel] &= ~(1ULL << note);
+			else
+				held_Finger_hi[channel] &= ~(1ULL << (note - 64));
 		}
 	}
 
   private:
 	uint64_t held_lo[16];
 	uint64_t held_hi[16];
+
+	uint64_t held_Finger_lo[16];
+	uint64_t held_Finger_hi[16];
 
 	bool pedal_down[16];
 
