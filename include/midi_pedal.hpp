@@ -49,33 +49,48 @@ class MidiPedalAdapter {
 		}
 
 		if (note < 64) {
-			held_lo[channel] |= 1ULL << note;
 			held_Finger_lo[channel] |= 1ULL << note;
 		} else {
-			held_hi[channel] |= 1ULL << (note - 64);
 			held_Finger_hi[channel] |= 1ULL << (note - 64);
 		}
 
-		note_on_callback(channel, note, velocity);
+		if (pedal_down[channel]) {
+			if (note < 64) {
+				held_lo[channel] |= 1ULL << note;
+			} else {
+				held_hi[channel] |= 1ULL << (note - 64);
+			}
+		}
+
+		if (note < 64) {
+			if ((held_Finger_hi[channel] & (1ULL << note)) && ((held_hi[channel] & (1ULL << note)))) {
+			} else {
+				note_on_callback(channel, note, velocity);
+			}
+		} else { // do not retrigger an already singing voice or it gets stuck (not sure why)
+			if (((held_Finger_hi[channel] & (1ULL << (note - 64)))) && ((held_hi[channel] & (1ULL << (note - 64))))) {
+			} else {
+				note_on_callback(channel, note, velocity);
+			} // do not retrigger an already singing voice or it gets stuck (not sure why)
+		}
 	}
 
 	void note_off(uint8_t channel, uint8_t note) {
+
+		if (note < 64) {
+			held_Finger_lo[channel] &= ~(1ULL << note);
+		} else {
+			held_Finger_hi[channel] &= ~(1ULL << (note - 64));
+		}
+
 		if (!pedal_down[channel]) {
 			if (note < 64) {
-				held_Finger_lo[channel] &= ~(1ULL << note);
 				held_lo[channel] &= ~(1ULL << note);
 			} else {
 				held_hi[channel] &= ~(1ULL << (note - 64));
-				held_Finger_hi[channel] &= ~(1ULL << (note - 64));
 			}
 
 			note_off_callback(channel, note);
-		} else {
-
-			if (note < 64)
-				held_Finger_lo[channel] &= ~(1ULL << note);
-			else
-				held_Finger_hi[channel] &= ~(1ULL << (note - 64));
 		}
 	}
 
