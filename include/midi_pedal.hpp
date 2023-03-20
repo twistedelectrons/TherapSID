@@ -11,17 +11,28 @@ class MidiPedalAdapter {
 	      note_off_callback(note_off_callback) {}
 
 	void set_pedal(uint8_t channel, bool pedal_down) {
+
+		// when pedal goes down, we want to add the held fingers to the held_lo/hi arrays
+		// otherwise stuck notes if pedal goes up/down twice
+		if (pedal_down) {
+			held_lo[channel] = held_Finger_lo[channel];
+			held_hi[channel] = held_Finger_hi[channel];
+		}
 		if (this->pedal_down[channel] && !pedal_down) {
 			for (int i = 0; i < 64; i++) {
 				if (held_lo[channel] & (1ULL << i)) {
-					if (!held_Finger_lo[channel])
+					if (held_Finger_lo[channel] & (1ULL << i)) {
+					} else {
 						note_off_callback(channel, i);
+					}
 				}
 			}
 			for (int i = 0; i < 64; i++) {
 				if (held_hi[channel] & (1ULL << i)) {
-					if (!held_Finger_hi[channel])
+					if (held_Finger_hi[channel] & (1ULL << i)) {
+					} else {
 						note_off_callback(channel, i + 64);
+					}
 				}
 			}
 			held_lo[channel] = 0;
@@ -37,21 +48,26 @@ class MidiPedalAdapter {
 			return;
 		}
 
-		if (note < 64){
+		if (note < 64) {
 			held_lo[channel] |= 1ULL << note;
-		held_Finger_lo[channel] |= 1ULL << note;
-	}else {held_hi[channel] |= 1ULL << (note - 64);
-		held_Finger_hi[channel] |= 1ULL << (note - 64);}
+			held_Finger_lo[channel] |= 1ULL << note;
+		} else {
+			held_hi[channel] |= 1ULL << (note - 64);
+			held_Finger_hi[channel] |= 1ULL << (note - 64);
+		}
 
 		note_on_callback(channel, note, velocity);
 	}
 
 	void note_off(uint8_t channel, uint8_t note) {
 		if (!pedal_down[channel]) {
-			if (note < 64)
+			if (note < 64) {
+				held_Finger_lo[channel] &= ~(1ULL << note);
 				held_lo[channel] &= ~(1ULL << note);
-			else
+			} else {
 				held_hi[channel] &= ~(1ULL << (note - 64));
+				held_Finger_hi[channel] &= ~(1ULL << (note - 64));
+			}
 
 			note_off_callback(channel, note);
 		} else {
