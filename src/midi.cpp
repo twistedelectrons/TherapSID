@@ -160,7 +160,7 @@ static void HandleControlChange(byte channel, byte data1, byte data2) {
 					break;
 
 				case 64:
-					pedal_adapter.set_pedal(channel, data2 >= 64);
+					pedal_adapter.set_pedal(channel,data2 >= 64);
 					break;
 
 				case 68:
