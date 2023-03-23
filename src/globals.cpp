@@ -11,7 +11,7 @@ bool lfoNewRand[3];
 byte aftertouch;      // latest read afterTouch value
 bool aftertouchToLfo; // option to assign aftertouch to LFO depth 2
 int loadTimer;
-
+byte volume;
 // LIMIT PW
 float bend, bend1, bend2, bend3;
 bool sync;
@@ -59,13 +59,15 @@ int arpRange;
 int arpRound;
 byte arpCount;
 byte envState;
-
+bool filterAssignmentChanged = false;
+bool volumeChanged;//flag to update EEprom
 int env;
 int a4, d4, s4, r4;
 byte lastNote = 0;
 int arpStepBase;
 
 bool arpModeHeld;
+bool filterModeHeldGlobal;
 byte arp_output_note;
 optional<byte> control_voltage_note;
 

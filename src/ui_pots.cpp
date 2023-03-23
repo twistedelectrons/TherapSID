@@ -290,13 +290,20 @@ void movedPot(byte number, int value, bool isMidi) {
 				break; // RESONANCE
 
 			case 7:
-				if (!isMidi) {
-					sendCC(34, value);
-					ui_state.lastPot = 17;
+				if (filterModeHeldGlobal) {
+					filterAssignmentChanged=true;
+					volume = value >> 6;
+					volumeChanged=true;
+				} else {
+					if (!isMidi) {
+						sendCC(34, value);
+						ui_state.lastPot = 17;
+					}
+					if (voice_state.n_held_keys() >= 1) {
+						arpStepBase = value >> 2;
+					}
 				}
-				if (voice_state.n_held_keys() >= 1) {
-					arpStepBase = value >> 2;
-				}
+
 				break; // ARP SCRUB
 
 			case 41:

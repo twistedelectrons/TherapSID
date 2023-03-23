@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <Arduino.h>
 
+
 void sidReset();
 void init1MhzClock();
 void sidSend(byte address, byte data);

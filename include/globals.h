@@ -12,6 +12,7 @@ extern byte settings;
 extern byte aftertouch;
 extern bool aftertouchToLfo;
 extern bool sendLfo;
+extern bool volumeChanged;
 extern bool sendArp;
 extern bool lfoNewRand[3];
 extern float bend, bend1, bend2, bend3;
@@ -23,9 +24,9 @@ extern int velocityToLfo;
 extern bool modToLfo;
 extern byte velocityLast;
 extern byte modWheelLast;
-
+extern bool filterModeHeldGlobal;
 inline bool arping() { return preset_data.arp_speed_base < 250; }
-
+extern bool filterAssignmentChanged ;
 extern byte lfoClockSpeedPending[3];
 extern int lfoTune1, lfoTune2, lfoTune3, lfoTune4, lfoTune5, lfoTune6, lfoTune7, lfoTune8, lfoTune9;
 extern float lfoFine1, lfoFine2, lfoFine3, lfoFine4, lfoFine5, lfoFine6, lfoFine7, lfoFine8, lfoFine9;
@@ -45,7 +46,7 @@ extern int arpStepBase;
 extern int lfoSpeed[3];
 
 extern byte preset;
-
+extern byte volume;
 extern byte arp_output_note;
 extern optional<byte> control_voltage_note;
 

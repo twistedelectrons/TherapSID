@@ -103,6 +103,9 @@ void setup() {
 
 	DDRC = B11111000;
 
+volume=15-EEPROM.read(2991);//max vol on a new eeprom
+if(volume>15)volume=15;
+
 	int preset_tmp;
 	preset_tmp = EEPROM.read(3999);
 	if (preset_tmp > 98)
