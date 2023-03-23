@@ -42,6 +42,10 @@ class MidiPedalAdapter {
 			note_off(channel, note);
 			return;
 		}
+		if (channel != masterChannel) {
+			note_on_callback(channel, note, velocity);
+			return;
+		}
 
 		// is the note already singing? Retrigger
 		if (getSustained(note)) {
@@ -61,6 +65,11 @@ class MidiPedalAdapter {
 	}
 
 	void note_off(uint8_t channel, uint8_t note) {
+
+		if (channel != masterChannel) {
+			note_off_callback(channel, note);
+			return;
+		}
 
 		// remove note from held array
 		setHeld(note, 0);

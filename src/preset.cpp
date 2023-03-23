@@ -28,7 +28,7 @@ twisted-electrons.com/tool
 3993:AfterTouch -> LFO2 depth
 3992:Velocity -> LFO3 depth
 
-2991 = master volume
+3991 = master volume
 
 
 */

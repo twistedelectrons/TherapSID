@@ -365,7 +365,7 @@ void buttChanged(byte number, bool value) {
 				}
 				ui_state.filterModeHeld = filterModeHeldGlobal = false;
 				if (volumeChanged) {
-					EEPROM.update(2991, 15 - volume);
+					EEPROM.update(3991, 15 - volume);
 				}
 
 				break;
