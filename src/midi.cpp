@@ -160,7 +160,7 @@ static void HandleControlChange(byte channel, byte data1, byte data2) {
 					break;
 
 				case 64:
-					pedal_adapter.set_pedal(channel,data2 >= 64);
+					pedal_adapter.set_pedal(channel, data2 >= 64);
 					break;
 
 				case 68:
@@ -361,11 +361,19 @@ void midiRead() {
 				// data byte 2
 				switch (mStatus) {
 					case 1:
-						pedal_adapter.note_on(mChannel, mData, input);
+						if (mChannel == masterChannel) {
+							pedal_adapter.note_on(mChannel, mData, input);
+						} else {
+							HandleNoteOn(mChannel, mData, input);
+						}
 						mData = 255;
 						break; // noteOn
 					case 2:
-						pedal_adapter.note_off(mChannel, mData);
+						if (mChannel == masterChannel) {
+							pedal_adapter.note_off(mChannel, mData);
+						} else {
+							HandleNoteOff(mChannel, mData);
+						}
 						mData = 255;
 						break; // noteOff
 					case 3:
