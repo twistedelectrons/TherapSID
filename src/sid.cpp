@@ -1,6 +1,5 @@
 #include "sid.h"
 #include "util.hpp"
-#include "globals.h"
 
 // COMS WITH SID CHIP
 
@@ -156,13 +155,10 @@ byte Sid::shape(int voice) const { return registers[7 * voice + CONTROL] & 0xf0;
 
 void Sid::set_filter_mode(uint8_t value) {
 	write_mask(registers[FILTER_MODE_VOLUME], HIGHPASS | BANDPASS | LOWPASS, value);
+}
 
-	bitWrite(registers[FILTER_MODE_VOLUME],0,bitRead(volume,0));
-	bitWrite(registers[FILTER_MODE_VOLUME],1,bitRead(volume,1));
-	bitWrite(registers[FILTER_MODE_VOLUME],2,bitRead(volume,2));
-	bitWrite(registers[FILTER_MODE_VOLUME],3,bitRead(volume,3));
-
-
+void Sid::set_volume(uint8_t value) {
+	registers[FILTER_MODE_VOLUME] = (registers[FILTER_MODE_VOLUME] & 0xF0) | (value & 0x0F);
 }
 
 uint8_t Sid::filter_mode() { return registers[FILTER_MODE_VOLUME] & (HIGHPASS | BANDPASS | LOWPASS); }

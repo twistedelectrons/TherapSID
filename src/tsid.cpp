@@ -103,8 +103,10 @@ void setup() {
 
 	DDRC = B11111000;
 
-volume=15-EEPROM.read(3991);//max vol on a new eeprom
-if(volume>15)volume=15;
+	volume = EEPROM.read(3991);
+	if ((volume > 15) || (volume < 1))
+		volume = 15; // let's avoid silent sids!!!
+	volumeChanged = true;
 
 	int preset_tmp;
 	preset_tmp = EEPROM.read(3999);

@@ -6,6 +6,7 @@
 #include "lfo.h"
 #include "sid.h"
 #include "ui.h"
+#include <EEPROM.h>
 
 static bool loadedAfterStartup; // we load the preset after 2sec (when SID is ready)
 
@@ -110,6 +111,15 @@ void setSidRegisters(Preset const& preset, ParamsAfterLfo const& params_after_lf
 }
 
 void loop() {
+
+	if (volumeChanged) {
+		// update volume
+		sid_chips[0].set_volume(volume);
+		sid_chips[1].set_volume(volume);
+		EEPROM.update(3991, volume);
+		volumeChanged = false;
+	}
+
 	//  load the first preset after all the butts and pots have been scanned
 	if (!loadedAfterStartup) {
 		if (millis() > 1400) {

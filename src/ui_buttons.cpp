@@ -4,7 +4,6 @@
 #include "arp.h"
 #include "util.hpp"
 #include "ui_vars.h"
-#include <EEPROM.h>
 
 static bool saveEngaged;
 
@@ -364,9 +363,6 @@ void buttChanged(byte number, bool value) {
 					sendCC(55, map((int)preset_data.filter_mode, 0, 4, 0, 1023));
 				}
 				ui_state.filterModeHeld = filterModeHeldGlobal = false;
-				if (volumeChanged) {
-					EEPROM.update(3991, 15 - volume);
-				}
 
 				break;
 		}

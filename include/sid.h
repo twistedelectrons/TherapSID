@@ -2,7 +2,6 @@
 #include <stdint.h>
 #include <Arduino.h>
 
-
 void sidReset();
 void init1MhzClock();
 void sidSend(byte address, byte data);
@@ -44,6 +43,8 @@ class Sid {
 	enum FilterMode { HIGHPASS = 1 << 6, BANDPASS = 1 << 5, LOWPASS = 1 << 4 };
 
 	void set_filter_mode(uint8_t value);
+
+	void set_volume(uint8_t value);
 
 	uint8_t filter_mode();
 

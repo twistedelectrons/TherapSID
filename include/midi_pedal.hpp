@@ -16,13 +16,13 @@ class MidiPedalAdapter {
 
 		// when pedal goes down, we want to transfer the notes that are held to sustained
 		if (pedal_down) {
-			for (int i = 0; i < 127; i++) {
+			for (int i = 0; i < 128; i++) {
 				setSustained(i, getHeld(i));
 			}
 		} else {
 
 			// when pedal goes up, we want to kill the notes that are sustained
-			for (int i = 0; i < 127; i++) {
+			for (int i = 0; i < 128; i++) {
 				if ((getSustained(i)) && (!getHeld(i))) {
 					//*(only if not held by fingers)
 
@@ -31,7 +31,7 @@ class MidiPedalAdapter {
 			}
 
 			// clear sustained notes
-			for (int i = 0; i < 127; i++) {
+			for (int i = 0; i < 128; i++) {
 				setSustained(i, 0);
 			}
 		}
@@ -88,8 +88,8 @@ class MidiPedalAdapter {
 	bool getHeld(uint8_t note) { return (note_held[note]); }
 
   private:
-	bool note_held[127];      // finger is pressing the note
-	bool note_sustained[127]; // finger is not pressing the note but pedal is sustaining it
+	bool note_held[128];      // finger is pressing the note
+	bool note_sustained[128]; // finger is not pressing the note but pedal is sustaining it
 
 	bool pedal_down;
 
