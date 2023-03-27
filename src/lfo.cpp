@@ -15,8 +15,7 @@ static byte resLfo1, resLfo2, resLfo3;
 static int lfoDepth[3] = {0, 0, 0};
 static byte lfoLast[3];
 
-static const bool limitPw = true;
-static const int pwMin = 10;
+static const int pwMin = 64;
 static const int pwMax = 2050;
 
 /// Sets a lot of global variables and returns sid's parameters after lfo'ing them.
@@ -438,7 +437,7 @@ ParamsAfterLfo lfoTick() {
 		pw1 = 2046;
 	}
 
-	if (limitPw) {
+	if (pwLimit) {
 		pw1 = constrain(pw1, pwMin, pwMax);
 	}
 
@@ -451,7 +450,7 @@ ParamsAfterLfo lfoTick() {
 		pw2 = 2046;
 	}
 
-	if (limitPw) {
+	if (pwLimit) {
 		pw2 = constrain(pw2, pwMin, pwMax);
 	}
 
@@ -464,7 +463,7 @@ ParamsAfterLfo lfoTick() {
 		pw3 = 2046;
 	}
 
-	if (limitPw) {
+	if (pwLimit) {
 		pw3 = constrain(pw3, pwMin, pwMax);
 	}
 

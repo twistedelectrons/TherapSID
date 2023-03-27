@@ -21,9 +21,6 @@ void movedPot(byte number, int value, bool isMidi) {
 		}
 		switch (number) {
 			case 4:
-				if (value < 1) {
-					value = 1;
-				}
 				preset_data.voice[0].pulsewidth_base = value << 1;
 				if (!isMidi) {
 					sendCC(2, value);
@@ -31,9 +28,6 @@ void movedPot(byte number, int value, bool isMidi) {
 				}
 				break; // PW1
 			case 24:
-				if (value < 1) {
-					value = 1;
-				}
 				preset_data.voice[1].pulsewidth_base = value << 1;
 				if (!isMidi) {
 					sendCC(10, value);
@@ -41,9 +35,6 @@ void movedPot(byte number, int value, bool isMidi) {
 				}
 				break; // PW2
 			case 30:
-				if (value < 1) {
-					value = 1;
-				}
 				preset_data.voice[2].pulsewidth_base = value << 1;
 				if (!isMidi) {
 					sendCC(18, value);

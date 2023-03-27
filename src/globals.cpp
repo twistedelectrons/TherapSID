@@ -3,9 +3,9 @@
 #include "util.hpp"
 
 UiState ui_state;
-
 bool sendLfo = false;
 bool sendArp = false;
+bool pwLimit;
 byte settings;
 bool lfoNewRand[3];
 byte aftertouch;      // latest read afterTouch value
@@ -16,6 +16,7 @@ byte volume;
 float bend, bend1, bend2, bend3;
 bool sync;
 int velocityToLfo;
+bool toolMode; // when set high by MIDI tool we can receive settings via CC
 int arpModeCounter;
 bool modToLfo;
 byte modWheelLast;
@@ -51,6 +52,9 @@ bool jumble;
 bool lfoButtPressed;
 byte masterChannel = 1;
 byte masterChannelOut = 1;
+byte voice1Channel = 2; // channel for voice 1 only
+byte voice2Channel = 3; // channel for voice 2 only
+byte voice3Channel = 4; // channel for voice 3 only
 
 int arpCounter;
 int lfoButtTimer;
@@ -60,7 +64,7 @@ int arpRound;
 byte arpCount;
 byte envState;
 bool filterAssignmentChanged = false;
-bool volumeChanged;//flag to update EEprom
+bool volumeChanged; // flag to update EEprom
 int env;
 int a4, d4, s4, r4;
 byte lastNote = 0;
