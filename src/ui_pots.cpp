@@ -281,7 +281,7 @@ void movedPot(byte number, int value, bool isMidi) {
 				break; // RESONANCE
 
 			case 7:
-				if (filterModeHeldGlobal) {
+				if (ui_state.filterModeHeld) {
 					filterAssignmentChanged = true;
 					volume = value >> 6;
 					if (!volume)
