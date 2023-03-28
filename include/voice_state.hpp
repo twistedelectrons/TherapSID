@@ -56,6 +56,11 @@ template <size_t N_OPERATORS> struct VoiceState {
 		}
 
 		if (n_individual_voices == 1) { // Monophonic mode
+
+			// replace all the individual notes
+			for (int i = 0; i < 6; i++) {
+				myLastNote[i] = note;
+			}
 			auto had_active_note = mono_note_tracker.has_active_note();
 			mono_note_tracker.note_on(note, velocity);
 			mono_note = mono_note_tracker.active_note()->note;
@@ -89,7 +94,10 @@ template <size_t N_OPERATORS> struct VoiceState {
 		}
 	}
 
-	void note_on_individual(int voice, int note) { mono_tracker[voice].note_on(note, 64); }
+	void note_on_individual(int voice, int note) {
+		mono_tracker[voice].note_on(note, 64);
+		myLastNote[voice] = note;
+	}
 
 	void note_off_individual(int voice, int note) { mono_tracker[voice].note_off(note); }
 
@@ -111,7 +119,13 @@ template <size_t N_OPERATORS> struct VoiceState {
 			if (individual.has_value()) {
 				return individual->note;
 			} else {
-				return mono_note;
+				// if(myLastNote[oper]){return myLastNote[oper];}else{return mono_note;}
+				// this prevents mono voices from jumping to channel1 note but breaks channel1
+				//
+				return myLastNote[oper]; // this fixes channels 2 3 4 but breaks ch1 (it no longer updates the notes of
+				                         // voices123) how do we distinguish ch1 from ch234 so we know to return
+				                         // myLastNote OR mono_note?
+				// return mono_note; // this causes the channels 2 3 4 to jump to last note of channel 1
 			}
 		} else if (n_individual_voices == 2) {
 			int voice = oper / 3;
@@ -141,6 +155,7 @@ template <size_t N_OPERATORS> struct VoiceState {
 	int n_held_keys() const { return _n_held_keys; }
 
   private:
+	byte myLastNote[6]; // track the last note of the individual voices in an effort to fix issue #23
 	int n_individual_voices = N_OPERATORS;
 	int n_usable_operators = N_OPERATORS;
 
