@@ -71,7 +71,6 @@ byte lastNote = 0;
 int arpStepBase;
 
 bool arpModeHeld;
-bool filterModeHeldGlobal;
 byte arp_output_note;
 optional<byte> control_voltage_note;
 

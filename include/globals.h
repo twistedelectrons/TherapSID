@@ -26,7 +26,6 @@ extern int velocityToLfo;
 extern bool modToLfo;
 extern byte velocityLast;
 extern byte modWheelLast;
-extern bool filterModeHeldGlobal;
 inline bool arping() { return preset_data.arp_speed_base < 250; }
 extern bool filterAssignmentChanged;
 extern byte lfoClockSpeedPending[3];
