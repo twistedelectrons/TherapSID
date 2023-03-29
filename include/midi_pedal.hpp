@@ -10,8 +10,6 @@ typedef void (*note_off_callback_t)(uint8_t, uint8_t);
  */
 struct BooleanArray8 {
 	BooleanArray8() : value(0) {} // initialize value to 0 in constructor
-	// void set(uint8_t index, bool value) { value = (value & (~(1 << index))) | (((!!value) << index)); }//I think it
-	// was getting confused because we have "value" declared in the function and struct?!
 	void set(uint8_t index, bool newValue) { bitWrite(value, index, newValue); }
 	bool get(uint8_t index) { return value & (1 << index); }
 
@@ -53,13 +51,13 @@ class MidiPedalAdapter {
 		// when pedal goes down, we want to transfer the notes that are held to sustained
 		if (pedal_down) {
 			for (int i = 0; i < 128; i++) {
-				sustainedNotes.set(i, heldNotes.get(i));
+				sustainedNotes[channel].set(i, heldNotes[channel].get(i));
 			}
 		} else {
 
 			// when pedal goes up, we want to kill the notes that are sustained
 			for (int i = 0; i < 128; i++) {
-				if (!heldNotes.get(i) && sustainedNotes.get(i)) {
+				if (!heldNotes[channel].get(i) && sustainedNotes[channel].get(i)) {
 					//*(only if not held by fingers)
 					note_off_callback(channel, i);
 				}
@@ -67,7 +65,7 @@ class MidiPedalAdapter {
 
 			// clear sustained notes
 			for (int i = 0; i < 128; i++) {
-				sustainedNotes.set(i, 0);
+				sustainedNotes[channel].set(i, 0);
 			}
 		}
 	}
@@ -79,7 +77,7 @@ class MidiPedalAdapter {
 		}
 
 		// is the note already singing? Retrigger
-		if (sustainedNotes.get(note)) {
+		if (sustainedNotes[channel].get(note)) {
 
 			note_off_callback(channel, note);
 		}
@@ -88,18 +86,18 @@ class MidiPedalAdapter {
 		note_on_callback(channel, note, velocity);
 
 		// add note to held array
-		heldNotes.set(note, 1);
+		heldNotes[channel].set(note, 1);
 
 		if (pedal_down) {
 			// pedal is down so we want to sustain the note
-			sustainedNotes.set(note, 1);
+			sustainedNotes[channel].set(note, 1);
 		}
 	}
 
 	void note_off(uint8_t channel, uint8_t note) {
 
 		// remove note from held array
-		heldNotes.set(note, 0);
+		heldNotes[channel].set(note, 0);
 
 		if (!pedal_down) {
 			note_off_callback(channel, note);
@@ -107,8 +105,8 @@ class MidiPedalAdapter {
 	}
 
   private:
-	BooleanArray128 heldNotes;
-	BooleanArray128 sustainedNotes;
+	BooleanArray128 heldNotes[16];
+	BooleanArray128 sustainedNotes[16];
 	bool pedal_down;
 
 	note_on_callback_t note_on_callback;

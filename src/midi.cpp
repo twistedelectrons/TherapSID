@@ -271,7 +271,9 @@ static void HandleControlChange(byte channel, byte data1, byte data2) {
 					break;
 
 				case 64:
-					pedal_adapter.set_pedal(channel, data2 >= 64);
+					for (int c = 0; c < 16; c++) {
+						pedal_adapter.set_pedal(c, data2 >= 64);
+					}
 					break;
 
 				case 68:
@@ -303,6 +305,13 @@ static void HandleControlChange(byte channel, byte data1, byte data2) {
 					}
 					break; // arp send
 			}
+		}
+	} else {
+		// listen to sustain on all other channels
+		switch (data1) {
+			case 64:
+				pedal_adapter.set_pedal(channel, data2 >= 64);
+				break;
 		}
 	}
 }
@@ -472,19 +481,15 @@ void midiRead() {
 				// data byte 2
 				switch (mStatus) {
 					case 1:
-						if (mChannel == masterChannel) {
-							pedal_adapter.note_on(mChannel, mData, input);
-						} else {
-							HandleNoteOn(mChannel, mData, input);
-						}
+
+						pedal_adapter.note_on(mChannel, mData, input);
+
 						mData = 255;
 						break; // noteOn
 					case 2:
-						if (mChannel == masterChannel) {
-							pedal_adapter.note_off(mChannel, mData);
-						} else {
-							HandleNoteOff(mChannel, mData);
-						}
+
+						pedal_adapter.note_off(mChannel, mData);
+
 						mData = 255;
 						break; // noteOff
 					case 3:
