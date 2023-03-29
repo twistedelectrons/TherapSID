@@ -21,9 +21,6 @@ void movedPot(byte number, int value, bool isMidi) {
 		}
 		switch (number) {
 			case 4:
-				if (value < 1) {
-					value = 1;
-				}
 				preset_data.voice[0].pulsewidth_base = value << 1;
 				if (!isMidi) {
 					sendCC(2, value);
@@ -31,9 +28,6 @@ void movedPot(byte number, int value, bool isMidi) {
 				}
 				break; // PW1
 			case 24:
-				if (value < 1) {
-					value = 1;
-				}
 				preset_data.voice[1].pulsewidth_base = value << 1;
 				if (!isMidi) {
 					sendCC(10, value);
@@ -41,9 +35,6 @@ void movedPot(byte number, int value, bool isMidi) {
 				}
 				break; // PW2
 			case 30:
-				if (value < 1) {
-					value = 1;
-				}
 				preset_data.voice[2].pulsewidth_base = value << 1;
 				if (!isMidi) {
 					sendCC(18, value);
@@ -279,7 +270,7 @@ void movedPot(byte number, int value, bool isMidi) {
 					ui_state.lastPot = 15;
 				}
 				preset_data.cutoff = value;
-				break; // CUTOFF
+				break; // CUTOF
 
 			case 0:
 				if (!isMidi) {
@@ -290,13 +281,22 @@ void movedPot(byte number, int value, bool isMidi) {
 				break; // RESONANCE
 
 			case 7:
-				if (!isMidi) {
-					sendCC(34, value);
-					ui_state.lastPot = 17;
+				if (filterModeHeldGlobal) {
+					filterAssignmentChanged = true;
+					volume = value >> 6;
+					if (!volume)
+						volume++;
+					volumeChanged = true;
+				} else {
+					if (!isMidi) {
+						sendCC(34, value);
+						ui_state.lastPot = 17;
+					}
+					if (voice_state.n_held_keys() >= 1) {
+						arpStepBase = value >> 2;
+					}
 				}
-				if (voice_state.n_held_keys() >= 1) {
-					arpStepBase = value >> 2;
-				}
+
 				break; // ARP SCRUB
 
 			case 41:

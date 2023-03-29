@@ -76,13 +76,13 @@ void arpReset() {
 void arpTick() {
 	if (voice_state.n_held_keys() > 0) {
 		if (preset_data.arp_mode) {
-			if (preset_data.lfo[0].retrig) {
+			if ((preset_data.lfo[0].retrig) || (voice_state.n_held_keys() == 1)) { // always retrigger on the first key
 				lfoStep[0] = 0;
 			}
-			if (preset_data.lfo[1].retrig) {
+			if ((preset_data.lfo[1].retrig) || (voice_state.n_held_keys() == 1)) { // always retrigger on the first key
 				lfoStep[1] = 0;
 			}
-			if (preset_data.lfo[2].retrig) {
+			if ((preset_data.lfo[2].retrig) || (voice_state.n_held_keys() == 1)) { // always retrigger on the first key
 				lfoStep[2] = 0;
 			}
 

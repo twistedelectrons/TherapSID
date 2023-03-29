@@ -157,6 +157,10 @@ void Sid::set_filter_mode(uint8_t value) {
 	write_mask(registers[FILTER_MODE_VOLUME], HIGHPASS | BANDPASS | LOWPASS, value);
 }
 
+void Sid::set_volume(uint8_t value) {
+	registers[FILTER_MODE_VOLUME] = (registers[FILTER_MODE_VOLUME] & 0xF0) | (value & 0x0F);
+}
+
 uint8_t Sid::filter_mode() { return registers[FILTER_MODE_VOLUME] & (HIGHPASS | BANDPASS | LOWPASS); }
 
 /// In addition to the usual 3 voices, this accepts voice==3 for the external input.

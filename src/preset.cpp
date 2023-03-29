@@ -28,6 +28,13 @@ twisted-electrons.com/tool
 3993:AfterTouch -> LFO2 depth
 3992:Velocity -> LFO3 depth
 
+3991 = master volume
+
+3990 = pwLimit //allow PW to silence the voice?
+
+3989 MIDI in voice1
+3988 MIDI in voice2
+3987 MIDI in voice3
 
 
 */

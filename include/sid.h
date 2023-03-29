@@ -44,6 +44,8 @@ class Sid {
 
 	void set_filter_mode(uint8_t value);
 
+	void set_volume(uint8_t value);
+
 	uint8_t filter_mode();
 
 	/// In addition to the usual 3 voices, this accepts voice==3 for the external input.

@@ -103,6 +103,11 @@ void setup() {
 
 	DDRC = B11111000;
 
+	volume = EEPROM.read(3991);
+	if ((volume > 15) || (volume < 1))
+		volume = 15; // let's avoid silent sids!!!
+	volumeChanged = true;
+
 	int preset_tmp;
 	preset_tmp = EEPROM.read(3999);
 	if (preset_tmp > 98)
@@ -145,6 +150,27 @@ void setup() {
 		velocityToLfo = true;
 	} else {
 		velocityToLfo = false;
+	}
+
+	if (EEPROM.read(3990) > 0) {
+		pwLimit = true;
+	} else {
+		pwLimit = false;
+	}
+
+	voice1Channel = EEPROM.read(3989);
+	if ((voice1Channel > 16) || (voice1Channel < 1)) {
+		voice1Channel = 2;
+	}
+
+	voice2Channel = EEPROM.read(3988);
+	if ((voice2Channel > 16) || (voice1Channel < 1)) {
+		voice2Channel = 3;
+	}
+
+	voice3Channel = EEPROM.read(3987);
+	if ((voice3Channel > 16) || (voice1Channel < 1)) {
+		voice3Channel = 4;
 	}
 
 	setupMux();

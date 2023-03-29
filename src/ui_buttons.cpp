@@ -6,7 +6,6 @@
 #include "ui_vars.h"
 
 static bool saveEngaged;
-static bool filterAssignmentChanged = false;
 
 enum Button {
 	RECT1 = 2,
@@ -282,7 +281,8 @@ void buttChanged(byte number, bool value) {
 
 			case FILTER_MODE:
 				filterAssignmentChanged = false;
-				ui_state.filterModeHeld = true;
+				ui_state.filterModeHeld = filterModeHeldGlobal = true;
+				volumeChanged = false;
 
 				break;
 		}
@@ -362,7 +362,8 @@ void buttChanged(byte number, bool value) {
 					    static_cast<FilterMode>((static_cast<int>(preset_data.filter_mode) + 1) % 5);
 					sendCC(55, map((int)preset_data.filter_mode, 0, 4, 0, 1023));
 				}
-				ui_state.filterModeHeld = false;
+				ui_state.filterModeHeld = filterModeHeldGlobal = false;
+
 				break;
 		}
 	}
