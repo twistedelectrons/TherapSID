@@ -10,7 +10,9 @@ typedef void (*note_off_callback_t)(uint8_t, uint8_t);
  */
 struct BooleanArray8 {
 	BooleanArray8() : value(0) {} // initialize value to 0 in constructor
-	void set(uint8_t index, bool value) { value = (value & (~(1 << index))) | (((!!value) << index)); }
+	// void set(uint8_t index, bool value) { value = (value & (~(1 << index))) | (((!!value) << index)); }//I think it
+	// was getting confused because we have "value" declared in the function and struct?!
+	void set(uint8_t index, bool newValue) { bitWrite(value, index, newValue); }
 	bool get(uint8_t index) { return value & (1 << index); }
 
   private:
@@ -25,13 +27,13 @@ struct BooleanArray128 {
 	BooleanArray128() : subarray{} {} // initialize subarray to empty array of BooleanArray8 with value initialized to 0
 
 	void set(uint8_t index, bool value) {
-		int subarray_index = index / 8;
-		int bit_in_subarray = index % 8;
+		uint8_t subarray_index = index / 8;
+		uint8_t bit_in_subarray = index % 8;
 		subarray[subarray_index].set(bit_in_subarray, value);
 	}
 	bool get(uint8_t index) {
-		int subarray_index = index / 8;
-		int bit_in_subarray = index % 8;
+		uint8_t subarray_index = index / 8;
+		uint8_t bit_in_subarray = index % 8;
 		return subarray[subarray_index].get(bit_in_subarray);
 	}
 
@@ -57,7 +59,7 @@ class MidiPedalAdapter {
 
 			// when pedal goes up, we want to kill the notes that are sustained
 			for (int i = 0; i < 128; i++) {
-				if (heldNotes.get(i) && !sustainedNotes.get(i)) {
+				if (!heldNotes.get(i) && sustainedNotes.get(i)) {
 					//*(only if not held by fingers)
 					note_off_callback(channel, i);
 				}
