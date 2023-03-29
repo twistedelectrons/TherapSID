@@ -41,8 +41,7 @@ static void HandleNoteOn(byte channel, byte note, byte velocity) {
 
 	if (velocity) {
 		for (int i = 0; i < 3; i++) {
-			if ((preset_data.lfo[i].retrig) ||
-			    (voice_state.n_held_keys() == 0)) { // first finger retriggers at all times
+			if (preset_data.lfo[i].retrig) {
 				lfoStep[i] = lfoStepF[i] = 0;
 			}
 		}
