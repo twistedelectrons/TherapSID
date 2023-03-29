@@ -97,35 +97,15 @@ class MidiPedalAdapter {
 	void note_off(uint8_t channel, uint8_t note) {
 
 		// remove note from held array
-		setHeld(note, 0);
+		heldNotes.set(note, 0);
 
 		if (!pedal_down) {
 			note_off_callback(channel, note);
 		}
 	}
 
-	void setSustained(uint8_t note, bool value) {
-		// note_sustained[note] = value;
-		sustainedNotes.set(note, value);
-	}
-
-	bool getSustained(uint8_t note) {
-		// return (note_sustained[note]);
-		return sustainedNotes.get(note);
-	}
-
-	void setHeld(uint8_t note, bool value) {
-		// note_held[note] = value;
-		heldNotes.set(note, value);
-	}
-
-	bool getHeld(uint8_t note) {
-		// return (note_held[note]);
-		return heldNotes.get(note);
-	}
-
   private:
- 	BooleanArray128 heldNotes;
+	BooleanArray128 heldNotes;
 	BooleanArray128 sustainedNotes;
 	bool pedal_down;
 
