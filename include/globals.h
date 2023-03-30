@@ -41,6 +41,7 @@ extern int arpCounter;
 extern int arpSpeed;
 extern int arpRange;
 extern int arpRound;
+extern byte tuneLfoRange;
 extern byte arpCount;
 extern byte envState;
 extern int env;

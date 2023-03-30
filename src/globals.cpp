@@ -28,6 +28,7 @@ int lfoSpeed[3];
 int presetScrollSpeed = 10000;
 int saveBounce;
 byte lfo[3];
+byte tuneLfoRange=6;
 byte velocityLast;
 bool presetUp, presetDown;
 byte preset = 1;
