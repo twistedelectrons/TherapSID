@@ -23,7 +23,6 @@ extern int frozen;                // UI
 extern bool lfoButtPressed;       // UI
 extern int lfoButtTimer;          // UI
 
-extern int arpModeCounter;
 extern int loadTimer;
 extern bool arpModeHeld;
 

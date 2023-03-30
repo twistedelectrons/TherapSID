@@ -201,7 +201,6 @@ void buttChanged(byte number, bool value) {
 
 			case ARP_MODE:
 				arpModeHeld = true;
-				fatChanged = false;
 				if (ui_state.midiSetup) {
 					ui_state.midiSetup = 3;
 				}
@@ -280,10 +279,10 @@ void buttChanged(byte number, bool value) {
 				break;
 
 			case FILTER_MODE:
+				fatChanged = false;
 				filterAssignmentChanged = false;
 				ui_state.filterModeHeld = true;
 				volumeChanged = false;
-
 				break;
 		}
 	} else {
@@ -304,20 +303,29 @@ void buttChanged(byte number, bool value) {
 				break;
 
 			case ARP_MODE:
-				arpModeHeld = false;
-				arpModeCounter = 0;
-				if (!ui_state.midiSetup && !fatChanged) {
-					if (!preset_data.paraphonic) {
-						preset_data.arp_mode++;
-						if (preset_data.arp_mode > 4) {
-							preset_data.arp_mode = 0;
-							sendNoteOff(lastNote, 127, masterChannelOut);
+				if (ui_state.filterModeHeld) {
+					fatChanged = true;
+					if (preset_data.paraphonic)
+						preset_data.fat_mode = static_cast<FatMode>(((int)preset_data.fat_mode + 1) % 6);
+					else
+						preset_data.fat_mode = static_cast<FatMode>(((int)preset_data.fat_mode + 1) % 5);
+
+				} else {
+
+					if (!ui_state.midiSetup) {
+						if (!preset_data.paraphonic) {
+							preset_data.arp_mode++;
+							if (preset_data.arp_mode > 4) {
+								preset_data.arp_mode = 0;
+								sendNoteOff(lastNote, 127, masterChannelOut);
+							}
+							reset_arp();
 						}
-						reset_arp();
+					} else if (ui_state.midiSetup == 3) {
+						ui_state.midiSetup = 0;
 					}
-				} else if (ui_state.midiSetup == 3) {
-					ui_state.midiSetup = 0;
 				}
+				arpModeHeld = false;
 				break;
 
 			case PRESET_UP:
@@ -357,7 +365,7 @@ void buttChanged(byte number, bool value) {
 				break;
 
 			case FILTER_MODE:
-				if (!filterAssignmentChanged) {
+				if ((!filterAssignmentChanged) && (!fatChanged)) {
 					preset_data.filter_mode =
 					    static_cast<FilterMode>((static_cast<int>(preset_data.filter_mode) + 1) % 5);
 					sendCC(55, map((int)preset_data.filter_mode, 0, 4, 0, 1023));

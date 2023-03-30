@@ -17,7 +17,6 @@ float bend, bend1, bend2, bend3;
 bool sync;
 int velocityToLfo;
 bool toolMode; // when set high by MIDI tool we can receive settings via CC
-int arpModeCounter;
 bool modToLfo;
 byte modWheelLast;
 bool cvActive[3];
