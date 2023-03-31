@@ -79,9 +79,9 @@ void movedPot(byte number, int value, bool isMidi) {
 				}
 				break; // FINE2
 			case 31:
+				preset_data.voice[2].fine_base = value / 1023.f;
 				if (!isMidi) {
 					sendCC(20, value);
-					preset_data.voice[2].fine_base = value / 1023.f;
 					ui_state.lastPot = 8;
 				}
 				break; // FINE3
@@ -281,7 +281,7 @@ void movedPot(byte number, int value, bool isMidi) {
 				break; // RESONANCE
 
 			case 7:
-				if (filterModeHeldGlobal) {
+				if (ui_state.filterModeHeld) {
 					filterAssignmentChanged = true;
 					volume = value >> 6;
 					if (!volume)

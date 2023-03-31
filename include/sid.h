@@ -66,6 +66,7 @@ class Sid {
 	bool force_initial_update = true;
 	byte registers[25];
 	byte registers_sent[25];
+	bool armSID = false;
 };
 
 extern Sid sid_chips[2];

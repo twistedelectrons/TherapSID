@@ -15,6 +15,7 @@ byte volume;
 // LIMIT PW
 float bend, bend1, bend2, bend3;
 bool sync;
+bool armSID;
 int velocityToLfo;
 bool toolMode; // when set high by MIDI tool we can receive settings via CC
 int arpModeCounter;
@@ -71,7 +72,6 @@ byte lastNote = 0;
 int arpStepBase;
 
 bool arpModeHeld;
-bool filterModeHeldGlobal;
 byte arp_output_note;
 optional<byte> control_voltage_note;
 

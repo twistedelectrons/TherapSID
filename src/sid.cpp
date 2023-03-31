@@ -204,23 +204,35 @@ bool Sid::maybe_update_register(size_t index) {
 }
 
 void Sid::send(size_t index, int data) {
-	// Note: The AVR runs at 8MHz, the SID at 1MHz.
-	// One AVR instruction takes at least 125ns.
 
-	PORTC = index << 3;
-	PORTB = data;
-	delayMicroseconds(3); // data latch input needs to be stable >= 25ns
+	if (armSID) {
+		// ARMSID sounds cleaner without delays
+		PORTC = index << 3;
+		PORTB = data;
+		PORTD |= _BV(3);
+		PORTD &= ~_BV(chip_enable_bit); // enable the sid chip
+		PORTD |= _BV(chip_enable_bit);  // disable the sid chip again
+		PORTD &= ~_BV(3);               // falling edge on the data latch. (ignored)
+	} else {
 
-	PORTD |= _BV(3);      // rising edge on the data latch. -> latch-in the data
-	delayMicroseconds(1); // need to wait >= 25ns until latch output is propagated.
-	                      // also, the sid's data input must be stable for >=80ns
+		// Note: The AVR runs at 8MHz, the SID at 1MHz.
+		// One AVR instruction takes at least 125ns.
 
-	PORTD &= ~_BV(chip_enable_bit); // enable the sid chip
-	delayMicroseconds(1);           // need to wait up to 1us until next sid clock edge
+		PORTC = index << 3;
+		PORTB = data;
+		delayMicroseconds(1); // data latch input needs to be stable >= 25ns
 
-	PORTD |= _BV(chip_enable_bit); // disable the sid chip again
-	PORTD &= ~_BV(3);              // falling edge on the data latch. (ignored)
-	delayMicroseconds(1);          // data need to be held for >= 10ns
+		PORTD |= _BV(3);      // rising edge on the data latch. -> latch-in the data
+		delayMicroseconds(1); // need to wait >= 25ns until latch output is propagated.
+		                      // also, the sid's data input must be stable for >=80ns
+
+		PORTD &= ~_BV(chip_enable_bit); // enable the sid chip
+		delayMicroseconds(1);           // need to wait up to 1us until next sid clock edge
+
+		PORTD |= _BV(chip_enable_bit); // disable the sid chip again
+		PORTD &= ~_BV(3);              // falling edge on the data latch. (ignored)
+		delayMicroseconds(1);          // data need to be held for >= 10ns
+	}
 }
 
 Sid sid_chips[2] = {Sid(6), Sid(2)};
