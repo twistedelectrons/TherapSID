@@ -121,6 +121,8 @@ template <size_t N_OPERATORS> struct VoiceState {
 			auto individual = mono_tracker[oper].active_note();
 			if (individual.has_value()) {
 				return individual->note;
+			} else if (mono_note_tracker.has_active_note()) {
+				return mono_note_tracker.active_note()->note;
 			} else {
 				return myLastNote[oper];
 			}

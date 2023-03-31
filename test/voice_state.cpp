@@ -69,6 +69,15 @@ TEST_CASE("VoiceState") {
 			state.note_off_individual(2, 42);
 			check_keys(state, {-1,-1,-42,-1,-1,-1});
 		}
+
+		SECTION("releasing an individual override falls back to main note when present") {
+			state.note_on(1, 64);
+			check_keys(state, {1,1,1,1,1,1});
+			state.note_on_individual(2, 42);
+			check_keys(state, {1,1,42,1,1,1});
+			state.note_off_individual(2, 42);
+			check_keys(state, {1,1,1,1,1,1});
+		}
 	}
 
 	SECTION("in poly mode") {
