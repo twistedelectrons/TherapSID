@@ -155,7 +155,7 @@ template <size_t N_OPERATORS> struct VoiceState {
 	int n_held_keys() const { return _n_held_keys; }
 
   private:
-	byte myLastNote[6]; // track the last note of the individual voices in an effort to fix issue #23
+	uint8_t myLastNote[6]; // track the last note of the individual voices in an effort to fix issue #23
 	int n_individual_voices = N_OPERATORS;
 	int n_usable_operators = N_OPERATORS;
 
