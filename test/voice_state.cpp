@@ -58,6 +58,17 @@ TEST_CASE("VoiceState") {
 			state.note_off_individual(2, 42);
 			check_keys(state, {1,1,1,1,1,1});
 		}
+
+		// regression test for https://github.com/twistedelectrons/TherapSID/issues/23
+		SECTION("releasing an individual override stays at the released note if no main note is held") {
+			state.note_on(1, 64);
+			state.note_off(1);
+			check_keys(state, {-1,-1,-1,-1,-1,-1});
+			state.note_on_individual(2, 42);
+			check_keys(state, {-1,-1,42,-1,-1,-1});
+			state.note_off_individual(2, 42);
+			check_keys(state, {-1,-1,-42,-1,-1,-1});
+		}
 	}
 
 	SECTION("in poly mode") {
