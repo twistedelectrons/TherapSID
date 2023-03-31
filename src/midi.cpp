@@ -41,8 +41,7 @@ static void HandleNoteOn(byte channel, byte note, byte velocity) {
 
 	if (velocity) {
 		for (int i = 0; i < 3; i++) {
-			if ((preset_data.lfo[i].retrig) ||
-			    (voice_state.n_held_keys() == 0)) { // first finger retriggers at all times
+			if (preset_data.lfo[i].retrig) {
 				lfoStep[i] = lfoStepF[i] = 0;
 			}
 		}
@@ -100,12 +99,12 @@ static void HandleNoteOn(byte channel, byte note, byte velocity) {
 
 static void HandleNoteOff(byte channel, byte note) { HandleNoteOn(channel, note, 0); }
 
-byte lastData1, lastData2; // keep track of last CC and Value for handshake with tool.
+static byte lastData1, lastData2; // keep track of last CC and Value for handshake with tool.
 
 static void HandleControlChange(byte channel, byte data1, byte data2) {
 	leftDot();
 
-	if ((channel == 16) && (lastData1 == 19) && (lastData2 == 82) && (data1 == 19) && (data2 == 82)) {
+	if (channel == 16 && lastData1 == 19 && lastData2 == 82 && data1 == 19 && data2 == 82) {
 		// transmit all the settings to tool. Tool expects noteOff messages on CH16 (yeah I couldn't get webMidi to
 		// parse sysex... )
 		sendNoteOff(1, version, 16);
@@ -130,7 +129,7 @@ static void HandleControlChange(byte channel, byte data1, byte data2) {
 
 	lastData1 = data1;
 	lastData2 = data2;
-	if ((channel == 16) && (toolMode) && (data1 == 85)) {
+	if (channel == 16 && toolMode && data1 == 85) {
 		if (data2) {
 			EEPROM.update(3994, 1);
 			modToLfo = 1;
@@ -139,7 +138,7 @@ static void HandleControlChange(byte channel, byte data1, byte data2) {
 			modToLfo = 0;
 		}
 	} // mod wheel -> lfo depth1
-	else if ((channel == 16) && (toolMode) && (data1 == 86)) {
+	else if (channel == 16 && toolMode && data1 == 86) {
 		if (data2) {
 			EEPROM.update(3993, 1);
 			aftertouchToLfo = 1;
@@ -148,7 +147,7 @@ static void HandleControlChange(byte channel, byte data1, byte data2) {
 			aftertouchToLfo = 0;
 		}
 	} // aftertouch -> lfo depth2
-	else if ((channel == 16) && (toolMode) && (data1 == 87)) {
+	else if (channel == 16 && toolMode && data1 == 87) {
 		if (data2) {
 			EEPROM.update(3992, 1);
 			velocityToLfo = 1;
@@ -157,7 +156,7 @@ static void HandleControlChange(byte channel, byte data1, byte data2) {
 			velocityToLfo = 0;
 		}
 	} // velocity -> lfo depth3
-	else if ((channel == 16) && (toolMode) && (data1 == 88)) {
+	else if (channel == 16 && toolMode && data1 == 88) {
 		if (data2) {
 			EEPROM.update(3990, 1);
 			pwLimit = 1;
@@ -167,7 +166,7 @@ static void HandleControlChange(byte channel, byte data1, byte data2) {
 		}
 	} // pwLimit
 
-	else if ((channel == 16) && (toolMode) && (data1 == 89)) {
+	else if (channel == 16 && toolMode && data1 == 89) {
 		volumeChanged = true;
 		volume = data2;
 		if ((volume > 15) || (volume < 1)) {
@@ -176,20 +175,20 @@ static void HandleControlChange(byte channel, byte data1, byte data2) {
 		EEPROM.update(3991, volume);
 	} // master volume
 
-	else if ((channel == 16) && (toolMode) && (data1 == 90)) {
+	else if (channel == 16 && toolMode && data1 == 90) {
 		if (data2 < 16) {
 			EEPROM.update(3998, data2 + 1);
 			masterChannel = data2 + 1;
 		}
 	} // master input channel
 
-	else if ((channel == 16) && (toolMode) && (data1 == 91)) {
+	else if (channel == 16 && toolMode && data1 == 91) {
 		if (data2 < 16) {
 			EEPROM.update(3997, data2 + 1);
 			masterChannelOut = data2 + 1;
 		}
 	} // master output channel
-	else if ((channel == 16) && (toolMode) && (data1 == 92)) {
+	else if (channel == 16 && toolMode && data1 == 92) {
 		if (data2) {
 			EEPROM.update(3996, 1);
 			sendLfo = 1;
@@ -198,26 +197,26 @@ static void HandleControlChange(byte channel, byte data1, byte data2) {
 			sendLfo = 0;
 		}
 	} // lfo transmits CC
-	else if ((channel == 16) && (toolMode) && (data1 == 94)) {
+	else if (channel == 16 && toolMode && data1 == 94) {
 		if (data2 < 16) {
 			EEPROM.update(3989, data2 + 1);
 			voice1Channel = data2 + 1;
 		}
 	} // master output channel voice1
-	else if ((channel == 16) && (toolMode) && (data1 == 95)) {
+	else if (channel == 16 && toolMode && data1 == 95) {
 		if (data2 < 16) {
 			EEPROM.update(3988, data2 + 1);
 			voice2Channel = data2 + 1;
 		}
 	} // master output channel voice2
-	else if ((channel == 16) && (toolMode) && (data1 == 96)) {
+	else if (channel == 16 && toolMode && data1 == 96) {
 		if (data2 < 16) {
 			EEPROM.update(3987, data2 + 1);
 			voice3Channel = data2 + 1;
 		}
 	} // master output channel voice3
 
-	else if ((channel == 16) && (toolMode) && (data1 == 93)) {
+	else if (channel == 16 && toolMode && data1 == 93) {
 		if (data2) {
 			EEPROM.update(3995, 1);
 			sendArp = 1;
@@ -307,10 +306,12 @@ static void HandleControlChange(byte channel, byte data1, byte data2) {
 			}
 		}
 	} else {
-		// listen to sustain on all other channels
+		// listen to sustain on all other assigned channels
 		switch (data1) {
 			case 64:
-				pedal_adapter.set_pedal(channel, data2 >= 64);
+				if (channel == voice1Channel || channel == voice2Channel || channel == voice3Channel) {
+					pedal_adapter.set_pedal(channel, data2 >= 64);
+				}
 				break;
 		}
 	}
@@ -481,15 +482,11 @@ void midiRead() {
 				// data byte 2
 				switch (mStatus) {
 					case 1:
-
 						pedal_adapter.note_on(mChannel, mData, input);
-
 						mData = 255;
 						break; // noteOn
 					case 2:
-
 						pedal_adapter.note_off(mChannel, mData);
-
 						mData = 255;
 						break; // noteOff
 					case 3:

@@ -86,11 +86,11 @@ class MidiPedalAdapter {
 		note_on_callback(channel, note, velocity);
 
 		// add note to held array
-		heldNotes[channel].set(note, 1);
+		heldNotes[channel].set(note, true);
 
-		if (pedal_down) {
+		if (pedal_down[channel]) {
 			// pedal is down so we want to sustain the note
-			sustainedNotes[channel].set(note, 1);
+			sustainedNotes[channel].set(note, true);
 		}
 	}
 
@@ -99,7 +99,7 @@ class MidiPedalAdapter {
 		// remove note from held array
 		heldNotes[channel].set(note, 0);
 
-		if (!pedal_down) {
+		if (!pedal_down[channel]) {
 			note_off_callback(channel, note);
 		}
 	}
@@ -107,7 +107,7 @@ class MidiPedalAdapter {
   private:
 	BooleanArray128 heldNotes[16];
 	BooleanArray128 sustainedNotes[16];
-	bool pedal_down;
+	bool pedal_down[16];
 
 	note_on_callback_t note_on_callback;
 	note_off_callback_t note_off_callback;
