@@ -44,12 +44,12 @@ class MidiPedalAdapter {
 	MidiPedalAdapter(note_on_callback_t note_on_callback, note_off_callback_t note_off_callback)
 	    : pedal_down{0}, note_on_callback(note_on_callback), note_off_callback(note_off_callback) {}
 
-	void set_pedal(uint8_t channel, bool pedal_down) {
+	void set_pedal(uint8_t channel, bool pedal) {
 
-		this->pedal_down[channel] = pedal_down;
+		this->pedal_down[channel] = pedal;
 
 		// when pedal goes down, we want to transfer the notes that are held to sustained
-		if (pedal_down) {
+		if (pedal) {
 			for (int i = 0; i < 128; i++) {
 				sustainedNotes[channel].set(i, heldNotes[channel].get(i));
 			}
