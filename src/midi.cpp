@@ -220,20 +220,20 @@ static void HandleControlChange(byte channel, byte data1, byte data2) {
 	else if (channel == 16 && toolMode && data1 == 93) {
 		if (data2) {
 			EEPROM.update(3995, 1);
-			sendArp = 1;
+			sendArp = true;
 		} else {
 			EEPROM.update(3995, 0);
-			sendArp = 0;
+			sendArp = false;
 		}
 	} // arp transmits MIDI notes
 
 	else if (channel == 16 && toolMode && data1 == 97) {
 		if (data2) {
 			EEPROM.update(3986, 1);
-			armSID = 1;
+			armSID = true;
 		} else {
 			EEPROM.update(3986, 0);
-			armSID = 0;
+			armSID = false;
 		}
 	} // ARMSID mode
 

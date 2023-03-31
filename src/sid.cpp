@@ -141,14 +141,6 @@ void Sid::set_gate(int voice, bool on) {
 	registers[7 * voice + CONTROL] |= on ? 0x01 : 0x00;
 }
 
-/// `value` needs to be OR-ed together out of NOISE, PULSE, SAW and/or TRI.
-/// Note that enabling NOISE together with any other waveform can clear the
-/// noise shift register inside the chip.
-void Sid::set_shape(int voice, byte value) {
-	registers[7 * voice + CONTROL] &= 0x0f;
-	registers[7 * voice + CONTROL] |= value;
-}
-
 void Sid::set_reg_control(int voice, uint8_t control) { registers[7 * voice + CONTROL] = control; }
 
 byte Sid::shape(int voice) const { return registers[7 * voice + CONTROL] & 0xf0; }
@@ -162,9 +154,6 @@ void Sid::set_volume(uint8_t value) {
 }
 
 uint8_t Sid::filter_mode() { return registers[FILTER_MODE_VOLUME] & (HIGHPASS | BANDPASS | LOWPASS); }
-
-/// In addition to the usual 3 voices, this accepts voice==3 for the external input.
-void Sid::set_voice_filter(int voice, bool enable) { bitWrite(registers[FILTER_RESONANCE_ROUTING], voice, enable); }
 
 bool Sid::is_voice_playing(size_t voice) { return registers[7 * voice + CONTROL] & 1; }
 

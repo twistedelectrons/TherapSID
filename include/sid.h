@@ -22,11 +22,6 @@ class Sid {
 
 	enum Shape { NOISE = 1 << 7, PULSE = 1 << 6, SAW = 1 << 5, TRI = 1 << 4 };
 
-	/// `value` needs to be OR-ed together out of NOISE, PULSE, SAW and/or TRI.
-	/// Note that enabling NOISE together with any other waveform can clear the
-	/// noise shift register inside the chip.
-	[[deprecated]] void set_shape(int voice, byte value);
-
 	/// 0..4095
 	void set_pulsewidth(int voice, uint16_t width);
 
@@ -48,8 +43,9 @@ class Sid {
 
 	uint8_t filter_mode();
 
-	/// In addition to the usual 3 voices, this accepts voice==3 for the external input.
-	[[deprecated]] void set_voice_filter(int voice, bool enable);
+	/// Changes the communication timing to be out-of-spec for normal SIDs, but to improve
+	/// quality for the ARM SID replacement
+	void set_arm_sid_mode(bool value) { armSID = value; }
 
   private:
 	bool is_voice_playing(size_t voice);
