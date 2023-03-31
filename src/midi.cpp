@@ -122,6 +122,7 @@ static void HandleControlChange(byte channel, byte data1, byte data2) {
 		sendNoteOff(12, sendLfo, 16);
 		sendNoteOff(13, sendArp, 16);
 		sendNoteOff(14, pwLimit, 16);
+		sendNoteOff(15, armSID, 16);
 
 		toolMode = true; // therapSid is listening to new settings (CC on CH16)
 	}
@@ -225,6 +226,17 @@ static void HandleControlChange(byte channel, byte data1, byte data2) {
 			sendArp = 0;
 		}
 	} // arp transmits MIDI notes
+
+	else if (channel == 16 && toolMode && data1 == 97) {
+		if (data2) {
+			EEPROM.update(3986, 1);
+			armSID = 1;
+		} else {
+			EEPROM.update(3986, 0);
+			armSID = 0;
+		}
+	} // ARMSID mode
+
 	else if (channel == masterChannel) {
 		if (data1 == 59)
 			data1 = 32;

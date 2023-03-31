@@ -181,10 +181,6 @@ void Sid::set_filter_cutoff(uint16_t cutoff) {
 	registers[FILTER_CUTOFF_HI] = cutoff >> 3;
 }
 
-void Sid::set_armSid(bool value) {
-armSID=value;
-}
-
 bool Sid::is_update_allowed(size_t register_index) {
 	if (register_index == SUSTAIN_RELEASE1 || register_index == SUSTAIN_RELEASE2 ||
 	    register_index == SUSTAIN_RELEASE3) {

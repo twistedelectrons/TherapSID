@@ -1,7 +1,7 @@
 #pragma once
 #include <stdint.h>
 #include <Arduino.h>
-
+#include <globals.h>
 void sidReset();
 void init1MhzClock();
 void sidSend(byte address, byte data);
@@ -35,11 +35,8 @@ class Sid {
 
 	void set_resonance_and_filter_enable(uint8_t resonance /* 0..15*/, bool en1, bool en2, bool en3, bool en_ext);
 
-	/// sets armSId mode to remove delays from send
-	void set_armSid(bool value);
-
-	    /// Sets gate, shape, sync and ring.
-	    void set_reg_control(int voice, byte value);
+	/// Sets gate, shape, sync and ring.
+	void set_reg_control(int voice, byte value);
 
 	byte shape(int voice) const;
 

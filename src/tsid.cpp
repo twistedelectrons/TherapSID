@@ -123,6 +123,11 @@ void setup() {
 		masterChannelOut = 1;
 	}
 
+	if (EEPROM.read(3986) > 0) {
+		armSID = false;
+	} else {
+		armSID = true;
+	}
 	if (EEPROM.read(3996) > 0) {
 		sendLfo = false;
 	} else {

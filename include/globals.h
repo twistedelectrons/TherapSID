@@ -19,6 +19,7 @@ extern float bend, bend1, bend2, bend3;
 extern bool sync;
 extern bool pwLimit;
 extern bool toolMode;
+extern bool armSID;
 extern bool cvActive[3];
 extern int lfoStep[3];
 extern byte lfo[3];

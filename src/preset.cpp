@@ -36,6 +36,7 @@ twisted-electrons.com/tool
 3988 MIDI in voice2
 3987 MIDI in voice3
 
+3986 ARMSID mode
 
 */
 
