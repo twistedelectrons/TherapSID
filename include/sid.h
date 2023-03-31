@@ -35,8 +35,11 @@ class Sid {
 
 	void set_resonance_and_filter_enable(uint8_t resonance /* 0..15*/, bool en1, bool en2, bool en3, bool en_ext);
 
-	/// Sets gate, shape, sync and ring.
-	void set_reg_control(int voice, byte value);
+	/// sets armSId mode to remove delays from send
+	void set_armSid(bool value);
+
+	    /// Sets gate, shape, sync and ring.
+	    void set_reg_control(int voice, byte value);
 
 	byte shape(int voice) const;
 
@@ -66,6 +69,7 @@ class Sid {
 	bool force_initial_update = true;
 	byte registers[25];
 	byte registers_sent[25];
+	bool armSID;
 };
 
 extern Sid sid_chips[2];
