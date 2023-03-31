@@ -46,7 +46,7 @@ class MidiPedalAdapter {
 
 	void set_pedal(uint8_t channel, bool pedal_down) {
 
-		this->pedal_down = pedal_down;
+		this->pedal_down[channel] = pedal_down;
 
 		// when pedal goes down, we want to transfer the notes that are held to sustained
 		if (pedal_down) {
