@@ -65,6 +65,8 @@ static void calculatePitch() {
 }
 void setSidRegisters(Preset const& preset, ParamsAfterLfo const& params_after_lfo) {
 	for (int i = 0; i < 2; i++) {
+		sid_chips[i].set_arm_sid_mode(armSID);
+
 		for (int v = 0; v < 3; v++) {
 			int oper = v + 3 * i;
 			int pv = voice_index[oper];

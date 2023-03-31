@@ -51,6 +51,10 @@ class Sid {
 	/// In addition to the usual 3 voices, this accepts voice==3 for the external input.
 	[[deprecated]] void set_voice_filter(int voice, bool enable);
 
+	/// Changes the communication timing to be out-of-spec for normal SIDs, but to improve
+	/// quality for the ARM SID replacement
+	void set_arm_sid_mode(bool value) { armSID = value; }
+
   private:
 	bool is_voice_playing(size_t voice);
 
