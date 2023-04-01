@@ -18,7 +18,6 @@ bool sync;
 bool armSID;
 int velocityToLfo;
 bool toolMode; // when set high by MIDI tool we can receive settings via CC
-int arpModeCounter;
 bool modToLfo;
 byte modWheelLast;
 bool cvActive[3];
@@ -30,6 +29,7 @@ int lfoSpeed[3];
 int presetScrollSpeed = 10000;
 int saveBounce;
 byte lfo[3];
+byte tuneLfoRange = 6;
 byte velocityLast;
 bool presetUp, presetDown;
 byte preset = 1;

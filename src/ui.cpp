@@ -58,18 +58,6 @@ void ui_tick() {
 	if (loadTimer)
 		loadTimer--;
 
-	if (arpModeHeld) {
-		arpModeCounter++;
-		if (arpModeCounter > 16000) {
-			fatChanged = true;
-			arpModeCounter = 0;
-			if (preset_data.paraphonic)
-				preset_data.fat_mode = static_cast<FatMode>(((int)preset_data.fat_mode + 1) % 6);
-			else
-				preset_data.fat_mode = static_cast<FatMode>(((int)preset_data.fat_mode + 1) % 5);
-		}
-	}
-
 	if (presetUp || presetDown) {
 		if (presetUp && !presetDown) {
 			presetScrollTimer += 4;
