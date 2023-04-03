@@ -110,16 +110,16 @@ void setup() {
 
 	int preset_tmp;
 	preset_tmp = EEPROM.read(3999);
-	if (preset_tmp > 98)
+	if ((preset_tmp > 99) || (preset_tmp < 1))
 		preset_tmp = 1;
 	preset = preset_tmp;
 
 	masterChannel = EEPROM.read(3998);
-	if (masterChannel > 16) {
+	if ((masterChannel > 16) || (masterChannel < 1)) {
 		masterChannel = 1;
 	}
 	masterChannelOut = EEPROM.read(3997);
-	if (masterChannelOut > 16) {
+	if ((masterChannelOut > 16) || (masterChannelOut < 1)) {
 		masterChannelOut = 1;
 	}
 
