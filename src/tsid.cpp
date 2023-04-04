@@ -18,8 +18,8 @@ tools/hex2sysex/hex2sysex.py --syx -o firmware.syx TSID.ino.hex
 TO DO:
 Add setup mode (hold arp mode for 2 seconds), press again to exit (same as megaFM)
 -MIDI channel learn (map input to ouput channel)
--in setup mode use a button (square 1?) to toggle LFO MIDI CC send on/off EEPROM 3996
--in setup mode uss a button (triangle 1?) to toggle ARP MIDI send on/off EEPROM 3995
+-in setup mode use a button (square 1?) to toggle LFO MIDI CC send on/off EEPROM_ADDR_SEND_LFO
+-in setup mode uss a button (triangle 1?) to toggle ARP MIDI send on/off EEPROM_ADDR_SEND_ARP
 -add 6 voice mode using 2 chips, I suggest we hold a waveform for several seconds for 3 voice paramode, hold it longer
 for 6 (show P3, then P6 on display) -kill the voices when they are done singing by setting the freq to 0. Never tried
 this (too dumb to figure out when the ADSR is finished), but I read it's a solution against the ghost notes (leaky VCA)
@@ -103,77 +103,77 @@ void setup() {
 
 	DDRC = B11111000;
 
-	volume = EEPROM.read(3991);
+	volume = EEPROM.read(EEPROM_ADDR_MASTER_VOLUME);
 	if ((volume > 15) || (volume < 1))
 		volume = 15; // let's avoid silent sids!!!
 	volumeChanged = true;
 
 	int preset_tmp;
-	preset_tmp = EEPROM.read(3999);
-	if ((preset_tmp > 99) || (preset_tmp < 1))
-		preset_tmp = 1;
+	preset_tmp = EEPROM.read(EEPROM_ADDR_PRESET_LAST);
+	if ((preset_tmp > PRESET_NUMBER_HIGHEST) || (preset_tmp < PRESET_NUMBER_LOWEST))
+		preset_tmp = PRESET_NUMBER_LOWEST;
 	preset = preset_tmp;
 
-	masterChannel = EEPROM.read(3998);
+	masterChannel = EEPROM.read(EEPROM_ADDR_MIDI_IN_CH_MASTER);
 	if ((masterChannel > 16) || (masterChannel < 1)) {
 		masterChannel = 1;
 	}
-	masterChannelOut = EEPROM.read(3997);
+	masterChannelOut = EEPROM.read(EEPROM_ADDR_MIDI_OUT_CH_MASTER);
 	if ((masterChannelOut > 16) || (masterChannelOut < 1)) {
 		masterChannelOut = 1;
 	}
 
-	if (EEPROM.read(3986) > 0) {
+	if (EEPROM.read(EEPROM_ADDR_ARMSID_MODE) > 0) {
 		armSID = false;
 	} else {
 		armSID = true;
 	}
-	if (EEPROM.read(3996) > 0) {
+	if (EEPROM.read(EEPROM_ADDR_SEND_LFO) > 0) {
 		sendLfo = false;
 	} else {
 		sendLfo = true;
 	}
-	if (EEPROM.read(3995) > 0) {
+	if (EEPROM.read(EEPROM_ADDR_SEND_ARP) > 0) {
 		sendArp = false;
 	} else {
 		sendArp = true;
 	}
 
-	if (EEPROM.read(3994) > 0) {
+	if (EEPROM.read(EEPROM_ADDR_MW_TO_LFO1) > 0) {
 		modToLfo = true;
 	} else {
 		modToLfo = false;
 	}
 
-	if (EEPROM.read(3993) > 0) {
+	if (EEPROM.read(EEPROM_ADDR_AT_TO_LFO2) > 0) {
 		aftertouchToLfo = true;
 	} else {
 		aftertouchToLfo = false;
 	}
 
-	if (EEPROM.read(3992) > 0) {
+	if (EEPROM.read(EEPROM_ADDR_VEL_TO_LFO3) > 0) {
 		velocityToLfo = true;
 	} else {
 		velocityToLfo = false;
 	}
 
-	if (EEPROM.read(3990) > 0) {
+	if (EEPROM.read(EEPROM_ADDR_PW_LIMIT) > 0) {
 		pwLimit = true;
 	} else {
 		pwLimit = false;
 	}
 
-	voice1Channel = EEPROM.read(3989);
+	voice1Channel = EEPROM.read(EEPROM_ADDR_MIDI_IN_CH_VOICE1);
 	if ((voice1Channel > 16) || (voice1Channel < 1)) {
 		voice1Channel = 2;
 	}
 
-	voice2Channel = EEPROM.read(3988);
+	voice2Channel = EEPROM.read(EEPROM_ADDR_MIDI_IN_CH_VOICE2);
 	if ((voice2Channel > 16) || (voice1Channel < 1)) {
 		voice2Channel = 3;
 	}
 
-	voice3Channel = EEPROM.read(3987);
+	voice3Channel = EEPROM.read(EEPROM_ADDR_MIDI_IN_CH_VOICE3);
 	if ((voice3Channel > 16) || (voice1Channel < 1)) {
 		voice3Channel = 4;
 	}

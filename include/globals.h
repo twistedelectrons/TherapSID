@@ -58,3 +58,19 @@ extern optional<byte> control_voltage_note;
 
 // voice_index[operator] tells you the preset's voice to read the operator's settings from.
 extern byte* voice_index; // array of size 6, set depending on preset.paraphonic
+
+// Memory Mapping
+#define EEPROM_ADDR_PRESET_LAST 3999
+#define EEPROM_ADDR_MIDI_IN_CH_MASTER 3998
+#define EEPROM_ADDR_MIDI_OUT_CH_MASTER 3997
+#define EEPROM_ADDR_SEND_LFO 3996
+#define EEPROM_ADDR_SEND_ARP 3995
+#define EEPROM_ADDR_MW_TO_LFO1 3994
+#define EEPROM_ADDR_AT_TO_LFO2 3993
+#define EEPROM_ADDR_VEL_TO_LFO3 3992
+#define EEPROM_ADDR_MASTER_VOLUME 3991
+#define EEPROM_ADDR_PW_LIMIT 3990
+#define EEPROM_ADDR_MIDI_IN_CH_VOICE1 3989
+#define EEPROM_ADDR_MIDI_IN_CH_VOICE2 3988
+#define EEPROM_ADDR_MIDI_IN_CH_VOICE3 3987
+#define EEPROM_ADDR_ARMSID_MODE 3986

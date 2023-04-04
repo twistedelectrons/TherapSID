@@ -132,37 +132,37 @@ static void HandleControlChange(byte channel, byte data1, byte data2) {
 	lastData2 = data2;
 	if (channel == 16 && toolMode && data1 == 85) {
 		if (data2) {
-			EEPROM.update(3994, 1);
+			EEPROM.update(EEPROM_ADDR_MW_TO_LFO1, 1);
 			modToLfo = 1;
 		} else {
-			EEPROM.update(3994, 0);
+			EEPROM.update(EEPROM_ADDR_MW_TO_LFO1, 0);
 			modToLfo = 0;
 		}
 	} // mod wheel -> lfo depth1
 	else if (channel == 16 && toolMode && data1 == 86) {
 		if (data2) {
-			EEPROM.update(3993, 1);
+			EEPROM.update(EEPROM_ADDR_AT_TO_LFO2, 1);
 			aftertouchToLfo = 1;
 		} else {
-			EEPROM.update(3993, 0);
+			EEPROM.update(EEPROM_ADDR_AT_TO_LFO2, 0);
 			aftertouchToLfo = 0;
 		}
 	} // aftertouch -> lfo depth2
 	else if (channel == 16 && toolMode && data1 == 87) {
 		if (data2) {
-			EEPROM.update(3992, 1);
+			EEPROM.update(EEPROM_ADDR_VEL_TO_LFO3, 1);
 			velocityToLfo = 1;
 		} else {
-			EEPROM.update(3992, 0);
+			EEPROM.update(EEPROM_ADDR_VEL_TO_LFO3, 0);
 			velocityToLfo = 0;
 		}
 	} // velocity -> lfo depth3
 	else if (channel == 16 && toolMode && data1 == 88) {
 		if (data2) {
-			EEPROM.update(3990, 1);
+			EEPROM.update(EEPROM_ADDR_PW_LIMIT, 1);
 			pwLimit = 1;
 		} else {
-			EEPROM.update(3990, 0);
+			EEPROM.update(EEPROM_ADDR_PW_LIMIT, 0);
 			pwLimit = 0;
 		}
 	} // pwLimit
@@ -173,66 +173,66 @@ static void HandleControlChange(byte channel, byte data1, byte data2) {
 		if ((volume > 15) || (volume < 1)) {
 			volume = 15;
 		}
-		EEPROM.update(3991, volume);
+		EEPROM.update(EEPROM_ADDR_MASTER_VOLUME, volume);
 	} // master volume
 
 	else if (channel == 16 && toolMode && data1 == 90) {
 		if (data2 < 16) {
-			EEPROM.update(3998, data2 + 1);
+			EEPROM.update(EEPROM_ADDR_MIDI_IN_CH_MASTER, data2 + 1);
 			masterChannel = data2 + 1;
 		}
 	} // master input channel
 
 	else if (channel == 16 && toolMode && data1 == 91) {
 		if (data2 < 16) {
-			EEPROM.update(3997, data2 + 1);
+			EEPROM.update(EEPROM_ADDR_MIDI_OUT_CH_MASTER, data2 + 1);
 			masterChannelOut = data2 + 1;
 		}
 	} // master output channel
 	else if (channel == 16 && toolMode && data1 == 92) {
 		if (data2) {
-			EEPROM.update(3996, 1);
+			EEPROM.update(EEPROM_ADDR_SEND_LFO, 1);
 			sendLfo = 1;
 		} else {
-			EEPROM.update(3996, 0);
+			EEPROM.update(EEPROM_ADDR_SEND_LFO, 0);
 			sendLfo = 0;
 		}
 	} // lfo transmits CC
 	else if (channel == 16 && toolMode && data1 == 94) {
 		if (data2 < 16) {
-			EEPROM.update(3989, data2 + 1);
+			EEPROM.update(EEPROM_ADDR_MIDI_IN_CH_VOICE1, data2 + 1);
 			voice1Channel = data2 + 1;
 		}
 	} // master output channel voice1
 	else if (channel == 16 && toolMode && data1 == 95) {
 		if (data2 < 16) {
-			EEPROM.update(3988, data2 + 1);
+			EEPROM.update(EEPROM_ADDR_MIDI_IN_CH_VOICE2, data2 + 1);
 			voice2Channel = data2 + 1;
 		}
 	} // master output channel voice2
 	else if (channel == 16 && toolMode && data1 == 96) {
 		if (data2 < 16) {
-			EEPROM.update(3987, data2 + 1);
+			EEPROM.update(EEPROM_ADDR_MIDI_IN_CH_VOICE3, data2 + 1);
 			voice3Channel = data2 + 1;
 		}
 	} // master output channel voice3
 
 	else if (channel == 16 && toolMode && data1 == 93) {
 		if (data2) {
-			EEPROM.update(3995, 1);
+			EEPROM.update(EEPROM_ADDR_SEND_ARP, 1);
 			sendArp = true;
 		} else {
-			EEPROM.update(3995, 0);
+			EEPROM.update(EEPROM_ADDR_SEND_ARP, 0);
 			sendArp = false;
 		}
 	} // arp transmits MIDI notes
 
 	else if (channel == 16 && toolMode && data1 == 97) {
 		if (data2) {
-			EEPROM.update(3986, 1);
+			EEPROM.update(EEPROM_ADDR_ARMSID_MODE, 1);
 			armSID = true;
 		} else {
-			EEPROM.update(3986, 0);
+			EEPROM.update(EEPROM_ADDR_ARMSID_MODE, 0);
 			armSID = false;
 		}
 	} // ARMSID mode
@@ -290,29 +290,29 @@ static void HandleControlChange(byte channel, byte data1, byte data2) {
 				case 68:
 					if (data2) {
 						sendLfo = true;
-						EEPROM.update(3996, 0);
+						EEPROM.update(EEPROM_ADDR_SEND_LFO, 0);
 					} else {
 						sendLfo = false;
-						EEPROM.update(3996, 1);
+						EEPROM.update(EEPROM_ADDR_SEND_LFO, 1);
 					}
 					break; // lfo send
 				case 69:
 					if (data2) {
 						sendArp = true;
-						EEPROM.update(3995, 0);
+						EEPROM.update(EEPROM_ADDR_SEND_ARP, 0);
 					} else {
 						sendArp = false;
-						EEPROM.update(3995, 1);
+						EEPROM.update(EEPROM_ADDR_SEND_ARP, 1);
 					}
 					break; // arp send
 
 				case 85:
 					if (data2) {
 						sendArp = true;
-						EEPROM.update(3995, 0);
+						EEPROM.update(EEPROM_ADDR_SEND_ARP, 0);
 					} else {
 						sendArp = false;
-						EEPROM.update(3995, 1);
+						EEPROM.update(EEPROM_ADDR_SEND_ARP, 1);
 					}
 					break; // arp send
 			}
@@ -516,8 +516,8 @@ void midiRead() {
 					case 6:
 						if (mChannel == masterChannel) {
 							preset = input + 1;
-							if (preset > 99) {
-								preset = 1;
+							if (preset > PRESET_NUMBER_HIGHEST) {
+								preset = PRESET_NUMBER_LOWEST;
 							}
 						}
 						mData = 0;
@@ -617,7 +617,8 @@ void recieveDump() {
 	byte ledLast = 0;
 	for (int i = 0; i < 4000; i++) {
 
-		if ((i != 3998) && (i != 3997)) { // don't overWrite MIDI channels!!
+		if ((i != EEPROM_ADDR_MIDI_IN_CH_MASTER) &&
+		    (i != EEPROM_ADDR_MIDI_OUT_CH_MASTER)) { // don't overWrite MIDI channels!!
 			EEPROM.update(i, mem[i]);
 			if (ledLast != i / 40) {
 				ledLast = i / 40;

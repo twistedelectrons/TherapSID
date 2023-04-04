@@ -30,7 +30,7 @@ void ui_loop() {
 		loadTimer = 800;
 		load(preset);
 		presetLast = preset;
-		EEPROM.update(3999, presetLast);
+		EEPROM.update(EEPROM_ADDR_PRESET_LAST, presetLast);
 	}
 	if (saveBounce)
 		saveBounce--;
@@ -67,8 +67,8 @@ void ui_tick() {
 					presetScrollSpeed -= 1000;
 				}
 				preset++;
-				if (preset > 99) {
-					preset = 1;
+				if (preset > PRESET_NUMBER_HIGHEST) {
+					preset = PRESET_NUMBER_LOWEST;
 				}
 				scrolled = true;
 			}
@@ -80,8 +80,8 @@ void ui_tick() {
 					presetScrollSpeed -= 1000;
 				}
 				preset--;
-				if (preset < 1) {
-					preset = 99;
+				if (preset < PRESET_NUMBER_LOWEST) {
+					preset = PRESET_NUMBER_HIGHEST;
 				}
 				scrolled = true;
 			}
