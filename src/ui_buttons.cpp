@@ -334,8 +334,8 @@ void buttChanged(byte number, bool value) {
 					presetScrollSpeed = 10000;
 					if ((!saveBounce) && (!loadTimer) && (!scrolled)) {
 						preset++;
-						if (preset > PRESET_NUMBER_HIGHEST) {
-							preset = PRESET_NUMBER_LOWEST;
+						if (preset > PRESET_NUMBER_MAX) {
+							preset = PRESET_NUMBER_MIN;
 						}
 					} else {
 						saveEngaged = false;
@@ -350,8 +350,8 @@ void buttChanged(byte number, bool value) {
 					presetScrollSpeed = 10000;
 					if ((!saveBounce) && (!loadTimer) && (!scrolled)) {
 						preset--;
-						if (preset < PRESET_NUMBER_LOWEST) {
-							preset = PRESET_NUMBER_HIGHEST;
+						if (preset < PRESET_NUMBER_MIN) {
+							preset = PRESET_NUMBER_MAX;
 						}
 					} else {
 						saveEngaged = false;

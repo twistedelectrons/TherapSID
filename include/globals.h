@@ -8,7 +8,6 @@ template <typename T> class optional;
 extern Preset preset_data;
 extern VoiceState<6> voice_state;
 extern Glide glide[6];
-extern byte settings;
 extern byte aftertouch;
 extern bool aftertouchToLfo;
 extern bool sendLfo;
@@ -23,7 +22,7 @@ extern bool armSID;
 extern bool cvActive[3];
 extern int lfoStep[3];
 extern byte lfo[3];
-extern int velocityToLfo;
+extern bool velocityToLfo;
 extern bool modToLfo;
 extern byte velocityLast;
 extern byte modWheelLast;
@@ -59,18 +58,38 @@ extern optional<byte> control_voltage_note;
 // voice_index[operator] tells you the preset's voice to read the operator's settings from.
 extern byte* voice_index; // array of size 6, set depending on preset.paraphonic
 
-// Memory Mapping
-#define EEPROM_ADDR_PRESET_LAST 3999
-#define EEPROM_ADDR_MIDI_IN_CH_MASTER 3998
-#define EEPROM_ADDR_MIDI_OUT_CH_MASTER 3997
-#define EEPROM_ADDR_SEND_LFO 3996
-#define EEPROM_ADDR_SEND_ARP 3995
-#define EEPROM_ADDR_MW_TO_LFO1 3994
-#define EEPROM_ADDR_AT_TO_LFO2 3993
-#define EEPROM_ADDR_VEL_TO_LFO3 3992
-#define EEPROM_ADDR_MASTER_VOLUME 3991
-#define EEPROM_ADDR_PW_LIMIT 3990
-#define EEPROM_ADDR_MIDI_IN_CH_VOICE1 3989
-#define EEPROM_ADDR_MIDI_IN_CH_VOICE2 3988
-#define EEPROM_ADDR_MIDI_IN_CH_VOICE3 3987
-#define EEPROM_ADDR_ARMSID_MODE 3986
+// EEPROM Memory Mapping
+#define EEPROM_ADDR_COOKIE 0x0000  // Two bytes
+#define EEPROM_ADDR_VERSION 0x0002 // Two bytes
+#define EEPROM_ADDR_PRESET_LAST 0x0004
+#define EEPROM_ADDR_MIDI_IN_CH_MASTER 0x0005
+#define EEPROM_ADDR_MIDI_OUT_CH_MASTER 0x0006
+#define EEPROM_ADDR_SEND_LFO 0x0007
+#define EEPROM_ADDR_SEND_ARP 0x0008
+#define EEPROM_ADDR_MW_TO_LFO1 0x0009
+#define EEPROM_ADDR_AT_TO_LFO2 0x000a
+#define EEPROM_ADDR_VEL_TO_LFO3 0x000b
+#define EEPROM_ADDR_MASTER_VOLUME 0x000c
+#define EEPROM_ADDR_PW_LIMIT 0x000d
+#define EEPROM_ADDR_MIDI_IN_CH_VOICE1 0x000e
+#define EEPROM_ADDR_MIDI_IN_CH_VOICE2 0x000f
+#define EEPROM_ADDR_MIDI_IN_CH_VOICE3 0x0010
+#define EEPROM_ADDR_ARMSID_MODE 0x0011
+#define EEPROM_ADDR_PRESET_DATA_START 0x0028
+#define EEPROM_ADDR_PRESET(preset) (EEPROM_ADDR_PRESET_DATA_START + (preset - 1) * PRESET_DATA_SIZE)
+
+#define EEPROM_COOKIE_VALUE (uint16_t)19028
+#define EEPROM_FORMAT_VERSION (uint16_t)0x0001
+
+// Global settings, stored in EEPROM
+struct globalSetting {
+	void* variable;
+	uint16_t eepromAddress;
+	byte minValue;
+	byte maxValue;
+	byte defaultValue;
+	byte ccMessageToolMode;
+	bool isChannel;
+};
+
+extern const globalSetting globalSettings[14];

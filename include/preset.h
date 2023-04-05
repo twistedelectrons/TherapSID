@@ -2,8 +2,8 @@
 #include <stdint.h>
 #include <Arduino.h>
 
-#define PRESET_NUMBER_LOWEST 1
-#define PRESET_NUMBER_HIGHEST 99
+#define PRESET_NUMBER_MIN 1
+#define PRESET_NUMBER_MAX 99
 #define PRESET_DATA_SIZE 40
 
 void save();

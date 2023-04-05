@@ -103,80 +103,38 @@ void setup() {
 
 	DDRC = B11111000;
 
-	volume = EEPROM.read(EEPROM_ADDR_MASTER_VOLUME);
-	if ((volume > 15) || (volume < 1))
-		volume = 15; // let's avoid silent sids!!!
+	// Validate EEPROM memory structure
+	uint16_t cookie_value;
+	EEPROM.get(EEPROM_ADDR_COOKIE, cookie_value);
+	bool initialize_memory = (cookie_value != EEPROM_COOKIE_VALUE);
+
+	// Initialize EEPROM memory if needed
+	if (initialize_memory) {
+		EEPROM.put(EEPROM_ADDR_COOKIE, EEPROM_COOKIE_VALUE);
+		EEPROM.put(EEPROM_ADDR_VERSION, EEPROM_FORMAT_VERSION);
+
+		// Write default values for all global settings
+		for (int i = 0; i < (int)(sizeof(globalSettings) / sizeof(globalSetting)); i++) {
+			const globalSetting* setting = &(globalSettings[i]);
+			EEPROM.update(setting->eepromAddress, setting->defaultValue);
+		}
+	}
+
+	// Update all global settings from EEPROM memory
+	for (int i = 0; i < (int)(sizeof(globalSettings) / sizeof(globalSetting)); i++) {
+		const globalSetting* setting = &(globalSettings[i]);
+		byte value = EEPROM.read(setting->eepromAddress);
+
+		// Validate range and set default if needed
+		if ((value < setting->minValue) || (value > setting->maxValue)) {
+			value = setting->defaultValue;
+		}
+
+		// Update the actual global setting variable
+		*(byte*)setting->variable = value;
+	}
+
 	volumeChanged = true;
-
-	int preset_tmp;
-	preset_tmp = EEPROM.read(EEPROM_ADDR_PRESET_LAST);
-	if ((preset_tmp > PRESET_NUMBER_HIGHEST) || (preset_tmp < PRESET_NUMBER_LOWEST))
-		preset_tmp = PRESET_NUMBER_LOWEST;
-	preset = preset_tmp;
-
-	masterChannel = EEPROM.read(EEPROM_ADDR_MIDI_IN_CH_MASTER);
-	if ((masterChannel > 16) || (masterChannel < 1)) {
-		masterChannel = 1;
-	}
-	masterChannelOut = EEPROM.read(EEPROM_ADDR_MIDI_OUT_CH_MASTER);
-	if ((masterChannelOut > 16) || (masterChannelOut < 1)) {
-		masterChannelOut = 1;
-	}
-
-	if (EEPROM.read(EEPROM_ADDR_ARMSID_MODE) > 0) {
-		armSID = false;
-	} else {
-		armSID = true;
-	}
-	if (EEPROM.read(EEPROM_ADDR_SEND_LFO) > 0) {
-		sendLfo = false;
-	} else {
-		sendLfo = true;
-	}
-	if (EEPROM.read(EEPROM_ADDR_SEND_ARP) > 0) {
-		sendArp = false;
-	} else {
-		sendArp = true;
-	}
-
-	if (EEPROM.read(EEPROM_ADDR_MW_TO_LFO1) > 0) {
-		modToLfo = true;
-	} else {
-		modToLfo = false;
-	}
-
-	if (EEPROM.read(EEPROM_ADDR_AT_TO_LFO2) > 0) {
-		aftertouchToLfo = true;
-	} else {
-		aftertouchToLfo = false;
-	}
-
-	if (EEPROM.read(EEPROM_ADDR_VEL_TO_LFO3) > 0) {
-		velocityToLfo = true;
-	} else {
-		velocityToLfo = false;
-	}
-
-	if (EEPROM.read(EEPROM_ADDR_PW_LIMIT) > 0) {
-		pwLimit = true;
-	} else {
-		pwLimit = false;
-	}
-
-	voice1Channel = EEPROM.read(EEPROM_ADDR_MIDI_IN_CH_VOICE1);
-	if ((voice1Channel > 16) || (voice1Channel < 1)) {
-		voice1Channel = 2;
-	}
-
-	voice2Channel = EEPROM.read(EEPROM_ADDR_MIDI_IN_CH_VOICE2);
-	if ((voice2Channel > 16) || (voice1Channel < 1)) {
-		voice2Channel = 3;
-	}
-
-	voice3Channel = EEPROM.read(EEPROM_ADDR_MIDI_IN_CH_VOICE3);
-	if ((voice3Channel > 16) || (voice1Channel < 1)) {
-		voice3Channel = 4;
-	}
 
 	setupMux();
 

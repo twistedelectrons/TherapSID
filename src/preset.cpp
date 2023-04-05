@@ -62,7 +62,7 @@ static int ready() {
 
 void save() {
 	byte temp;
-	writeIndex = preset * PRESET_DATA_SIZE;
+	writeIndex = EEPROM_ADDR_PRESET(preset);
 
 	bitWrite(preset_data.voice[0].reg_control, 0, 0);
 	bitWrite(preset_data.voice[1].reg_control, 0, 0);
@@ -227,7 +227,7 @@ void load(byte number) {
 	Serial1.end();
 	Timer1.stop(); //
 
-	writeIndex = number * 40;
+	writeIndex = EEPROM_ADDR_PRESET(number);
 	byte temp;
 
 	preset_data.voice[0].reg_control = ready();

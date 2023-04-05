@@ -67,8 +67,8 @@ void ui_tick() {
 					presetScrollSpeed -= 1000;
 				}
 				preset++;
-				if (preset > PRESET_NUMBER_HIGHEST) {
-					preset = PRESET_NUMBER_LOWEST;
+				if (preset > PRESET_NUMBER_MAX) {
+					preset = PRESET_NUMBER_MIN;
 				}
 				scrolled = true;
 			}
@@ -80,8 +80,8 @@ void ui_tick() {
 					presetScrollSpeed -= 1000;
 				}
 				preset--;
-				if (preset < PRESET_NUMBER_LOWEST) {
-					preset = PRESET_NUMBER_HIGHEST;
+				if (preset < PRESET_NUMBER_MIN) {
+					preset = PRESET_NUMBER_MAX;
 				}
 				scrolled = true;
 			}
