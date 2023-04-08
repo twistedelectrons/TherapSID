@@ -40,9 +40,43 @@ static void HandleNoteOn(byte channel, byte note, byte velocity) {
 	note -= 12;
 
 	if (velocity) {
-		for (int i = 0; i < 3; i++) {
-			if (preset_data.lfo[i].retrig) {
-				lfoStep[i] = lfoStepF[i] = 0;
+		if (channel == masterChannel) {
+			// retrigger all LFO
+			for (int i = 0; i < 3; i++) {
+				if (preset_data.lfo[i].retrig) {
+					lfoStep[i] = lfoStepF[i] = 0;
+				}
+			}
+		} else if (channel == voice1Channel) {
+			// only retrigger LFO if it is chained to voice 1
+			for (int i = 0; i < 3; i++) {
+				if (preset_data.lfo[i].mapping[0] || preset_data.lfo[i].mapping[1] || preset_data.lfo[i].mapping[2]) {
+					if (preset_data.lfo[i].retrig) {
+						lfoStep[i] = lfoStepF[i] = 0;
+					}
+				}
+			}
+		}
+
+		else if (channel == voice2Channel) {
+			// only retrigger LFO if it is chained to voice 2
+			for (int i = 0; i < 3; i++) {
+				if (preset_data.lfo[i].mapping[3] || preset_data.lfo[i].mapping[4] || preset_data.lfo[i].mapping[5]) {
+					if (preset_data.lfo[i].retrig) {
+						lfoStep[i] = lfoStepF[i] = 0;
+					}
+				}
+			}
+		}
+
+		else if (channel == voice3Channel) {
+			// only retrigger LFO if it is chained to voice 3
+			for (int i = 0; i < 3; i++) {
+				if (preset_data.lfo[i].mapping[6] || preset_data.lfo[i].mapping[7] || preset_data.lfo[i].mapping[8]) {
+					if (preset_data.lfo[i].retrig) {
+						lfoStep[i] = lfoStepF[i] = 0;
+					}
+				}
 			}
 		}
 	}
