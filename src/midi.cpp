@@ -153,7 +153,8 @@ static void HandleControlChange(byte channel, byte data1, byte data2) {
 		}
 
 		volumeChanged = (volume != prevVolume);
-	} else if (channel == masterChannel) {
+	} else if (channel == masterChannel || channel == voice1Channel || channel == voice2Channel ||
+	           channel == voice3Channel) {
 		if (data1 == 59)
 			data1 = 32;
 
