@@ -199,8 +199,12 @@ static void HandleControlChange(byte channel, byte data1, byte data2) {
 					break;
 
 				case 64:
-					for (int c = 0; c < 16; c++) {
-						pedal_adapter.set_pedal(c, data2 >= 64);
+					if (channel == voice1Channel || channel == voice2Channel || channel == voice3Channel) {
+						pedal_adapter.set_pedal(channel, data2 >= 64);
+					} else {
+						for (int c = 0; c < 16; c++) {
+							pedal_adapter.set_pedal(c, data2 >= 64); // it's the master channel - send pedal to all
+						}
 					}
 					break;
 
@@ -217,15 +221,6 @@ static void HandleControlChange(byte channel, byte data1, byte data2) {
 					EEPROM.update(EEPROM_ADDR_SEND_ARP, sendArp);
 					break; // arp send
 			}
-		}
-	} else {
-		// listen to sustain on all other assigned channels
-		switch (data1) {
-			case 64:
-				if (channel == voice1Channel || channel == voice2Channel || channel == voice3Channel) {
-					pedal_adapter.set_pedal(channel, data2 >= 64);
-				}
-				break;
 		}
 	}
 }
