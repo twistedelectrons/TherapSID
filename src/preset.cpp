@@ -60,7 +60,30 @@ static int ready() {
 	return ((data));
 }
 
+bool read_bit4000(int bit_index) { // read any bit from the upper end of the EEPROM (4000+)
+	const int byte_index = (bit_index / 8) + 4000;
+	const int bit_offset = bit_index % 8;
+	return (EEPROM.read(byte_index) >> bit_offset) & 1;
+}
+
+void write_bit4000(int bit_index, bool bit_value) { // write any bit in the upper end of the EEPROM (4000+)
+	const int byte_index = (bit_index / 8) + 4000;
+	const int bit_offset = bit_index % 8;
+	byte byte_value = EEPROM.read(byte_index);
+	if (bit_value) {
+		byte_value |= (1 << bit_offset);
+	} else {
+		byte_value &= ~(1 << bit_offset);
+	}
+	EEPROM.write(byte_index, byte_value);
+}
+
 void save() {
+
+	for (int i = 0; i < 3; i++) {
+		write_bit4000(((preset - 1) * 3) + i, preset_data.voice[i].filter_enabled);
+	}
+
 	byte temp;
 	writeIndex = EEPROM_ADDR_PRESET(preset);
 
@@ -221,6 +244,11 @@ void save() {
 }
 
 void load(byte number) {
+
+	for (int i = 0; i < 3; i++) {
+		preset_data.voice[i].filter_enabled = read_bit4000(((preset - 1) * 3) + i);
+	}
+
 	lfo[0] = lfo[1] = lfo[2] = 0;
 
 	arpCounter = 0;
