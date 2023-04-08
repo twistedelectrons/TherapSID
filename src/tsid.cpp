@@ -18,8 +18,8 @@ tools/hex2sysex/hex2sysex.py --syx -o firmware.syx TSID.ino.hex
 TO DO:
 Add setup mode (hold arp mode for 2 seconds), press again to exit (same as megaFM)
 -MIDI channel learn (map input to ouput channel)
--in setup mode use a button (square 1?) to toggle LFO MIDI CC send on/off EEPROM 3996
--in setup mode uss a button (triangle 1?) to toggle ARP MIDI send on/off EEPROM 3995
+-in setup mode use a button (square 1?) to toggle LFO MIDI CC send on/off EEPROM_ADDR_SEND_LFO
+-in setup mode uss a button (triangle 1?) to toggle ARP MIDI send on/off EEPROM_ADDR_SEND_ARP
 -add 6 voice mode using 2 chips, I suggest we hold a waveform for several seconds for 3 voice paramode, hold it longer
 for 6 (show P3, then P6 on display) -kill the voices when they are done singing by setting the freq to 0. Never tried
 this (too dumb to figure out when the ADSR is finished), but I read it's a solution against the ghost notes (leaky VCA)
@@ -103,80 +103,38 @@ void setup() {
 
 	DDRC = B11111000;
 
-	volume = EEPROM.read(3991);
-	if ((volume > 15) || (volume < 1))
-		volume = 15; // let's avoid silent sids!!!
+	// Validate EEPROM memory structure
+	uint16_t cookie_value;
+	EEPROM.get(EEPROM_ADDR_COOKIE, cookie_value);
+	bool initialize_memory = (cookie_value != EEPROM_COOKIE_VALUE);
+
+	// Initialize EEPROM memory if needed
+	if (initialize_memory) {
+		EEPROM.put(EEPROM_ADDR_COOKIE, EEPROM_COOKIE_VALUE);
+		EEPROM.put(EEPROM_ADDR_VERSION, EEPROM_FORMAT_VERSION);
+
+		// Write default values for all global settings
+		for (int i = 0; i < (int)(sizeof(globalSettings) / sizeof(globalSetting)); i++) {
+			const globalSetting* setting = &(globalSettings[i]);
+			EEPROM.update(setting->eepromAddress, setting->defaultValue);
+		}
+	}
+
+	// Update all global settings from EEPROM memory
+	for (int i = 0; i < (int)(sizeof(globalSettings) / sizeof(globalSetting)); i++) {
+		const globalSetting* setting = &(globalSettings[i]);
+		byte value = EEPROM.read(setting->eepromAddress);
+
+		// Validate range and set default if needed
+		if ((value < setting->minValue) || (value > setting->maxValue)) {
+			value = setting->defaultValue;
+		}
+
+		// Update the actual global setting variable
+		*(byte*)setting->variable = value;
+	}
+
 	volumeChanged = true;
-
-	int preset_tmp;
-	preset_tmp = EEPROM.read(3999);
-	if (preset_tmp > 98)
-		preset_tmp = 1;
-	preset = preset_tmp;
-
-	masterChannel = EEPROM.read(3998);
-	if (masterChannel > 16) {
-		masterChannel = 1;
-	}
-	masterChannelOut = EEPROM.read(3997);
-	if (masterChannelOut > 16) {
-		masterChannelOut = 1;
-	}
-
-	if (EEPROM.read(3986) > 0) {
-		armSID = false;
-	} else {
-		armSID = true;
-	}
-	if (EEPROM.read(3996) > 0) {
-		sendLfo = false;
-	} else {
-		sendLfo = true;
-	}
-	if (EEPROM.read(3995) > 0) {
-		sendArp = false;
-	} else {
-		sendArp = true;
-	}
-
-	if (EEPROM.read(3994) > 0) {
-		modToLfo = true;
-	} else {
-		modToLfo = false;
-	}
-
-	if (EEPROM.read(3993) > 0) {
-		aftertouchToLfo = true;
-	} else {
-		aftertouchToLfo = false;
-	}
-
-	if (EEPROM.read(3992) > 0) {
-		velocityToLfo = true;
-	} else {
-		velocityToLfo = false;
-	}
-
-	if (EEPROM.read(3990) > 0) {
-		pwLimit = true;
-	} else {
-		pwLimit = false;
-	}
-
-	voice1Channel = EEPROM.read(3989);
-	if ((voice1Channel > 16) || (voice1Channel < 1)) {
-		voice1Channel = 2;
-	}
-
-	voice2Channel = EEPROM.read(3988);
-	if ((voice2Channel > 16) || (voice1Channel < 1)) {
-		voice2Channel = 3;
-	}
-
-	voice3Channel = EEPROM.read(3987);
-	if ((voice3Channel > 16) || (voice1Channel < 1)) {
-		voice3Channel = 4;
-	}
 
 	setupMux();
 

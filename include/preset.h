@@ -2,6 +2,10 @@
 #include <stdint.h>
 #include <Arduino.h>
 
+#define PRESET_NUMBER_MIN 1
+#define PRESET_NUMBER_MAX 99
+#define PRESET_DATA_SIZE 40
+
 void save();
 void load(byte number);
 void saveChannels();

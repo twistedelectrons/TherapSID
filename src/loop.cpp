@@ -119,7 +119,7 @@ void loop() {
 		// update volume
 		sid_chips[0].set_volume(volume);
 		sid_chips[1].set_volume(volume);
-		EEPROM.update(3991, volume);
+		EEPROM.update(EEPROM_ADDR_MASTER_VOLUME, volume);
 		volumeChanged = false;
 	}
 

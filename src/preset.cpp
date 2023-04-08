@@ -7,39 +7,6 @@
 #include "util.hpp"
 #include "globals.h"
 
-/*
-
-MEMORY MAPPING
-(0-3960) 99 PRESETS = 40 bytes
-
-3999 PRESET LAST
-
-3998 MIDI IN MASTER CHANNEL
-3997 MIDI OUT MASTER CHANNEL
-
-3996 SEND LFO
-3995 SEND ARP
-
- OPTIONS
-set via the online webmidi tool
-twisted-electrons.com/tool
-
-3994:Mod Wheel -> LFO1 depth
-3993:AfterTouch -> LFO2 depth
-3992:Velocity -> LFO3 depth
-
-3991 = master volume
-
-3990 = pwLimit //allow PW to silence the voice?
-
-3989 MIDI in voice1
-3988 MIDI in voice2
-3987 MIDI in voice3
-
-3986 ARMSID mode
-
-*/
-
 static FilterMode uint2FilterMode(uint8_t i) {
 	if (i < 5) {
 		return static_cast<FilterMode>(i);
@@ -95,7 +62,7 @@ static int ready() {
 
 void save() {
 	byte temp;
-	writeIndex = preset * 40;
+	writeIndex = EEPROM_ADDR_PRESET(preset);
 
 	bitWrite(preset_data.voice[0].reg_control, 0, 0);
 	bitWrite(preset_data.voice[1].reg_control, 0, 0);
@@ -260,7 +227,7 @@ void load(byte number) {
 	Serial1.end();
 	Timer1.stop(); //
 
-	writeIndex = number * 40;
+	writeIndex = EEPROM_ADDR_PRESET(number);
 	byte temp;
 
 	preset_data.voice[0].reg_control = ready();
@@ -619,6 +586,6 @@ void load(byte number) {
 
 void saveChannels() {
 
-	EEPROM.update(3998, masterChannel);
-	EEPROM.update(3997, masterChannelOut);
+	EEPROM.update(EEPROM_ADDR_MIDI_IN_CH_MASTER, masterChannel);
+	EEPROM.update(EEPROM_ADDR_MIDI_OUT_CH_MASTER, masterChannelOut);
 }
