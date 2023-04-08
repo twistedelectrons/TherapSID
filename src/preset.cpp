@@ -49,7 +49,7 @@ static FilterMode uint2FilterMode(uint8_t i) {
 }
 
 static FatMode uint2FatMode(uint8_t i) {
-	if (i < 4) {
+	if (i < 6) {
 		return static_cast<FatMode>(i);
 	} else {
 		return FatMode::UNISONO;
