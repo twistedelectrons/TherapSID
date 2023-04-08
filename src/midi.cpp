@@ -233,19 +233,14 @@ static void handleBend(byte channel, int value) {
 	if (value_f < -1)
 		value_f = -1;
 
-	if (masterChannel == 1) {
-		if (channel == 1)
-			bend = value_f;
-		else if (channel == 2)
-			bend1 = value_f;
-		else if (channel == 3)
-			bend2 = value_f;
-		else if (channel == 4)
-			bend3 = value_f;
-	} else {
-		if (channel == masterChannel) {
-			bend = value_f;
-		}
+	if (channel == masterChannel) {
+		bend = value_f;
+	} else if (channel == voice1Channel) {
+		bend1 = value_f;
+	} else if (channel == voice2Channel) {
+		bend2 = value_f;
+	} else if (channel == voice3Channel) {
+		bend3 = value_f;
 	}
 }
 
