@@ -165,8 +165,6 @@ static void HandleControlChange(byte channel, byte data1, byte data2) {
 	lastData1 = data1;
 	lastData2 = data2;
 	if (channel == 16 && toolMode) {
-		byte prevVolume = volume;
-
 		// Go through all global settings and check if the tool requested to change one
 		for (int i = 0; i < (int)(sizeof(globalSettings) / sizeof(globalSetting)); i++) {
 			const globalSetting* setting = &(globalSettings[i]);
@@ -186,7 +184,7 @@ static void HandleControlChange(byte channel, byte data1, byte data2) {
 			}
 		}
 
-		volumeChanged = (volume != prevVolume);
+		volumeChanged = true;
 	} else if (channel == masterChannel || channel == voice1Channel || channel == voice2Channel ||
 	           channel == voice3Channel) {
 		if (data1 == 59)
