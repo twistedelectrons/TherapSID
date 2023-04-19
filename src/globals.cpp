@@ -46,7 +46,6 @@ float lfoFine1, lfoFine2, lfoFine3, lfoFine4, lfoFine5, lfoFine6, lfoFine7, lfoF
 Preset preset_data;
 VoiceState<6> voice_state;
 Glide glide[6];
-
 int frozen;
 bool jumble;
 bool lfoButtPressed;

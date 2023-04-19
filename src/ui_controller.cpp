@@ -2,9 +2,9 @@
 #include "preset.h"
 #include "util.hpp"
 #include "ui_leds.h"
-#include "ui_vars.h"
 #include "globals.h"
 #include "ui_controller.h"
+#include "ui_vars.h"
 
 static const int POT_NONE = 20;
 static const int DONTCARE = 123;
