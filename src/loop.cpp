@@ -7,6 +7,7 @@
 #include "sid.h"
 #include "ui.h"
 #include <EEPROM.h>
+#include "ui_vars.h"
 
 static bool loadedAfterStartup; // we load the preset after 2sec (when SID is ready)
 
@@ -115,6 +116,12 @@ void setSidRegisters(Preset const& preset, ParamsAfterLfo const& params_after_lf
 
 void loop() {
 
+	if (ui_state.saveFlag) {
+		saveBounce = 1600;
+		save();
+		ui_state.saveMode = false;
+		ui_state.saveFlag = false;
+	}
 	if (volumeChanged) {
 		// update volume
 		sid_chips[0].set_volume(volume);

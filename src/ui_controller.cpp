@@ -2,9 +2,9 @@
 #include "preset.h"
 #include "util.hpp"
 #include "ui_leds.h"
-#include "ui_vars.h"
 #include "globals.h"
 #include "ui_controller.h"
+#include "ui_vars.h"
 
 static const int POT_NONE = 20;
 static const int DONTCARE = 123;
@@ -234,14 +234,32 @@ void UiDisplayController::update_7seg(int preset_number, const Preset& preset, c
 				digit0 = last_changed_digit0;
 				digit1 = last_changed_digit1;
 			} else {
-				if (!ui_state.saveMode || millis() % 512 > 256) {
-					digit0 = preset_number / 10;
-					digit1 = preset_number % 10;
-				} else {
-					digit0 = 99;
-					digit1 = 99;
+				digit0 = preset_number / 10;
+				digit1 = preset_number % 10;
+
+				if (ui_state.saveMode) {
+
+					// blink the preset number faster as time runs out
+					switch (ui_state.saveTimeout) {
+						case 200 ... 300:
+						case 400 ... 600:
+						case 900 ... 1200:
+						case 1600 ... 2000:
+						case 2500 ... 3000:
+						case 3600 ... 4100:
+						case 4900 ... 5400:
+						case 6400 ... 6900:
+						case 8100 ... 8600:
+						case 10000 ... 10500:
+						case 13000 ... 13500:
+
+							digit0 = 99;
+							digit1 = 99;
+							break;
+					}
 				}
 			}
+			break;
 	}
 
 	if (digit0 != old_digit0) {
