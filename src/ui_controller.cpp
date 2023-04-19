@@ -203,8 +203,13 @@ void UiDisplayController::update_7seg(int preset_number, const Preset& preset, c
 	if (preset.arp_range_base != old_preset.arp_range_base)
 		show_changed(preset.arp_range_base);
 
-	if (preset.paraphonic != old_preset.paraphonic)
-		temp_7seg(14, 17, 500);
+	if (preset.paraphonic != old_preset.paraphonic) {
+		if (preset_data.paraphonic == true) {
+			temp_7seg(14, 17, 500);
+		} else {
+			temp_7seg(0, 12, 500);
+		} // "PA" or "OF"
+	}
 
 	if (old_preset_number != preset_number) {
 		// un-show whatever what was show_changed() before.
