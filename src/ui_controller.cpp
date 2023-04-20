@@ -239,7 +239,7 @@ void UiDisplayController::update_7seg(int preset_number, const Preset& preset, c
 				digit0 = last_changed_digit0;
 				digit1 = last_changed_digit1;
 			} else {
-				if (!ui_state.saveMode || millis() % 512 > 256) {
+				if (!ui_state.saveMode || millis() % 512 > 31) {
 					digit0 = preset_number / 10;
 					digit1 = preset_number % 10;
 				} else {

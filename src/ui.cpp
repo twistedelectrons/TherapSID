@@ -7,8 +7,6 @@
 #include "display.h"
 #include "globals.h"
 
-static int presetScrollTimer;
-
 static UiDisplayController ui_display_controller;
 
 void ui_loop() {
@@ -58,12 +56,12 @@ void ui_tick() {
 	if (loadTimer)
 		loadTimer--;
 
-	if (presetUp || presetDown) {
+	if ((presetUp || presetDown)) {
 		if (presetUp && !presetDown) {
-			presetScrollTimer += 4;
+			presetScrollTimer += 6;
 			if (presetScrollTimer > presetScrollSpeed) {
 				presetScrollTimer = 0;
-				if (presetScrollSpeed > 1001) {
+				if (presetScrollSpeed > 3001) {
 					presetScrollSpeed -= 1000;
 				}
 				preset++;
@@ -73,10 +71,10 @@ void ui_tick() {
 				scrolled = true;
 			}
 		} else if (!presetUp && presetDown) {
-			presetScrollTimer += 4;
+			presetScrollTimer += 6;
 			if (presetScrollTimer > presetScrollSpeed) {
 				presetScrollTimer = 0;
-				if (presetScrollSpeed > 1001) {
+				if (presetScrollSpeed > 3001) {
 					presetScrollSpeed -= 1000;
 				}
 				preset--;

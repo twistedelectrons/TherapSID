@@ -11,6 +11,7 @@ extern Glide glide[6];
 extern byte aftertouch;
 extern bool aftertouchToLfo;
 extern bool sendLfo;
+extern int presetScrollTimer;
 extern bool volumeChanged;
 extern bool sendArp;
 extern bool lfoNewRand[3];

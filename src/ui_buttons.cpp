@@ -6,7 +6,10 @@
 #include "ui_vars.h"
 
 static bool saveEngaged;
-
+static bool
+    presetDownDisabled; // temporarily disable button release action if we just entered savemode (individual debounce)
+static bool
+    presetUpDisabled; // temporarily disable button release action if we just entered savemode (individual debounce)
 enum Button {
 	RECT1 = 2,
 	TRI1 = 12,
@@ -224,6 +227,8 @@ void buttChanged(byte number, bool value) {
 						saveChannels();
 					}
 				} else {
+					presetScrollTimer = 0;
+					presetScrollSpeed = 26000;
 					if (arpModeHeld) {
 						ui_state.midiSetup = 1;
 					} else {
@@ -231,11 +236,11 @@ void buttChanged(byte number, bool value) {
 						if (presetDown) {
 							if (!ui_state.saveMode) {
 								ui_state.saveMode = true;
-								saveBounce = 1600;
+								presetDownDisabled = presetUpDisabled = true;
 							} else {
-								saveBounce = 1600;
 								save();
 								ui_state.saveMode = false;
+								presetDownDisabled = presetUpDisabled = true;
 							}
 						}
 					}
@@ -257,15 +262,17 @@ void buttChanged(byte number, bool value) {
 					if (arpModeHeld) {
 						ui_state.midiSetup = 2;
 					} else {
+						presetScrollSpeed = 26000;
+						presetScrollTimer = 0;
 						presetDown = true;
 						if (presetUp) {
 							if (!ui_state.saveMode) {
 								ui_state.saveMode = true;
-								saveBounce = 1600;
+								presetDownDisabled = presetUpDisabled = true;
 							} else {
-								saveBounce = 1600;
 								save();
 								ui_state.saveMode = false;
+								presetDownDisabled = presetUpDisabled = true;
 							}
 						}
 					}
@@ -274,8 +281,12 @@ void buttChanged(byte number, bool value) {
 
 			case PRESET_RESET:
 				resetDown = true;
-				load(1);
-				resetDownTimer = 0;
+				if (ui_state.saveMode) {
+					ui_state.saveMode = false;
+				} else {
+					load(1);
+					resetDownTimer = 0;
+				}
 				break;
 
 			case FILTER_MODE:
@@ -330,15 +341,19 @@ void buttChanged(byte number, bool value) {
 
 			case PRESET_UP:
 				if (!ui_state.midiSetup) {
+
 					presetUp = false;
-					presetScrollSpeed = 10000;
-					if ((!saveBounce) && (!loadTimer) && (!scrolled)) {
-						preset++;
-						if (preset > PRESET_NUMBER_MAX) {
-							preset = PRESET_NUMBER_MIN;
+					if (!presetUpDisabled) {
+						if ((!presetDown) && (!saveBounce) && (!loadTimer) && (!scrolled)) {
+							preset++;
+							if (preset > PRESET_NUMBER_MAX) {
+								preset = PRESET_NUMBER_MIN;
+							}
+						} else {
+							saveEngaged = false;
 						}
 					} else {
-						saveEngaged = false;
+						presetUpDisabled = false;
 					}
 				}
 				scrolled = false;
@@ -346,18 +361,22 @@ void buttChanged(byte number, bool value) {
 
 			case PRESET_DOWN:
 				if (!ui_state.midiSetup) {
+
 					presetDown = false;
-					presetScrollSpeed = 10000;
-					if ((!saveBounce) && (!loadTimer) && (!scrolled)) {
-						preset--;
-						if (preset < PRESET_NUMBER_MIN) {
-							preset = PRESET_NUMBER_MAX;
+					if (!presetDownDisabled) {
+						if ((!presetUp) && (!saveBounce) && (!loadTimer) && (!scrolled)) {
+							preset--;
+							if (preset < PRESET_NUMBER_MIN) {
+								preset = PRESET_NUMBER_MAX;
+							}
+						} else {
+							saveEngaged = false;
 						}
 					} else {
-						saveEngaged = false;
+						presetDownDisabled = false;
 					}
+					scrolled = false;
 				}
-				scrolled = false;
 				break;
 
 			case PRESET_RESET:
