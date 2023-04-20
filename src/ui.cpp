@@ -8,7 +8,6 @@
 #include "globals.h"
 
 static int presetScrollTimer;
-bool saveTimeoutAlternator;
 
 static UiDisplayController ui_display_controller;
 
@@ -43,18 +42,6 @@ void ui_loop() {
 }
 
 void ui_tick() {
-
-	saveTimeoutAlternator = !saveTimeoutAlternator;
-	if (saveTimeoutAlternator) {
-		if (ui_state.saveTimeout) {
-
-			ui_state.saveTimeout--;
-			if (!ui_state.saveTimeout) {
-				ui_state.saveFlag = true;
-			}
-		}
-	}
-
 	if (shape1Pressed) {
 		shape1PressedTimer++;
 	}

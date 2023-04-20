@@ -7,8 +7,6 @@ struct UiState {
 	byte selectedLfo;
 	byte midiSetup = 0;
 	bool saveMode;
-	int16_t saveTimeout;
-	bool saveFlag; // set high in the ISR after save timeOut - then save preset in mainloop
 };
 
 extern bool scrolled;             // UI
