@@ -11,6 +11,7 @@ byte aftertouch;      // latest read afterTouch value
 bool aftertouchToLfo; // option to assign aftertouch to LFO depth 2
 int loadTimer;
 byte volume;
+int presetScrollTimer;
 // LIMIT PW
 float bend, bend1, bend2, bend3;
 bool sync;
