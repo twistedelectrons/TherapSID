@@ -77,10 +77,16 @@ extern byte* voice_index; // array of size 6, set depending on preset.paraphonic
 #define EEPROM_ADDR_MIDI_IN_CH_VOICE3 0x0010
 #define EEPROM_ADDR_ARMSID_MODE 0x0011
 #define EEPROM_ADDR_PRESET_DATA_START 0x0028
+// block of main storage for presets
 #define EEPROM_ADDR_PRESET(preset) (EEPROM_ADDR_PRESET_DATA_START + (preset - 1) * PRESET_DATA_SIZE)
+// one extra byte of storage per preset - located at two different places (1-96, 97-99)
+#define EEPROM_ADDR_PRESET_EXTRA_BYTE(preset)                                                                          \
+	(preset <= 96) ? EEPROM_ADDR_PRESET_DATA_START + PRESET_NUMBER_MAX* PRESET_DATA_SIZE + preset - 1                  \
+	               : EEPROM_ADDR_PRESET_DATA_START + preset - 100
 
 #define EEPROM_COOKIE_VALUE (uint16_t)19028
-#define EEPROM_FORMAT_VERSION (uint16_t)0x0001
+#define EEPROM_FORMAT_VERSION_V1 (uint16_t)0x0001
+#define EEPROM_FORMAT_VERSION_V2 (uint16_t)0x0002
 
 // Global settings, stored in EEPROM
 struct globalSetting {

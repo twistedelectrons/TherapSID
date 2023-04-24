@@ -67,18 +67,6 @@ void setup() {
 	digitalWrite(A3, HIGH); // pullup
 	digitalWrite(A4, HIGH); // pullup
 
-	mux(9);
-
-	// are we holding preset down button at startup?
-	if ((PINA & _BV(4)) == 0) {
-		sendDump();
-	} else {
-		mux(3);
-		if ((PINA & _BV(4)) == 0) {
-			recieveDump();
-		}
-	}
-
 	pinMode(16, INPUT);
 	digitalWrite(16, HIGH); // CV switch1
 	pinMode(17, INPUT);
@@ -93,6 +81,18 @@ void setup() {
 	mydisplay.shutdown(0, false);
 	mydisplay.setIntensity(0, 1); // 15 = brightest
 
+	mux(9);
+
+	// are we holding preset down button at startup?
+	if ((PINA & _BV(4)) == 0) {
+		sendDump();
+	} else {
+		mux(3);
+		if ((PINA & _BV(4)) == 0) {
+			recieveDump();
+		}
+	}
+
 	showVersion();
 
 	boot();
@@ -104,20 +104,33 @@ void setup() {
 	DDRC = B11111000;
 
 	// Validate EEPROM memory structure
-	uint16_t cookie_value;
-	EEPROM.get(EEPROM_ADDR_COOKIE, cookie_value);
-	bool initialize_memory = (cookie_value != EEPROM_COOKIE_VALUE);
+	uint16_t value;
+	EEPROM.get(EEPROM_ADDR_COOKIE, value);
+	bool initialize_memory = (value != EEPROM_COOKIE_VALUE);
 
 	// Initialize EEPROM memory if needed
 	if (initialize_memory) {
 		EEPROM.put(EEPROM_ADDR_COOKIE, EEPROM_COOKIE_VALUE);
-		EEPROM.put(EEPROM_ADDR_VERSION, EEPROM_FORMAT_VERSION);
+		EEPROM.put(EEPROM_ADDR_VERSION, EEPROM_FORMAT_VERSION_V1);
 
 		// Write default values for all global settings
 		for (int i = 0; i < (int)(sizeof(globalSettings) / sizeof(globalSetting)); i++) {
 			const globalSetting* setting = &(globalSettings[i]);
 			EEPROM.update(setting->eepromAddress, setting->defaultValue);
 		}
+	}
+
+	// Run EEPROM format upgrades when needed
+	EEPROM.get(EEPROM_ADDR_VERSION, value);
+	if (value == EEPROM_FORMAT_VERSION_V1) {
+		// Convert from V1 to V2:
+
+		// Fill in default values on filter enabled (all three channels on)
+		for (byte i = PRESET_NUMBER_MIN; i <= PRESET_NUMBER_MAX; i++) {
+			EEPROM.update(EEPROM_ADDR_PRESET_EXTRA_BYTE(i), 0x07);
+		}
+
+		EEPROM.put(EEPROM_ADDR_VERSION, EEPROM_FORMAT_VERSION_V2);
 	}
 
 	// Update all global settings from EEPROM memory

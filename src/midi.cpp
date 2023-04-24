@@ -464,8 +464,8 @@ void sendDump() {
 	digit(0, 5);
 	digit(1, 18);
 
-	byte mem[4000];
-	for (int i = 0; i < 4000; i++) {
+	byte mem[EEPROM.length()];
+	for (size_t i = 0; i < sizeof(mem) / sizeof(*mem); i++) {
 		mem[i] = EEPROM.read(i);
 	}
 	byte nill = 0;
@@ -475,7 +475,7 @@ void sendDump() {
 	Serial.write(100);
 	delay(1);
 
-	for (int i = 0; i < 4000; i++) {
+	for (size_t i = 0; i < sizeof(mem) / sizeof(*mem); i++) {
 
 		if (mem[i] > 127) {
 			Serial.write(mem[i] - 128);
@@ -494,7 +494,7 @@ void sendDump() {
 }
 
 void recieveDump() {
-	byte mem[4000];
+	byte mem[EEPROM.length()];
 	digit(0, 16);
 	digit(1, 18);
 
@@ -538,7 +538,7 @@ void recieveDump() {
 	}
 
 	byte ledLast = 0;
-	for (int i = 0; i < 4000; i++) {
+	for (size_t i = 0; i < sizeof(mem) / sizeof(*mem); i++) {
 
 		if ((i != EEPROM_ADDR_MIDI_IN_CH_MASTER) &&
 		    (i != EEPROM_ADDR_MIDI_OUT_CH_MASTER)) { // don't overWrite MIDI channels!!
