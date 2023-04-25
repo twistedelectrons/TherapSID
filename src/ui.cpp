@@ -15,6 +15,8 @@ void ui_loop() {
 		shape1Pressed = false;
 		shape1PressedTimer = 0;
 		preset_data.paraphonic = !preset_data.paraphonic;
+		if (preset_data.paraphonic)
+			preset_data.arp_mode = 0;
 	}
 
 	dotTick();
@@ -35,6 +37,11 @@ void ui_loop() {
 	if (frozen) {
 		frozen--;
 	}
+
+	if (autoChordChanged) {
+		autoChordChanged = false;
+		ui_display_controller.temp_7seg(10, 21, 200);
+	} // show CH when autochord is toggled
 
 	ui_display_controller.update(preset, preset_data, ui_state);
 }

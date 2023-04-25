@@ -21,7 +21,13 @@ bool toolMode; // when set high by MIDI tool we can receive settings via CC
 bool modToLfo;
 byte modWheelLast;
 bool cvActive[3];
+bool heldKeys[128];
+bool chordKeys[128];
+bool clearAutoChord;
+bool autoChordChanged;
 bool scrolled;
+bool autoChord; // when set high by mode+retrig capture held notes and play themback with single finger.
+byte chordRoot;
 bool shape1Pressed;
 int shape1PressedTimer;
 int lfoStep[3], resetDownTimer;

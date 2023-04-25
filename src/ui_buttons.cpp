@@ -4,8 +4,11 @@
 #include "arp.h"
 #include "util.hpp"
 #include "ui_vars.h"
+#include "ui_leds.h"
+#include "ui_controller.h"
 
 static bool saveEngaged;
+static bool noArpAction;
 static bool
     presetDownDisabled; // temporarily disable button release action if we just entered savemode (individual debounce)
 static bool
@@ -203,6 +206,7 @@ void buttChanged(byte number, bool value) {
 				break;
 
 			case ARP_MODE:
+				noArpAction = true;
 				arpModeHeld = true;
 				if (ui_state.midiSetup) {
 					ui_state.midiSetup = 3;
@@ -210,7 +214,23 @@ void buttChanged(byte number, bool value) {
 				break;
 
 			case RETRIG:
-				preset_data.lfo[ui_state.selectedLfo].retrig = !preset_data.lfo[ui_state.selectedLfo].retrig;
+				if (arpModeHeld) {
+					noArpAction = false;
+					autoChordChanged = true;
+					if (autoChord) {
+						clearAutoChord = true;
+					} else {
+						autoChord = true;
+						for (int i = 128; i > 0; i--) {
+							chordKeys[i] = heldKeys[i];
+							if (heldKeys[i]) {
+								chordRoot = i;
+							}
+						}
+					}
+				} else {
+					preset_data.lfo[ui_state.selectedLfo].retrig = !preset_data.lfo[ui_state.selectedLfo].retrig;
+				}
 				break;
 			case LOOP:
 				preset_data.lfo[ui_state.selectedLfo].looping = !preset_data.lfo[ui_state.selectedLfo].looping;
@@ -322,20 +342,22 @@ void buttChanged(byte number, bool value) {
 						preset_data.fat_mode = static_cast<FatMode>(((int)preset_data.fat_mode + 1) % 5);
 
 				} else {
-
-					if (!ui_state.midiSetup) {
-						if (!preset_data.paraphonic) {
-							preset_data.arp_mode++;
-							if (preset_data.arp_mode > 4) {
-								preset_data.arp_mode = 0;
-								sendNoteOff(lastNote, 127, masterChannelOut);
+					if (noArpAction) {
+						if (!ui_state.midiSetup) {
+							if (!preset_data.paraphonic) {
+								preset_data.arp_mode++;
+								if (preset_data.arp_mode > 4) {
+									preset_data.arp_mode = 0;
+									sendNoteOff(lastNote, 127, masterChannelOut);
+								}
+								reset_arp();
 							}
-							reset_arp();
+						} else if (ui_state.midiSetup == 3) {
+							ui_state.midiSetup = 0;
 						}
-					} else if (ui_state.midiSetup == 3) {
-						ui_state.midiSetup = 0;
 					}
 				}
+
 				arpModeHeld = false;
 				break;
 
