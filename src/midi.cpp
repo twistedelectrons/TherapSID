@@ -25,13 +25,48 @@ static int dumpCounter = 0;
 static byte dump;
 static bool alternator;
 static byte flash;
-
 static byte val[] = {0, 128};
 
+static void PrepareHandleNoteOn(byte channel, byte note, byte velocity);
+static void PrepareHandleNoteOff(byte channel, byte note);
 static void HandleNoteOn(byte channel, byte note, byte velocity);
 static void HandleNoteOff(byte channel, byte note);
 
-static MidiPedalAdapter pedal_adapter(HandleNoteOn, HandleNoteOff);
+static MidiPedalAdapter pedal_adapter(PrepareHandleNoteOn, PrepareHandleNoteOff);
+
+static void PrepareHandleNoteOn(byte channel, byte note, byte velocity) {
+	heldKeys[note] = 1;
+	if (autoChord) {
+		for (int i = 0; i < 128; i++) {
+			if (chordKeys[i])
+				HandleNoteOn(channel, note + i - chordRoot, velocity);
+		}
+	} else {
+
+		HandleNoteOn(channel, note, velocity);
+	}
+}
+
+static void PrepareHandleNoteOff(byte channel, byte note) {
+	heldKeys[note] = 0;
+	if (autoChord) {
+		for (int i = 0; i < 128; i++) {
+			if (chordKeys[i])
+				HandleNoteOff(channel, note + i - chordRoot);
+		}
+		if (clearAutoChord) {
+			// silence all notes just in case
+			for (int i = 0; i < 128; i++) {
+				HandleNoteOff(channel, i);
+			}
+
+			autoChord = clearAutoChord = false;
+		}
+	} else {
+
+		HandleNoteOff(channel, note);
+	}
+}
 
 static void HandleNoteOn(byte channel, byte note, byte velocity) {
 	if (note < 12 || note >= 107)
