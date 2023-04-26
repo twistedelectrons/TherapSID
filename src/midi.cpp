@@ -192,6 +192,8 @@ static void HandleControlChange(byte channel, byte data1, byte data2) {
 		sendNoteOff(13, sendArp, 16);
 		sendNoteOff(14, pwLimit, 16);
 		sendNoteOff(15, armSID, 16);
+		sendNoteOff(99, pitchBendUp, 16);
+		sendNoteOff(100, pitchBendDown, 16);
 
 		toolMode = true; // therapSid is listening to new settings (CC on CH16)
 	}
@@ -299,6 +301,12 @@ static void handleBend(byte channel, int value) {
 		value_f = 1;
 	if (value_f < -1)
 		value_f = -1;
+
+	if (value_f > 0) {
+		value_f *= pitchBendUp;
+	} else {
+		value_f *= pitchBendDown;
+	} // remap to bend ranges
 
 	if (channel == masterChannel) {
 		bend = value_f;

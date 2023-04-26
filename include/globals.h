@@ -47,6 +47,8 @@ extern byte voice3Channel;
 extern int arpCounter;
 extern int arpSpeed;
 extern int arpRange;
+extern byte pitchBendUp;
+extern byte pitchBendDown;
 extern int arpRound;
 extern byte tuneLfoRange;
 extern byte arpCount;
@@ -83,6 +85,8 @@ extern byte* voice_index; // array of size 6, set depending on preset.paraphonic
 #define EEPROM_ADDR_MIDI_IN_CH_VOICE3 0x0010
 #define EEPROM_ADDR_ARMSID_MODE 0x0011
 #define EEPROM_ADDR_PRESET_DATA_START 0x0028
+#define EEPROM_ADDR_PITCH_BEND_UP 0x0029
+#define EEPROM_ADDR_PITCH_BEND_DOWN 0x002a
 // block of main storage for presets
 #define EEPROM_ADDR_PRESET(preset) (EEPROM_ADDR_PRESET_DATA_START + (preset - 1) * PRESET_DATA_SIZE)
 // one extra byte of storage per preset - located at two different places (1-96, 97-99)
@@ -105,4 +109,4 @@ struct globalSetting {
 	bool isChannel;
 };
 
-extern const globalSetting globalSettings[14];
+extern const globalSetting globalSettings[16];
