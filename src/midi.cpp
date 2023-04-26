@@ -69,7 +69,7 @@ static void PrepareHandleNoteOff(byte channel, byte note) {
 }
 
 static void HandleNoteOn(byte channel, byte note, byte velocity) {
-	if (note < 12 || note >= 107)
+	if (note < 12 || note >= 119)
 		return;
 
 	note -= 12;
@@ -174,26 +174,12 @@ static void HandleControlChange(byte channel, byte data1, byte data2) {
 	leftDot();
 
 	if (channel == 16 && lastData1 == 19 && lastData2 == 82 && data1 == 19 && data2 == 82) {
-		// transmit all the settings to tool. Tool expects noteOff messages on CH16 (yeah I couldn't get webMidi to
-		// parse sysex... )
-		sendNoteOff(1, version, 16);
-		sendNoteOff(2, versionDecimal, 16);
-		sendNoteOff(3, masterChannel, 16);
-		sendNoteOff(4, voice1Channel, 16);
-		sendNoteOff(5, voice2Channel, 16);
-		sendNoteOff(6, voice3Channel, 16);
-		sendNoteOff(7, masterChannelOut, 16);
-		sendNoteOff(8, volume, 16);
+		// Transmit all the settings to tool. Tool expects CC messages on CH16
+		for (int i = 0; i < (int)(sizeof(globalSettings) / sizeof(*globalSettings)); i++) {
+			const globalSetting* setting = &(globalSettings[i]);
 
-		sendNoteOff(9, modToLfo, 16);
-		sendNoteOff(10, aftertouchToLfo, 16);
-		sendNoteOff(11, velocityToLfo, 16);
-		sendNoteOff(12, sendLfo, 16);
-		sendNoteOff(13, sendArp, 16);
-		sendNoteOff(14, pwLimit, 16);
-		sendNoteOff(15, armSID, 16);
-		sendNoteOff(99, pitchBendUp, 16);
-		sendNoteOff(100, pitchBendDown, 16);
+			sendControlChange(setting->ccMessageToolMode, *(byte*)setting->variable, 16);
+		}
 
 		toolMode = true; // therapSid is listening to new settings (CC on CH16)
 	}
@@ -203,13 +189,13 @@ static void HandleControlChange(byte channel, byte data1, byte data2) {
 	lastData2 = data2;
 	if (channel == 16 && toolMode) {
 		// Go through all global settings and check if the tool requested to change one
-		for (int i = 0; i < (int)(sizeof(globalSettings) / sizeof(globalSetting)); i++) {
+		for (int i = 0; i < (int)(sizeof(globalSettings) / sizeof(*globalSettings)); i++) {
 			const globalSetting* setting = &(globalSettings[i]);
 
 			if (setting->ccMessageToolMode == data1) {
 
-				if (setting->isChannel) {
-					// If the setting is a MIDI channel, adjust for internal representation
+				if (setting->isBaseOne) {
+					// Adjust for internal representation
 					data2++;
 				}
 
@@ -295,8 +281,8 @@ static void HandleControlChange(byte channel, byte data1, byte data2) {
 }
 
 static void handleBend(byte channel, int value) {
-	//-8192 to 8191
-	float value_f = (value - 64.f) / 64.f;
+	// 0 to 127 => -1.0 to 1.0
+	float value_f = (value - 64.f) / 63.f;
 	if (value_f > 1)
 		value_f = 1;
 	if (value_f < -1)
@@ -321,17 +307,17 @@ static void handleBend(byte channel, int value) {
 
 void sendMidiButt(byte number, int value) {
 	rightDot();
-	sendControlChange(number, !!value);
+	sendControlChange(number, !!value, masterChannelOut);
 }
 
 void sendCC(byte number, int value) {
 	rightDot();
-	sendControlChange(number, value >> 3);
+	sendControlChange(number, value >> 3, masterChannelOut);
 }
 
-void sendControlChange(byte number, byte value) {
+void sendControlChange(byte number, byte value, byte channel) {
 	if (!thru) {
-		Serial.write(175 + masterChannelOut);
+		Serial.write(175 + channel);
 		Serial.write(number);
 		Serial.write(value);
 	}

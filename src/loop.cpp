@@ -10,30 +10,30 @@
 
 static bool loadedAfterStartup; // we load the preset after 2sec (when SID is ready)
 
-static int calc_pitch(int note, float frac) {
+static int calc_pitch(float note_exact) {
 
-	static const int32_t sidScale[] = {
-	    // dropped by half a semi so that fine value 0 (knob at noon) is concert
-	    133,   140,   149,   158,   168,   177,   188,   199,   210,   223,   118,   251,   266,   282,   299,
-	    316,   336,   355,   377,   399,   422,   448,   475,   503,   533,   564,   598,   633,   671,   711,
-	    754,   798,   846,   897,   948,   1006,  1066,  1130,  1197,  1268,  1344,  1423,  1508,  1597,  1693,
-	    1793,  1900,  2012,  2133,  2259,  2393,  2536,  2687,  2847,  3016,  3195,  3386,  3587,  3800,  4026,
-	    4265,  4519,  4788,  5073,  5374,  5694,  6032,  6392,  6772,  7174,  7601,  8053,  8532,  9039,  9577,
-	    10147, 10749, 11389, 12066, 12783, 13543, 14349, 15203, 16106, 17064, 18078, 19155, 20310, 21500, 22778,
-	    24133, 25567, 27088, 28699, 30357, 32213, 34129, 36158, 38308, 40587, 43000, 45557, 48266, 51136, 54176,
-	    57398, 60811, 32213, 34129, 36158, 38308, 40587, 43000, 45557, 48266, 51136, 54176, 57398, 60811, 32213,
-	    34129, 36158, 38308, 40587, 43000, 45557, 48266, 51136, 54176, 57398, 60811};
+	static const uint16_t sidScale[] = {
+	    // From C-1 to A#7 (A=440 Hz)
+	    137,   145,   154,   163,   173,   183,   194,   206,   218,   231,   244,   259,   274,   291,   308,   326,
+	    346,   366,   388,   411,   435,   461,   489,   518,   549,   581,   616,   652,   691,   732,   776,   822,
+	    871,   923,   978,   1036,  1097,  1163,  1232,  1305,  1383,  1465,  1552,  1644,  1742,  1845,  1955,  2071,
+	    2195,  2325,  2463,  2610,  2765,  2930,  3104,  3288,  3484,  3691,  3910,  4143,  4389,  4650,  4927,  5220,
+	    5530,  5859,  6207,  6577,  6968,  7382,  7821,  8286,  8779,  9301,  9854,  10440, 11060, 11718, 12415, 13153,
+	    13935, 14764, 15642, 16572, 17557, 18601, 19708, 20879, 22121, 23436, 24830, 26306, 27871, 29528, 31284, 33144,
+	    35115, 37203, 39415, 41759, 44242, 46873, 49660, 52613, 55741, 59056, 62567};
 
-	if (note > 127) {
-		note = 127;
-	} else if (note - 13 < 0) {
-		note = 13;
+	byte note = (int)note_exact;
+	float frac = note_exact - note;
+
+	// Compensate for Tune knob being offset by 12, and clamp pitch&bend upwards.
+	note = max(0, note - 12);
+	if (note >= sizeof(sidScale) / (sizeof(*sidScale)) - 1) {
+		note = sizeof(sidScale) / (sizeof(*sidScale)) - 1;
+		frac = 0.0;
 	}
 
-	float fine = frac / 2 + 0.5;
-	fine *= .90;
-
-	return (sidScale[note - 12 - 1] + (sidScale[note - 12 + 2] - sidScale[note - 12]) * fine);
+	// Pitch is note plus distance to next
+	return (sidScale[note] + (sidScale[note + 1] - sidScale[note]) * frac);
 }
 
 static void calculatePitch() {
@@ -58,9 +58,10 @@ static void calculatePitch() {
 
 		float my_bend = voice_state.has_individual_override(oper) ? bends[oper_mod3] : bend;
 
-		glide[oper].destination_pitch =
-		    calc_pitch(key + preset_data.voice[voice_knob_idx].tune_base + lfo_tune[voice_knob_idx],
-		               preset_data.voice[voice_knob_idx].fine_base + lfo_fine[voice_knob_idx] + my_bend / 0.9);
+		float note_exact = key + preset_data.voice[voice_knob_idx].tune_base + lfo_tune[voice_knob_idx] + my_bend +
+		                   (preset_data.voice[voice_knob_idx].fine_base - 0.5) + lfo_fine[voice_knob_idx];
+
+		glide[oper].destination_pitch = calc_pitch(note_exact);
 	}
 }
 void setSidRegisters(Preset const& preset, ParamsAfterLfo const& params_after_lfo) {
