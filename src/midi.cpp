@@ -174,11 +174,16 @@ static void HandleControlChange(byte channel, byte data1, byte data2) {
 	leftDot();
 
 	if (channel == 16 && lastData1 == 19 && lastData2 == 82 && data1 == 19 && data2 == 82) {
+		// Transmit device ID & Firmware version
+		sendControlChange(1, 2, 16); // TOOL expects 2 for TherapSID
+		sendControlChange(2, version, 16);
+		sendControlChange(3, versionDecimal, 16);
 		// Transmit all the settings to tool. Tool expects CC messages on CH16
 		for (int i = 0; i < (int)(sizeof(globalSettings) / sizeof(*globalSettings)); i++) {
 			const globalSetting* setting = &(globalSettings[i]);
 
-			sendControlChange(setting->ccMessageToolMode, *(byte*)setting->variable, 16);
+			if (setting->ccMessageToolMode < 128) // don't want to send last preset (CC#255)
+				sendControlChange(setting->ccMessageToolMode, *(byte*)setting->variable, 16);
 		}
 
 		toolMode = true; // therapSid is listening to new settings (CC on CH16)
