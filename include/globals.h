@@ -106,7 +106,7 @@ struct globalSetting {
 	byte maxValue;
 	byte defaultValue;
 	byte ccMessageToolMode;
-	bool isChannel;
+	bool isBaseOne;
 };
 
 extern const globalSetting globalSettings[16];

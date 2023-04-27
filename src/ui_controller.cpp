@@ -10,7 +10,7 @@ static const int POT_NONE = 20;
 static const int DONTCARE = 123;
 
 static int scaleFine(int input) {
-	input = map(input, 0, 1023, -51, 51);
+	input = map(input, 0, 1023, -50, 50);
 
 	return (input);
 }
