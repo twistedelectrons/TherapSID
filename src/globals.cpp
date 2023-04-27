@@ -76,7 +76,8 @@ int env;
 int a4, d4, s4, r4;
 byte lastNote = 0;
 int arpStepBase;
-
+byte pitchBendUp;
+byte pitchBendDown;
 bool arpModeHeld;
 byte arp_output_note;
 optional<byte> control_voltage_note;
@@ -85,7 +86,7 @@ optional<byte> control_voltage_note;
 byte* voice_index; // array of size 6, set depending on preset.paraphonic
 
 // Global settings, ranges and where stored in EEPROM memory
-const globalSetting globalSettings[14] = {
+const globalSetting globalSettings[16] = {
 
     {&modToLfo, EEPROM_ADDR_MW_TO_LFO1, 0, 1, true, 85, false},
     {&aftertouchToLfo, EEPROM_ADDR_AT_TO_LFO2, 0, 1, true, 86, false},
@@ -103,5 +104,6 @@ const globalSetting globalSettings[14] = {
 
     {&volume, EEPROM_ADDR_MASTER_VOLUME, 1, 15, 15, 89, false},
     {&preset, EEPROM_ADDR_PRESET_LAST, PRESET_NUMBER_MIN, PRESET_NUMBER_MAX, PRESET_NUMBER_MIN, 255, false},
-
+    {&pitchBendUp, EEPROM_ADDR_PITCH_BEND_UP, 1, 48, 2, 99, true},
+    {&pitchBendDown, EEPROM_ADDR_PITCH_BEND_DOWN, 1, 48, 2, 100, true},
 };

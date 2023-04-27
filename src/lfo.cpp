@@ -475,7 +475,7 @@ ParamsAfterLfo lfoTick() {
 		if (temp != lfoLast[i]) {
 			lfoLast[i] = temp;
 			if (sendLfo)
-				sendControlChange(56 + i, temp);
+				sendControlChange(56 + i, temp, masterChannelOut);
 		}
 	}
 
