@@ -267,19 +267,6 @@ static void HandleControlChange(byte channel, byte data1, byte data2) {
 						}
 					}
 					break;
-
-				case 68:
-					// TODO: Why CC 68? Manual says 61
-					sendLfo = (data2 > 0);
-					EEPROM.update(EEPROM_ADDR_SEND_LFO, sendLfo);
-					break; // lfo send
-
-				case 69:
-				case 85:
-					// TODO: Why CC 69 and 85? Manual says 62
-					sendArp = (data2 > 0);
-					EEPROM.update(EEPROM_ADDR_SEND_ARP, sendArp);
-					break; // arp send
 			}
 		}
 	}
