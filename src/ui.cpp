@@ -40,7 +40,7 @@ void ui_loop() {
 
 	if (autoChordChanged) {
 		autoChordChanged = false;
-		ui_display_controller.temp_7seg(10, 21, 200);
+		ui_display_controller.temp_7seg(10, 19, 200);
 	} // show CH when autochord is toggled
 
 	ui_display_controller.update(preset, preset_data, ui_state);

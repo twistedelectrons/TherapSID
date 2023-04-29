@@ -72,8 +72,8 @@ void digit(uint8_t channel, uint8_t number) {
 	    0b1010000, // 16 = r
 	    0b1110111, // 17 = A
 	    0b1111001, // 18 = E
-	    0b0000000, // 19 = <blank>
-	    0b1110110  // 20 = H
+	    0b1110110, // 19 = H
+	    0b0000000, // 20 = <blank>
 	};
 	const auto DIGITS_LEN = sizeof(digits) / sizeof(*digits);
 
