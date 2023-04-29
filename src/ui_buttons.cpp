@@ -7,6 +7,27 @@
 #include "ui_leds.h"
 #include "ui_controller.h"
 
+const byte presetChords[16][6] = {
+    {0, 4, 7, 10, 14, 17}, // C Major 7
+    {0, 3, 7, 10, 14, 17}, // C Minor 7
+    {0, 4, 7, 11, 14, 17}, // C Dominant 7
+    {0, 4, 7, 11, 14, 18}, // C Major 7(#11)
+    {0, 4, 7, 10, 13, 17}, // C6
+    {0, 4, 7, 9, 14, 17},  // C Minor Major 7
+    {0, 2, 4, 7, 9, 11},   // Cm6
+    {0, 3, 6, 10, 14, 17}, // C Minor 7(b5)
+    {0, 5, 7, 10, 14, 17}, // C9
+    {0, 4, 7, 10, 14, 19}, // C Major 9
+    {0, 4, 7, 10, 14, 15}, // Cadd9
+    {0, 4, 7, 11, 14, 21}, // C13
+    {0, 2, 4, 7, 9, 10},   // Cmadd9
+    {0, 4, 7, 11, 15, 18}, // C7(#9)
+    {0, 4, 7, 10, 14, 21}, // C6/9
+    {0, 3, 7, 9, 14, 17}   // Cm(Maj7)/C Minor Major 7
+};
+
+byte presetChordNumber;
+
 static bool saveEngaged;
 static bool noArpAction;
 static bool
@@ -218,13 +239,33 @@ void buttChanged(byte number, bool value) {
 					noArpAction = false;
 					autoChordChanged = true;
 					if (autoChord) {
+						for (int i = 128; i > 0; i--) {
+							chordKeys[i] = 0;
+						}
+						presetChordNumber++;
+						if (presetChordNumber > 15)
+							presetChordNumber = 0;
 						clearAutoChord = true;
 					} else {
 						autoChord = true;
+						bool noNotes = true; // use preset chords if no keys are held
 						for (int i = 128; i > 0; i--) {
 							chordKeys[i] = heldKeys[i];
 							if (heldKeys[i]) {
 								chordRoot = i;
+								noNotes = false;
+							}
+						}
+						if (noNotes) {
+							chordRoot = 0;
+							for (int i = 0; i < 6; i++) {
+								if (presetChordNumber % 2 == 0) { // alternate between 3 and 6 note chords
+									if (i < 3) {
+										chordKeys[presetChords[presetChordNumber][i]] = 1;
+									}
+								} else {
+									chordKeys[presetChords[presetChordNumber][i]] = 1;
+								}
 							}
 						}
 					}
