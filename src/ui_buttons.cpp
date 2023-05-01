@@ -387,11 +387,11 @@ void buttChanged(byte number, bool value) {
 						if (!ui_state.midiSetup) {
 							if (!preset_data.paraphonic) {
 								preset_data.arp_mode++;
-								if (preset_data.arp_mode > 4) {
+								if (preset_data.arp_mode > 7) {
 									preset_data.arp_mode = 0;
 									sendNoteOff(lastNote, 127, masterChannelOut);
 								}
-								reset_arp();
+								arpReset();
 							}
 						} else if (ui_state.midiSetup == 3) {
 							ui_state.midiSetup = 0;

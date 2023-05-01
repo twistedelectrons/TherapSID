@@ -139,8 +139,19 @@ void UiDisplayController::show_arp_mode(int arp_mode) {
 			temp_7seg(13, 15, 500);
 			break;
 
-		case 4: // UP/DOWN
+		case 4: // RANDOM
 			temp_7seg(16, 15, 500);
+			break;
+
+		case 5: // OCTAVE
+			temp_7seg(0, 10, 500);
+			break;
+		case 6: // TRILL (+1 SEMITONE)
+			temp_7seg(14, 1, 500);
+			break;
+
+		case 7: // TRILL (+2 SEMITONES)
+			temp_7seg(14, 2, 500);
 			break;
 	}
 }
