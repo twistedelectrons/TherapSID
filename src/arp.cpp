@@ -6,12 +6,7 @@ static byte arpNotes[128];
 static int arpNote;
 static bool arpPendulum;
 static byte scrubNote, scrubNoteLast;
-
-void reset_arp() {
-	arpRound = 0;
-	arpCounter = 0;
-	arpNote = 0;
-}
+static byte trillStep;
 
 void arpSteptrigger(int number) {
 	if (number > 255) {
@@ -67,6 +62,13 @@ void arpReset() {
 			arpNote = 0;
 			arpRound = 0;
 			arpPendulum = 0;
+			break;
+		case 5:
+			arpNote = 0;
+			arpRound = 0;
+			while (!voice_state.held_key(arpNote)) {
+				arpNote++;
+			}
 			break;
 	}
 	arpCounter = 0;
@@ -167,6 +169,52 @@ void arpTick() {
 
 				case 4:
 					arpSteptrigger(random(255));
+					break;
+
+				case 5:
+					arpRound++;
+					if (arpRound > arpRange) {
+						arpRound = 0;
+						arpNote++;
+						if (arpNote > 127)
+							arpNote = 0;
+						while (!voice_state.held_key(arpNote)) {
+							arpNote++;
+							if (arpNote > 127) {
+								arpNote = 0;
+							}
+						}
+					}
+					arp_output_note = arpNote + (arpRound * 12);
+					if (sendArp)
+						midiOut(arp_output_note);
+					break;
+
+				case 6:
+				case 7:
+					trillStep++;
+					if (trillStep > 2) {
+						trillStep = 0;
+						arpNote++;
+						if (arpNote > 127)
+							arpNote = 0;
+						while (!voice_state.held_key(arpNote)) {
+							arpNote++;
+							if (arpNote > 127) {
+								arpNote = 0;
+								arpRound++;
+								if (arpRound > arpRange) {
+									arpRound = 0;
+								}
+							}
+						}
+					}
+					arp_output_note = arpNote + (arpRound * 12);
+					if (trillStep == 1) {
+						arp_output_note += preset_data.arp_mode - 5;
+					}
+					if (sendArp)
+						midiOut(arp_output_note);
 					break;
 			}
 		}
