@@ -14,7 +14,7 @@ static int pw1Lfo1, pw1Lfo2, pw1Lfo3, pw2Lfo1, pw2Lfo2, pw2Lfo3, pw3Lfo1, pw3Lfo
 static byte resLfo1, resLfo2, resLfo3;
 static int lfoDepth[3] = {0, 0, 0};
 static byte lfoLast[3];
-
+static byte lfoStepQuantized[3];
 static const int pwMin = 64;
 static const int pwMax = 2050;
 
@@ -52,8 +52,9 @@ ParamsAfterLfo lfoTick() {
 							lfoNewRand[i] = false;
 						}
 					} else {
-						if ((lfoStep[i] == 1) || (lfoStep[i] == 50) || (lfoStep[i] == 100) || (lfoStep[i] == 150) ||
-						    (lfoStep[i] == 200)) {
+
+						if (lfoStepQuantized[i] != lfoStep[i] >> 5) {
+							lfoStepQuantized[i] = lfoStep[i] >> 5; // generate noise 8 times per LFO cycle
 							lfo[i] = random(255);
 						}
 					}
