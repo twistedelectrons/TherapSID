@@ -106,7 +106,7 @@ void UiDisplayController::update_leds(const Preset& p, const UiState& ui_state) 
 	}
 
 	for (int shape = 1; shape <= 5; shape++) {
-		if (lfoStep[ui_state.selectedLfo] <10 && lfoSpeed[ui_state.selectedLfo]) {
+		if (lfoStep[ui_state.selectedLfo] < 10 && lfoSpeed[ui_state.selectedLfo]) {
 			set_led(21 + shape, 0); // blink the lfo LED to thebeat if LFO is moving
 		} else {
 			set_led(21 + shape, p.lfo[ui_state.selectedLfo].shape == shape);
