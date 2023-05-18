@@ -53,8 +53,8 @@ ParamsAfterLfo lfoTick() {
 						}
 					} else {
 
-						if (lfoStepQuantized[i] != lfoStep[i] >> 5) {
-							lfoStepQuantized[i] = lfoStep[i] >> 5; // generate noise 8 times per LFO cycle
+						if (lfoStepQuantized[i] != lfoStep[i] >> 6) {
+							lfoStepQuantized[i] = lfoStep[i] >> 6; // generate noise 4 times per LFO cycle
 							lfo[i] = random(255);
 						}
 					}
