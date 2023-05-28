@@ -39,7 +39,7 @@ template <size_t N_OPERATORS> struct VoiceState {
 		n_usable_operators = (N_OPERATORS / n) * n;
 
 		for (size_t i = 0; i < N_OPERATORS; i++) {
-			mono_tracker[i].clear();
+			individual_override_note_tracker[i].clear();
 		}
 		mono_note_tracker.clear();
 		voice_allocator.set_max_voices(n);
@@ -94,19 +94,19 @@ template <size_t N_OPERATORS> struct VoiceState {
 	}
 
 	void note_on_individual(int voice, int note) {
-		mono_tracker[voice].note_on(note, 64);
-		myLastNote[voice] = mono_tracker[voice].active_note()->note;
+		individual_override_note_tracker[voice].note_on(note, 64);
+		myLastNote[voice] = individual_override_note_tracker[voice].active_note()->note;
 	}
 
 	void note_off_individual(int voice, int note) {
-		mono_tracker[voice].note_off(note);
-		if (mono_tracker[voice].has_active_note())
-			myLastNote[voice] = mono_tracker[voice].active_note()->note;
+		individual_override_note_tracker[voice].note_off(note);
+		if (individual_override_note_tracker[voice].has_active_note())
+			myLastNote[voice] = individual_override_note_tracker[voice].active_note()->note;
 	}
 
 	int has_individual_override(int oper) {
 		if (n_individual_voices == 1) {
-			return mono_tracker[oper].has_active_note();
+			return individual_override_note_tracker[oper].has_active_note();
 		} else {
 			return false;
 		}
@@ -118,7 +118,7 @@ template <size_t N_OPERATORS> struct VoiceState {
 		}
 
 		if (n_individual_voices == 1) {
-			auto individual = mono_tracker[oper].active_note();
+			auto individual = individual_override_note_tracker[oper].active_note();
 			if (individual.has_value()) {
 				return individual->note;
 			} else if (mono_note_tracker.has_active_note()) {
@@ -140,7 +140,7 @@ template <size_t N_OPERATORS> struct VoiceState {
 		}
 
 		if (n_individual_voices == 1) {
-			return mono_tracker[oper].has_active_note() || mono_note_tracker.has_active_note();
+			return individual_override_note_tracker[oper].has_active_note() || mono_note_tracker.has_active_note();
 		} else if (n_individual_voices == 2) {
 			int voice = oper / 3;
 			return voice_allocator.get_voices()[voice].playing;
@@ -158,7 +158,7 @@ template <size_t N_OPERATORS> struct VoiceState {
 	int n_individual_voices = N_OPERATORS;
 	int n_usable_operators = N_OPERATORS;
 
-	MonoNoteTracker<16> mono_tracker[N_OPERATORS];
+	MonoNoteTracker<16> individual_override_note_tracker[N_OPERATORS];
 	PolyVoiceAllocator<6> voice_allocator;
 	MonoNoteTracker<16> mono_note_tracker;
 
