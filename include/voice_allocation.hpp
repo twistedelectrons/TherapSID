@@ -5,6 +5,9 @@
 
 #include "util.hpp"
 
+/** Notes are arranged in a stack. Note-on puts the desired note onto the top
+    of the stack, note-off removes the desired notes from within the stack.
+    The active note is always the one on the top. */
 template <size_t N> class MonoNoteTracker {
   public:
 	struct NoteVelo {
@@ -40,6 +43,9 @@ template <size_t N> class MonoNoteTracker {
 	}
 
 	void clear() { notes.clear(); }
+
+	/** Number of notes on the stack */
+	size_t n_notes() const { return notes.size(); }
 
   private:
 	StaticVector<NoteVelo, N> notes;
