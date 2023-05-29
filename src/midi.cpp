@@ -154,14 +154,6 @@ static void HandleNoteOn(byte channel, byte note, byte velocity) {
 			voice_state.note_off_individual(voice, note);
 			voice_state.note_off_individual(voice + 3, note);
 		}
-
-		if (velocity) {
-			voice_state.note_on_individual(voice, note);
-			voice_state.note_on_individual(voice + 3, note);
-		} else {
-			voice_state.note_off_individual(voice, note);
-			voice_state.note_off_individual(voice + 3, note);
-		}
 	}
 	leftDot();
 }
