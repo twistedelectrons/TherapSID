@@ -112,6 +112,20 @@ template <size_t N_OPERATORS> struct VoiceState {
 		}
 	}
 
+	bool shall_glide(int oper) {
+		if (n_individual_voices != 1) {
+			// no glide in polyphonic modes.
+			return false;
+		}
+
+		// We glide only when notes are played "legato"
+		if (!has_individual_override(oper)) {
+			return mono_note_tracker.n_notes() >= 2;
+		} else {
+			return individual_override_note_tracker[oper].n_notes() >= 2;
+		}
+	}
+
 	int key(int oper) const {
 		if (oper >= n_usable_operators) {
 			return 0;

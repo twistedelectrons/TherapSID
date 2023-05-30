@@ -174,10 +174,8 @@ void isr() {
 		}
 	}
 	// glides
-	// in monophonic mode, we glide only while the old note is still held down.
-	bool skip_glide = !preset_data.is_polyphonic() && voice_state.n_held_keys() <= 1;
 	for (int i = 0; i < 6; i++) {
-		glide[i].glide_tick(skip_glide ? 0 : preset_data.voice[voice_index[i]].glide);
+		glide[i].glide_tick(voice_state.shall_glide(i) ? preset_data.voice[voice_index[i]].glide : 0);
 	}
 
 	// LFO
