@@ -108,6 +108,12 @@ void setup() {
 	EEPROM.get(EEPROM_ADDR_COOKIE, value);
 	bool initialize_memory = (value != EEPROM_COOKIE_VALUE);
 
+	// are we holding reset (to reset globals)?
+	mux(7);
+	if ((PINA & _BV(4)) == 0) {
+		initialize_memory = true;
+	}
+
 	// Initialize EEPROM memory if needed
 	if (initialize_memory) {
 		EEPROM.put(EEPROM_ADDR_COOKIE, EEPROM_COOKIE_VALUE);
