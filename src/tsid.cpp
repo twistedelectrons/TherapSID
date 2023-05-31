@@ -108,12 +108,6 @@ void setup() {
 	EEPROM.get(EEPROM_ADDR_COOKIE, value);
 	bool initialize_memory = (value != EEPROM_COOKIE_VALUE);
 
-	// are we holding reset (to reset globals)?
-	mux(7);
-	if ((PINA & _BV(4)) == 0) {
-		initialize_memory = true;
-	}
-
 	// Initialize EEPROM memory if needed
 	if (initialize_memory) {
 		EEPROM.put(EEPROM_ADDR_COOKIE, EEPROM_COOKIE_VALUE);
@@ -139,13 +133,17 @@ void setup() {
 		EEPROM.put(EEPROM_ADDR_VERSION, EEPROM_FORMAT_VERSION_V2);
 	}
 
+	// are we holding reset (to reset globals)?
+	mux(7);
+	bool initialize_globals = ((PINA & _BV(4)) == 0);
+
 	// Update all global settings from EEPROM memory
 	for (int i = 0; i < (int)(sizeof(globalSettings) / sizeof(globalSetting)); i++) {
 		const globalSetting* setting = &(globalSettings[i]);
 		byte value = EEPROM.read(setting->eepromAddress);
 
 		// Validate range and set default if needed
-		if ((value < setting->minValue) || (value > setting->maxValue)) {
+		if ((value < setting->minValue) || (value > setting->maxValue) || initialize_globals) {
 			value = setting->defaultValue;
 		}
 
