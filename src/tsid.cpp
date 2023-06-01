@@ -145,6 +145,7 @@ void setup() {
 		// Validate range and set default if needed
 		if ((value < setting->minValue) || (value > setting->maxValue) || initialize_globals) {
 			value = setting->defaultValue;
+			EEPROM.update(setting->eepromAddress, value);
 		}
 
 		// Update the actual global setting variable
