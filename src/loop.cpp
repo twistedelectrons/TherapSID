@@ -6,6 +6,7 @@
 #include "lfo.h"
 #include "sid.h"
 #include "ui.h"
+#include "asid.h"
 #include <EEPROM.h>
 
 static bool loadedAfterStartup; // we load the preset after 2sec (when SID is ready)
@@ -116,6 +117,27 @@ void setSidRegisters(Preset const& preset, ParamsAfterLfo const& params_after_lf
 
 void loop() {
 
+	// If ASID is on, just run that and ignore everything else
+	if (asidState.enabled) {
+		midiRead();
+
+		// Read some muxes between MIDI bytes to improve button responsiveness
+		for (byte i = 0; i < 3; i++) {
+			readMux();
+		}
+
+		// Held down RESET (normally 'random') will exit
+		if (jumble) {
+			jumble = 0;
+			asidState.enabled = false;
+			force_display_update();
+			load(preset);
+			volumeChanged = true;
+		}
+
+		return;
+	}
+
 	if (volumeChanged) {
 		// update volume
 		sid_chips[0].set_volume(volume);
@@ -135,6 +157,13 @@ void loop() {
 	ui_loop();
 
 	midiRead();
+
+	// A MIDI message might enable ASID mode - and at that point we want to be in full
+	// control of the SIDs, so don't do more stuff if so.
+	if (asidState.enabled) {
+		return;
+	}
+
 	if (arpCounter >= arpSpeed + 100) {
 		arpCounter = 0;
 		arpTick();

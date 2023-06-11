@@ -1,6 +1,7 @@
 #include "globals.h"
 #include "isr.h"
 #include "ui.h"
+#include "asid.h"
 
 static int envCounter;
 static int lfoCounter[3];
@@ -115,6 +116,11 @@ const int envMap2[] = {
 // called at 10kHz frequency
 void isr() {
 	ui_tick();
+
+	if (asidState.enabled) {
+		asidTick();
+		return;
+	}
 
 	// ENV
 	switch (envState) {

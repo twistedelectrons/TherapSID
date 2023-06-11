@@ -13,6 +13,10 @@ class Sid {
 	/// Updates the next pair of changed registers. Call this in your main loop.
 	void send_next_update_pair();
 
+	// Update the SID directly
+	void send_update_immediate(byte index, byte data);
+	byte get_current_register(byte index);
+
 	void set_freq(int voice, uint16_t value);
 	[[deprecated]] void set_gate(int voice, bool on);
 	/// attack,decay in [0; 15]

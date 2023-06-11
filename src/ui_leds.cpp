@@ -13,6 +13,8 @@ void ledSet(byte number, bool value) {
 	}
 }
 
+void dotSet(byte dot, bool state) { mydisplay.setLed(0, 7, dot ? 7 : 6, state); }
+
 /*
   0
 5   1
@@ -51,6 +53,12 @@ void ledNumber(int number) {
 		}
 	}
 }
+
+void ledHex(byte value) {
+	digit(0, value >> 4);
+	digit(1, value & 0x0f);
+}
+
 void digit(uint8_t channel, uint8_t number) {
 	const uint8_t digits[] = {
 	    0b0111111, // 0
@@ -63,17 +71,19 @@ void digit(uint8_t channel, uint8_t number) {
 	    0b0000111, // 7
 	    0b1111111, // 8
 	    0b1100111, // 9
-	    0b0111001, // 10 = C
-	    0b0111000, // 11 = L
-	    0b1110001, // 12 = F
-	    0b0111110, // 13 = U
-	    0b1110011, // 14 = P
-	    0b1011110, // 15 = d
-	    0b1010000, // 16 = r
-	    0b1110111, // 17 = A
-	    0b1111001, // 18 = E
-	    0b1110110, // 19 = H
-	    0b0000000, // 20 = <blank>
+	    0b1110111, // 10 = A
+	    0b1111100, // 11 = B
+	    0b0111001, // 12 = C
+	    0b1011110, // 13 = d
+	    0b1111001, // 14 = E
+	    0b1110001, // 15 = F
+	    0b1110110, // 16 = H
+	    0b0111000, // 17 = L
+	    0b1110011, // 18 = P
+	    0b1010000, // 19 = r
+	    0b1111000, // 20 = t
+	    0b0111110, // 21 = U
+	    0b0000000, // 22 = <blank>
 	};
 	const auto DIGITS_LEN = sizeof(digits) / sizeof(*digits);
 
