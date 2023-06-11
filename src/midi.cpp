@@ -474,8 +474,8 @@ void midiOut(byte note) {
 
 void sendDump() {
 
-	digit(0, 5);
-	digit(1, 18);
+	digit(0, DIGIT_S);
+	digit(1, DIGIT_E);
 
 	byte mem[EEPROM.length()];
 	for (size_t i = 0; i < sizeof(mem) / sizeof(*mem); i++) {
@@ -508,8 +508,8 @@ void sendDump() {
 
 void recieveDump() {
 	byte mem[EEPROM.length()];
-	digit(0, 16);
-	digit(1, 18);
+	digit(0, DIGIT_R);
+	digit(1, DIGIT_E);
 
 	Timer1.stop();
 
@@ -562,8 +562,8 @@ void recieveDump() {
 			}
 		}
 	}
-	digit(0, 99);
-	digit(1, 99);
+	digit(0, DIGIT_BLANK);
+	digit(1, DIGIT_BLANK);
 
 	Timer1.resume();
 

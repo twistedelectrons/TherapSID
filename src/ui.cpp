@@ -42,9 +42,9 @@ void ui_loop() {
 		autoChordChanged = false;
 
 		if (autoChord && !clearAutoChord) {
-			ui_display_controller.temp_7seg(10, 19, 500);
+			ui_display_controller.temp_7seg(DIGIT_C, DIGIT_H, 500);
 		} else {
-			ui_display_controller.temp_7seg(0, 12, 500);
+			ui_display_controller.temp_7seg(DIGIT_O, DIGIT_F, 500);
 		}
 
 	} // show CH or OF when autochord is toggled
@@ -106,7 +106,7 @@ void ui_tick() {
 			for (int i = 0; i < 20; i++) {
 				preset_data.lfo[ui_state.selectedLfo].mapping[i] = 0;
 			}
-			ui_display_controller.temp_7seg(10, 11, 500);
+			ui_display_controller.temp_7seg(DIGIT_C, DIGIT_L, 500);
 
 			lfoButtTimer = 0;
 			lfoButtPressed = false;

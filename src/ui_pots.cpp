@@ -5,6 +5,80 @@
 
 static int arpDivisions[] = {1, 3, 6, 8, 12, 24, 32, 48};
 
+enum class Pot {
+	PW1 = 4,
+	TUNE1 = 6,
+	FINE1 = 14,
+	GLIDE1 = 1,
+	ATTACK1 = 5,
+	DECAY1 = 15,
+	SUSTAIN1 = 13,
+	RELEASE1 = 16,
+
+	PW2 = 24,
+	TUNE2 = 26,
+	FINE2 = 17,
+	GLIDE2 = 27,
+	ATTACK2 = 22,
+	DECAY2 = 25,
+	SUSTAIN2 = 23,
+	RELEASE2 = 20,
+
+	PW3 = 30,
+	TUNE3 = 21,
+	FINE3 = 31,
+	GLIDE3 = 19,
+	ATTACK3 = 29,
+	DECAY3 = 18,
+	SUSTAIN3 = 28,
+	RELEASE3 = 3,
+
+	LFO_RATE1 = 11,
+	LFO_DEPTH1 = 12,
+	LFO_RATE2 = 10,
+	LFO_DEPTH2 = 9,
+	LFO_RATE3 = 36,
+	LFO_DEPTH3 = 2,
+
+	CUTOFF = 8,
+	RESONANCE = 0,
+	ARP_SCRUB = 7,
+	ARP_RATE = 41,
+	ARP_RANGE = 32
+};
+
+// Maps hardware potentiometer number to other properties such as MIDI CC and mapping
+struct potMap {
+	Pot hwPot;
+	byte index;
+	byte midiCC;
+	byte bindID;
+};
+
+const potMap potMaps[] = {
+    {Pot::PW1, 0, 2, 0},          {Pot::PW2, 1, 10, 3},         {Pot::PW3, 2, 18, 6},
+    {Pot::TUNE1, 0, 3, 1},        {Pot::TUNE2, 1, 11, 4},       {Pot::TUNE3, 2, 19, 7},
+    {Pot::FINE1, 0, 4, 2},        {Pot::FINE2, 1, 12, 5},       {Pot::FINE3, 2, 20, 8},
+    {Pot::GLIDE1, 0, 5, 20},      {Pot::GLIDE2, 1, 13, 20},     {Pot::GLIDE3, 2, 21, 20},
+    {Pot::ATTACK1, 0, 6, 20},     {Pot::ATTACK2, 1, 14, 20},    {Pot::ATTACK3, 2, 22, 20},
+    {Pot::DECAY1, 0, 7, 20},      {Pot::DECAY2, 1, 15, 20},     {Pot::DECAY3, 2, 23, 20},
+    {Pot::SUSTAIN1, 0, 8, 20},    {Pot::SUSTAIN2, 1, 16, 20},   {Pot::SUSTAIN3, 2, 24, 20},
+    {Pot::RELEASE1, 0, 9, 20},    {Pot::RELEASE2, 1, 17, 20},   {Pot::RELEASE3, 2, 25, 20},
+    {Pot::LFO_RATE1, 0, 26, 9},   {Pot::LFO_RATE2, 1, 28, 11},  {Pot::LFO_RATE3, 2, 30, 13},
+    {Pot::LFO_DEPTH1, 0, 27, 10}, {Pot::LFO_DEPTH2, 1, 29, 12}, {Pot::LFO_DEPTH3, 2, 31, 14},
+    {Pot::CUTOFF, 0, 59, 15},     {Pot::RESONANCE, 0, 33, 16},  {Pot::ARP_RANGE, 0, 36, 19},
+    {Pot::ARP_RATE, 0, 35, 18},   {Pot::ARP_SCRUB, 0, 34, 17},
+};
+
+const potMap* getPotMap(Pot* pot) {
+	for (byte i = 0; i < sizeof(potMaps) / sizeof(*potMaps); i++) {
+		if (potMaps[i].hwPot == *pot) {
+			return &(potMaps[i]);
+		}
+	}
+	return NULL;
+}
+
 static byte scale4bit(int input) { return (input >> 6); }
 
 static byte octScale(int value) {
@@ -15,272 +89,96 @@ static byte octScale(int value) {
 }
 
 void movedPot(byte number, int value, bool isMidi) {
+	Pot pot = static_cast<Pot>(number);
+
 	if (!ui_state.saveMode) {
-		if (!isMidi) {
-			ui_state.lastPot = 20; // unselect
-		}
-		switch (number) {
-			case 4:
-				preset_data.voice[0].pulsewidth_base = value << 1;
-				if (!isMidi) {
-					sendCC(2, value);
-					ui_state.lastPot = 0;
-				}
-				break; // PW1
-			case 24:
-				preset_data.voice[1].pulsewidth_base = value << 1;
-				if (!isMidi) {
-					sendCC(10, value);
-					ui_state.lastPot = 3;
-				}
-				break; // PW2
-			case 30:
-				preset_data.voice[2].pulsewidth_base = value << 1;
-				if (!isMidi) {
-					sendCC(18, value);
-					ui_state.lastPot = 6;
-				}
-				break; // PW3
+		const potMap* potmap = getPotMap(&pot);
 
-			case 6:
-				preset_data.voice[0].tune_base = octScale(value);
-				if (!isMidi) {
-					sendCC(3, value);
-					ui_state.lastPot = 1;
-				}
-				break; // TUNE1
-			case 26:
-				preset_data.voice[1].tune_base = octScale(value);
-				if (!isMidi) {
-					sendCC(11, value);
-					ui_state.lastPot = 4;
-				}
-				break; // TUNE2
-			case 21:
-				preset_data.voice[2].tune_base = octScale(value);
-				if (!isMidi) {
-					sendCC(19, value);
-					ui_state.lastPot = 7;
-				}
-				break; // TUNE3
-
-			case 14:
-				preset_data.voice[0].fine_base = value / 1023.f;
-				if (!isMidi) {
-					sendCC(4, value);
-					ui_state.lastPot = 2;
-				}
-				break; // FINE1
-			case 17:
-				preset_data.voice[1].fine_base = value / 1023.f;
-				if (!isMidi) {
-					sendCC(12, value);
-					ui_state.lastPot = 5;
-				}
-				break; // FINE2
-			case 31:
-				preset_data.voice[2].fine_base = value / 1023.f;
-				if (!isMidi) {
-					sendCC(20, value);
-					ui_state.lastPot = 8;
-				}
-				break; // FINE3
-
-			case 1:
-				preset_data.voice[0].glide = value >> 4;
-				if (!isMidi) {
-					sendCC(5, value);
-				}
-				break; // GLIDE 1
-			case 27:
-				preset_data.voice[1].glide = value >> 4;
-				if (!isMidi) {
-					sendCC(13, value);
-				}
-				break; // GLIDE 2
-			case 19:
-				preset_data.voice[2].glide = value >> 4;
-				if (!isMidi) {
-					sendCC(21, value);
-				}
-				break; // GLIDE 3
-
-			case 5: // ATTACK 1
-				if (!isMidi) {
-					sendCC(6, value);
-				}
-				value = scale4bit(value);
-				preset_data.voice[0].attack = value;
-
+		switch (pot) {
+			case Pot::PW1:
+			case Pot::PW2:
+			case Pot::PW3:
+				preset_data.voice[potmap->index].pulsewidth_base = value << 1;
 				break;
 
-			case 22: // ATTACK 2
-				if (!isMidi) {
-					sendCC(14, value);
-				}
-				value = scale4bit(value);
-				preset_data.voice[1].attack = value;
+			case Pot::TUNE1:
+			case Pot::TUNE2:
+			case Pot::TUNE3:
+				preset_data.voice[potmap->index].tune_base = octScale(value);
 				break;
 
-			case 29: // ATTACK 3
-				if (!isMidi) {
-					sendCC(22, value);
-				}
-				a4 = value;
-				value = scale4bit(value);
-				preset_data.voice[2].attack = value;
+			case Pot::FINE1:
+			case Pot::FINE2:
+			case Pot::FINE3:
+				preset_data.voice[potmap->index].fine_base = value / 1023.f;
 				break;
 
-			case 15: // DECAY 1
-				if (!isMidi) {
-					sendCC(7, value);
-				}
-				value = scale4bit(value);
-				preset_data.voice[0].decay = value;
+			case Pot::GLIDE1:
+			case Pot::GLIDE2:
+			case Pot::GLIDE3:
+				preset_data.voice[potmap->index].glide = value >> 4;
 				break;
 
-			case 25: // DECAY 2
-				if (!isMidi) {
-					sendCC(15, value);
+			case Pot::ATTACK1:
+			case Pot::ATTACK2:
+			case Pot::ATTACK3:
+				preset_data.voice[potmap->index].attack = scale4bit(value);
+				if (pot == Pot::ATTACK3) {
+					a4 = value;
 				}
-				value = scale4bit(value);
-				preset_data.voice[1].decay = value;
 				break;
 
-			case 18: // DECAY 3
-				if (!isMidi) {
-					sendCC(23, value);
+			case Pot::DECAY1:
+			case Pot::DECAY2:
+			case Pot::DECAY3:
+				preset_data.voice[potmap->index].decay = scale4bit(value);
+				if (pot == Pot::DECAY3) {
+					d4 = value;
 				}
-				d4 = value;
-				value = scale4bit(value);
-				preset_data.voice[2].decay = value;
 				break;
 
-			case 13: // SUSTAIN 1
-				if (!isMidi) {
-					sendCC(8, value);
+			case Pot::SUSTAIN1:
+			case Pot::SUSTAIN2:
+			case Pot::SUSTAIN3:
+				if (pot == Pot::SUSTAIN3) {
+					s4 = value >> 2; // Will map to max 255
 				}
-				value = scale4bit(value);
-				preset_data.voice[0].sustain = value;
+				preset_data.voice[potmap->index].sustain = scale4bit(value);
 				break;
 
-			case 23: // SUSTAIN 2
-				if (!isMidi) {
-					sendCC(16, value);
+			case Pot::RELEASE1:
+			case Pot::RELEASE2:
+			case Pot::RELEASE3:
+				if (pot == Pot::RELEASE3) {
+					r4 = value;
 				}
-				value = scale4bit(value);
-				preset_data.voice[1].sustain = value;
+				preset_data.voice[potmap->index].release = scale4bit(value);
 				break;
 
-			case 28: // SUSTAIN 3
-				if (!isMidi) {
-					sendCC(24, value);
-				}
-				s4 = value >> 2;
-				value = scale4bit(value);
-				preset_data.voice[2].sustain = value;
+			case Pot::LFO_RATE1:
+			case Pot::LFO_RATE2:
+			case Pot::LFO_RATE3:
+				lfoClockSpeedPending[potmap->index] = 1 + (value >> 7);
+				preset_data.lfo[potmap->index].speed = value * 1.3;
+				ui_state.selectedLfo = potmap->index;
 				break;
 
-			case 16: // RELEASE 1
-				if (!isMidi) {
-					sendCC(9, value);
-				}
-				value = scale4bit(value);
-				preset_data.voice[0].release = value;
+			case Pot::LFO_DEPTH1:
+			case Pot::LFO_DEPTH2:
+			case Pot::LFO_DEPTH3:
+				preset_data.lfo[potmap->index].depth = value;
+				ui_state.selectedLfo = potmap->index;
 				break;
 
-			case 20: // RELEASE 2
-				if (!isMidi) {
-					sendCC(17, value);
-				}
-				value = scale4bit(value);
-				preset_data.voice[1].release = value;
-				break;
-
-			case 3: // RELEASE 3
-				if (!isMidi) {
-					sendCC(25, value);
-				}
-				r4 = value;
-
-				value = scale4bit(value);
-				preset_data.voice[2].release = value;
-				break;
-
-			case 11:
-				if (!isMidi) {
-					sendCC(26, value);
-					ui_state.lastPot = 9;
-				}
-				lfoClockSpeedPending[0] = 1 + (value >> 7);
-				preset_data.lfo[0].speed = value * 1.3;
-				ui_state.selectedLfo = 0;
-				break; // LFO RATE 1
-
-			case 12:
-				if (!isMidi) {
-					sendCC(27, value);
-					ui_state.lastPot = 10;
-				}
-				preset_data.lfo[0].depth = value;
-				ui_state.selectedLfo = 0;
-				break; // LFO DEPTH 1
-
-			case 10:
-				if (!isMidi) {
-					sendCC(28, value);
-					ui_state.lastPot = 11;
-				}
-				lfoClockSpeedPending[1] = 1 + (value >> 7);
-				preset_data.lfo[1].speed = value * 1.3;
-				ui_state.selectedLfo = 1;
-				break; // LFO RATE 2
-
-			case 9:
-				if (!isMidi) {
-					sendCC(29, value);
-					ui_state.lastPot = 12;
-				}
-				preset_data.lfo[1].depth = value;
-				ui_state.selectedLfo = 1;
-				break; // LFO DEPTH 2
-
-			case 36:
-				if (!isMidi) {
-					sendCC(30, value);
-					ui_state.lastPot = 13;
-				}
-				lfoClockSpeedPending[2] = 1 + (value >> 7);
-				preset_data.lfo[2].speed = value * 1.3;
-				ui_state.selectedLfo = 2;
-				break; // LFO RATE 3
-
-			case 2:
-				if (!isMidi) {
-					sendCC(31, value);
-					ui_state.lastPot = 14;
-				}
-				preset_data.lfo[2].depth = value;
-				ui_state.selectedLfo = 2;
-				break; // LFO DEPTH 3
-
-			case 8:
-				if (!isMidi) {
-					sendCC(59, value);
-					ui_state.lastPot = 15;
-				}
+			case Pot::CUTOFF:
 				preset_data.cutoff = value;
-				break; // CUTOF
+				break;
 
-			case 0:
-				if (!isMidi) {
-					sendCC(33, value);
-					ui_state.lastPot = 16;
-				}
+			case Pot::RESONANCE:
 				preset_data.resonance_base = scale4bit(value);
-				break; // RESONANCE
+				break;
 
-			case 7:
+			case Pot::ARP_SCRUB:
 				if (ui_state.filterModeHeld) {
 					filterAssignmentChanged = true;
 					volume = value >> 6;
@@ -288,35 +186,26 @@ void movedPot(byte number, int value, bool isMidi) {
 						volume++;
 					volumeChanged = true;
 				} else {
-					if (!isMidi) {
-						sendCC(34, value);
-						ui_state.lastPot = 17;
-					}
 					if (voice_state.n_held_keys() >= 1) {
 						arpStepBase = value >> 2;
 					}
 				}
+				break;
 
-				break; // ARP SCRUB
-
-			case 41:
-				if (!isMidi) {
-					sendCC(35, value);
-					ui_state.lastPot = 18;
-				}
-
+			case Pot::ARP_RATE:
 				preset_data.arp_speed_base = (1023 - value) >> 2;
 				preset_data.arp_rate = arpDivisions[preset_data.arp_speed_base >> 5];
+				break;
 
-				break; // ARP RATE
-
-			case 32:
-				if (!isMidi) {
-					sendCC(36, value);
-				}
-				ui_state.lastPot = 19;
+			case Pot::ARP_RANGE:
 				preset_data.arp_range_base = value >> 8;
-				break; // ARP RANGE
+				break;
+		}
+
+		// Send the MIDI CC message for the knob if used in the regular case
+		if (!isMidi && !(pot == Pot::ARP_SCRUB && ui_state.filterModeHeld)) {
+			sendCC(potmap->midiCC, value);
+			ui_state.lastPot = potmap->bindID;
 		}
 	}
 }

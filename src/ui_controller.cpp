@@ -128,41 +128,41 @@ void UiDisplayController::show_changed(int value) {
 void UiDisplayController::show_arp_mode(int arp_mode) {
 	switch (arp_mode) {
 		case 0: // OFF
-			temp_7seg(0, 12, 500);
+			temp_7seg(DIGIT_O, DIGIT_F, 500);
 			break;
 
 		case 1: // UP
-			temp_7seg(13, 14, 500);
+			temp_7seg(DIGIT_U, DIGIT_P, 500);
 			break;
 
 		case 2: // DOWN
-			temp_7seg(15, 0, 500);
+			temp_7seg(DIGIT_D, DIGIT_O, 500);
 			break;
 
 		case 3: // UP/DOWN
-			temp_7seg(13, 15, 500);
+			temp_7seg(DIGIT_U, DIGIT_D, 500);
 			break;
 
 		case 4: // RANDOM
-			temp_7seg(16, 15, 500);
+			temp_7seg(DIGIT_R, DIGIT_D, 500);
 			break;
 
 		case 5: // OCTAVE
-			temp_7seg(0, 10, 500);
+			temp_7seg(DIGIT_O, DIGIT_C, 500);
 			break;
 		case 6: // TRILL (+1 SEMITONE)
-			temp_7seg(14, 1, 500);
+			temp_7seg(DIGIT_T, 1, 500);
 			break;
 
 		case 7: // TRILL (+2 SEMITONES)
-			temp_7seg(14, 2, 500);
+			temp_7seg(DIGIT_T, 2, 500);
 			break;
 	}
 }
 
 void UiDisplayController::update_7seg(int preset_number, const Preset& preset, const UiState& ui_state) {
 	if (preset.fat_mode != old_preset.fat_mode)
-		temp_7seg(12, (int)preset.fat_mode + 1, 2000);
+		temp_7seg(DIGIT_F, (int)preset.fat_mode + 1, 2000);
 
 	if (preset.arp_mode != old_preset.arp_mode)
 		show_arp_mode(preset.arp_mode);
@@ -220,9 +220,9 @@ void UiDisplayController::update_7seg(int preset_number, const Preset& preset, c
 
 	if (preset.paraphonic != old_preset.paraphonic) {
 		if (preset_data.paraphonic == true) {
-			temp_7seg(14, 17, 500);
+			temp_7seg(DIGIT_P, DIGIT_A, 500);
 		} else {
-			temp_7seg(0, 12, 500);
+			temp_7seg(DIGIT_O, DIGIT_F, 500);
 		} // "PA" or "OF"
 	}
 
