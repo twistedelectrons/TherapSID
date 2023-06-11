@@ -224,4 +224,12 @@ void Sid::send(size_t index, int data) {
 	}
 }
 
-Sid sid_chips[2] = {Sid(6), Sid(2)};
+void Sid::send_update_immediate(byte index, byte data) {
+	registers_sent[index] = registers[index] = data;
+	send(index, data);
+}
+
+byte Sid::get_current_register(byte index) { return registers[index]; }
+
+// Setup SID slots 1 and 2
+Sid sid_chips[2] = {Sid(2), Sid(6)};

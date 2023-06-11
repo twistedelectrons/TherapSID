@@ -4,6 +4,9 @@
 #include "arp.h"
 #include "util.hpp"
 #include "ui_controller.h"
+#include "asid.h"
+
+#include "ui_leds.h"
 
 const byte presetChords[16][6] = {
     {0, 4, 7, 10, 14, 17}, // C Major 7
@@ -137,8 +140,235 @@ byte indexFromButton(Button button) {
 	return index;
 }
 
+void updateWaveformAsid(byte chip, byte voice, bool all, WaveformState waveform) {
+	if (asidState.overrideWaveform[chip][voice] == waveform) {
+		asidState.overrideWaveform[chip][voice] = WaveformState::NOISE_ONLY;
+	} else {
+		asidState.overrideWaveform[chip][voice] = waveform;
+	}
+	asidState.muteChannel[chip][voice] = false;
+
+	if (all) {
+		// Copy from 0 to 1
+		asidState.overrideWaveform[1][voice] = asidState.overrideWaveform[0][voice];
+		asidState.muteChannel[1][voice] = false;
+	}
+}
+
+void updateTriStateButtonAsid(byte chip, byte voice, bool all, OverrideState buttonState[][SIDVOICES]) {
+	if (buttonState[chip][voice] == OverrideState::OFF) {
+		buttonState[chip][voice] = OverrideState::ON;
+	} else {
+		buttonState[chip][voice] = static_cast<OverrideState>(static_cast<int>(buttonState[chip][voice]) + 1);
+	}
+	if (all) {
+		// Copy from 0 to 1
+		buttonState[1][voice] = buttonState[0][voice];
+	}
+}
+
+void buttChangedAsid(Button button, bool value) {
+	if (!value) {
+		// Pressed
+		byte index = indexFromButton(button);
+		byte chip;
+		bool indicateChange[] = {true, true};
+		bool all = false;
+
+		// If one pressed - execute it only on that chip
+		// If both affected - execute 0 then copy to 1 (executing actions if needed)
+		if ((asidState.selectedSids.all == 0) || (asidState.selectedSids.b.sid1 && asidState.selectedSids.b.sid2)) {
+			// Both chips should be affected
+			all = true;
+			chip = 0;
+		} else {
+			// One chip selected
+			if (asidState.selectedSids.b.sid1) {
+				chip = 0;
+				indicateChange[1] = false;
+			} else {
+				chip = 1;
+				indicateChange[0] = false;
+			}
+		}
+
+		switch (button) {
+			case Button::RECT1:
+			case Button::RECT2:
+			case Button::RECT3:
+				updateWaveformAsid(chip, index, all, WaveformState::RECT);
+				break;
+
+			case Button::TRI1:
+			case Button::TRI2:
+			case Button::TRI3:
+				updateWaveformAsid(chip, index, all, WaveformState::TRI);
+				break;
+
+			case Button::SAW1:
+			case Button::SAW2:
+			case Button::SAW3:
+				updateWaveformAsid(chip, index, all, WaveformState::SAW);
+				break;
+
+			case Button::NOISE1:
+			case Button::NOISE2:
+			case Button::NOISE3:
+				asidState.muteChannel[chip][index] = !asidState.muteChannel[chip][index];
+				if (all) {
+					asidState.muteChannel[1][index] = asidState.muteChannel[0][index];
+				}
+				break;
+
+			case Button::SYNC1:
+			case Button::SYNC2:
+			case Button::SYNC3:
+				updateTriStateButtonAsid(chip, index, all, asidState.overrideSync);
+				break;
+
+			case Button::RING1:
+			case Button::RING2:
+			case Button::RING3:
+				updateTriStateButtonAsid(chip, index, all, asidState.overrideRingMod);
+				break;
+
+			case Button::LFO_CHAIN1:
+			case Button::LFO_CHAIN2:
+			case Button::LFO_CHAIN3:
+				updateTriStateButtonAsid(chip, index, all, asidState.overrideFilterRoute);
+				asidUpdateFilterRoute(chip, false);
+				if (all) {
+					asidUpdateFilterRoute(1, all);
+				}
+				break;
+
+			case Button::PRESET_RESET:
+				resetDown = true;
+				resetDownTimer = 0;
+
+				if (all) {
+					asidRestore(-1);
+				} else {
+					asidRestore(chip);
+				}
+				return; // Done, no indication update
+				break;
+
+			case Button::FILTER_MODE:
+				asidAdvanceFilterMode(chip, false);
+				if (all) {
+					// Same thing for chip 2
+					asidAdvanceFilterMode(1, all);
+				}
+				break;
+
+			case Button::LFO_RECT: {
+				bool tmpMode;
+				asidState.isCleanMode = !asidState.isCleanMode;
+				tmpMode = asidState.isCleanMode;
+				asidRestore(-1); // restore both
+
+				// Restore will affect clean mode itself, so need to keep the state
+				asidState.isCleanMode = tmpMode;
+				return; // Done, no indication update
+			} break;
+
+			case Button::RETRIG:
+				asidState.selectedSids.b.sid1 = true;
+				return; // Done, no indication update
+				break;
+
+			case Button::LOOP:
+				asidState.selectedSids.b.sid2 = true;
+				return; // Done, no indication update
+				break;
+
+			case Button::ARP_MODE:
+				asidToggleCutoffAdjustMode(true);
+				return; // Done, no indication update
+				break;
+
+#ifdef ASID_PROFILER
+			case Button::LFO_TRI:
+				asidState.selectedSids.b.dbg1 = true;
+				return;
+				break;
+
+			case Button::LFO_SAW:
+				asidState.selectedSids.b.dbg2 = true;
+				return;
+				break;
+
+			case Button::LFO_NOISE:
+				asidState.selectedSids.b.dbg3 = true;
+				return;
+				break;
+
+			case Button::LFO_ENV3:
+				asidState.selectedSids.b.dbg4 = true;
+				return;
+				break;
+#endif
+
+			default:
+				indicateChange[chip] = false;
+				break;
+		}
+
+		// Update dot indication for changed SIDs, if needed
+		for (byte i = 0; i < 2; i++) {
+			if (indicateChange[i] && !asidState.isRemixed[i]) {
+				asidIndicateChanged(i);
+			}
+		}
+
+	} else {
+		// Released
+		switch (button) {
+			case Button::PRESET_RESET:
+				resetDown = false;
+				break;
+
+			case Button::RETRIG:
+				asidState.selectedSids.b.sid1 = false;
+				break;
+
+			case Button::LOOP:
+				asidState.selectedSids.b.sid2 = false;
+				break;
+
+			case Button::ARP_MODE:
+				asidToggleCutoffAdjustMode(false);
+				break;
+
+#ifdef ASID_PROFILER
+			case Button::LFO_TRI:
+				asidState.selectedSids.b.dbg1 = false;
+				break;
+
+			case Button::LFO_SAW:
+				asidState.selectedSids.b.dbg2 = false;
+				break;
+
+			case Button::LFO_NOISE:
+				asidState.selectedSids.b.dbg3 = false;
+				break;
+
+			case Button::LFO_ENV3:
+				asidState.selectedSids.b.dbg4 = false;
+				break;
+#endif
+			default:
+				break;
+		}
+	}
+}
+
 void buttChanged(byte number, bool value) {
 	Button button = static_cast<Button>(number);
+	if (asidState.enabled) {
+		return buttChangedAsid(button, value);
+	}
 
 	if (!value) {
 		//  PRESSED

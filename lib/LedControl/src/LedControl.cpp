@@ -111,6 +111,7 @@ void LedControl::clearDisplay(int addr) {
 void LedControl::setLed(int addr, int row, int column, boolean state) {
     int offset;
     byte val=0x00;
+    byte current;
 
     if(addr<0 || addr>=maxDevices)
         return;
@@ -118,13 +119,17 @@ void LedControl::setLed(int addr, int row, int column, boolean state) {
         return;
     offset=addr*8;
     val=B10000000 >> column;
+    current = status[offset+row];
     if(state)
         status[offset+row]=status[offset+row]|val;
     else {
         val=~val;
         status[offset+row]=status[offset+row]&val;
     }
-    spiTransfer(addr, row+1,status[offset+row]);
+    if (status[offset+row] != current) {
+        // Only transmit if there is new data
+        spiTransfer(addr, row+1,status[offset+row]);
+    }
 }
 
 void LedControl::setRow(int addr, int row, byte value) {

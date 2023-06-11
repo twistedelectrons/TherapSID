@@ -280,3 +280,11 @@ void UiDisplayController::set_led(int index, bool value) {
 		ledSet(index, value);
 	}
 }
+
+void UiDisplayController::force_update() {
+	for (byte i = 0; i < sizeof(leds); i++) {
+		leds[i] = false;
+		ledSet(i, false);
+	}
+	old_digit0 = old_digit1 = -1;
+}

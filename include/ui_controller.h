@@ -6,6 +6,7 @@ class UiDisplayController {
   public:
 	void temp_7seg(int digit0, int digit1, int time);
 	void update(int preset_number, const Preset& preset, const UiState& ui_state);
+	void force_update();
 
   private:
 	void update_leds(const Preset& p, const UiState& ui_state);

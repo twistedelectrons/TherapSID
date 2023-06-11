@@ -2,6 +2,7 @@
 #include "ui_pots.h"
 #include "midi.h"
 #include "ui_vars.h"
+#include "asid.h"
 
 static int arpDivisions[] = {1, 3, 6, 8, 12, 24, 32, 48};
 
@@ -88,8 +89,109 @@ static byte octScale(int value) {
 	return (value);
 }
 
+void movedPotAsid(Pot pot, int value) {
+	const potMap* potmap = getPotMap(&pot);
+	bool indicateChange[] = {false, false};
+	bool useChip[] = {(asidState.selectedSids.all == 0) || asidState.selectedSids.b.sid1,
+	                  (asidState.selectedSids.all == 0) || asidState.selectedSids.b.sid2};
+
+	for (byte i = 0; i < 2; i++) {
+		// Run this twice if needed, one for each chip
+		if (useChip[i]) {
+			indicateChange[i] = true;
+			switch (pot) {
+				case Pot::PW1:
+				case Pot::PW2:
+				case Pot::PW3:
+					asidState.overridePW[i][potmap->index] = POT_VALUE_TO_ASID_PW(value);
+					asidUpdateWidth(i, potmap->index);
+					break;
+
+				case Pot::ATTACK1:
+				case Pot::ATTACK2:
+				case Pot::ATTACK3:
+					asidState.adjustAttack[i][potmap->index] = POT_VALUE_TO_ASID_LORES(value);
+					break;
+
+				case Pot::DECAY1:
+				case Pot::DECAY2:
+				case Pot::DECAY3:
+					asidState.adjustDecay[i][potmap->index] = POT_VALUE_TO_ASID_LORES(value);
+					break;
+
+				case Pot::SUSTAIN1:
+				case Pot::SUSTAIN2:
+				case Pot::SUSTAIN3:
+					asidState.adjustSustain[i][potmap->index] = POT_VALUE_TO_ASID_LORES(value);
+					break;
+
+				case Pot::RELEASE1:
+				case Pot::RELEASE2:
+				case Pot::RELEASE3:
+					asidState.adjustRelease[i][potmap->index] = POT_VALUE_TO_ASID_LORES(value);
+					break;
+
+				case Pot::CUTOFF:
+					asidState.adjustCutoff[i] = POT_VALUE_TO_ASID_CUTOFF(value);
+					asidUpdateFilterCutoff(i);
+					break;
+
+				case Pot::RESONANCE:
+					asidState.adjustReso[i] = POT_VALUE_TO_ASID_LORES(value);
+					asidUpdateFilterReso(i);
+					break;
+
+#ifdef ASID_VOLUME_ADJUST
+				case Pot::ARP_SCRUB:
+					asidState.adjustVolume[i] = POT_VALUE_TO_ASID_LORES(value);
+					asidUpdateVolume(i);
+#endif
+					break;
+
+				case Pot::TUNE1:
+				case Pot::TUNE2:
+				case Pot::TUNE3: {
+					// Octaves, -1, 0, +1: even spaced
+					int8_t octave;
+
+					if (value < 1 * 1023 / 3) {
+						octave = -1;
+					} else if (value < 2 * 1023 / 3) {
+						octave = 0;
+					} else {
+						octave = 1;
+					}
+					asidState.adjustOctave[i][potmap->index] = octave;
+
+				} break;
+
+				case Pot::FINE1:
+				case Pot::FINE2:
+				case Pot::FINE3:
+					asidState.adjustFine[i][potmap->index] = POT_VALUE_TO_ASID_FINETUNE(value);
+					break;
+
+				default:
+					// Nothing was changed on this
+					indicateChange[i] = false;
+					break;
+			}
+		}
+	}
+
+	// Update dot indication for changed SIDs, if needed
+	for (byte i = 0; i < 2; i++) {
+		if (indicateChange[i] && !asidState.isRemixed[i]) {
+			asidIndicateChanged(i);
+		}
+	}
+}
+
 void movedPot(byte number, int value, bool isMidi) {
 	Pot pot = static_cast<Pot>(number);
+	if (asidState.enabled) {
+		return movedPotAsid(pot, value);
+	}
 
 	if (!ui_state.saveMode) {
 		const potMap* potmap = getPotMap(&pot);

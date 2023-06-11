@@ -6,6 +6,7 @@
 #include "isr.h"
 #include "sid.h"
 #include "ui_leds.h"
+#include "asid.h"
 
 /*
  *
@@ -157,4 +158,7 @@ void setup() {
 	setupMux();
 
 	sidReset(); // present sustained Note at startup
+
+	asidState.enabled = false;
+	asidInit(-1);
 }

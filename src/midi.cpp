@@ -8,6 +8,7 @@
 #include "ui_pots.h"
 #include "voice_state.hpp"
 #include "midi_pedal.hpp"
+#include "asid.h"
 
 static byte mStatus;
 static byte mData;
@@ -33,6 +34,16 @@ static void HandleNoteOn(byte channel, byte note, byte velocity);
 static void HandleNoteOff(byte channel, byte note);
 
 static MidiPedalAdapter pedal_adapter(PrepareHandleNoteOn, PrepareHandleNoteOff);
+
+typedef enum { IDLE, RECEIVING, WAITING_FOR_END } SysexState;
+
+typedef struct {
+	SysexState state;
+	byte buffer[256];
+	unsigned int index;
+} SysexMachine;
+
+static SysexMachine sysexMachine;
 
 static void PrepareHandleNoteOn(byte channel, byte note, byte velocity) {
 	heldKeys[note] = 1;
@@ -323,6 +334,19 @@ void sendNoteOn(byte note, byte velocity, byte channel) {
 	}
 }
 
+// Handles a completed sysex buffer
+void processSysex(byte* buffer, int size) {
+	if (size > 1) {
+
+		if (buffer[0] == 45) {
+			// Manufacturer ID used for ASID (DH's favourite number)
+			asidProcessMessage(buffer, size);
+		} else {
+			// Room for other sysex messages
+		}
+	}
+}
+
 void midiRead() {
 	while (Serial.available()) {
 		byte input = Serial.read();
@@ -333,6 +357,16 @@ void midiRead() {
 		if (input & 0x80) {
 
 			switch (input) {
+				case 0xf0: // sysex start
+					sysexMachine.state = RECEIVING;
+					sysexMachine.index = 0;
+					break;
+
+				case 0xf7: // sysex end
+					processSysex(sysexMachine.buffer, sysexMachine.index);
+					sysexMachine.index = 0;
+					sysexMachine.state = IDLE;
+					break;
 
 				case 0xf8: // clock
 
@@ -422,7 +456,18 @@ void midiRead() {
 
 		// status
 		else {
-			if (mData == 255) {
+			if (sysexMachine.state == RECEIVING) {
+				if (sysexMachine.index < sizeof(sysexMachine.buffer) / sizeof(*sysexMachine.buffer)) {
+					// Add sysex data to the buffer
+					sysexMachine.buffer[sysexMachine.index++] = input;
+				} else {
+					// Buffer is full, just wait for this message to be finished
+					sysexMachine.state = WAITING_FOR_END;
+				}
+			} else if (sysexMachine.state == WAITING_FOR_END) {
+				// We are getting data even though we are just waiting for sysex end to come
+				// So just consume data and do nothing...
+			} else if (mData == 255) {
 				mData = input;
 			} // data byte 1
 			else {

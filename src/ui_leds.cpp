@@ -13,6 +13,8 @@ void ledSet(byte number, bool value) {
 	}
 }
 
+void dotSet(byte dot, bool state) { mydisplay.setLed(0, 7, dot ? 7 : 6, state); }
+
 /*
   0
 5   1
@@ -51,6 +53,12 @@ void ledNumber(int number) {
 		}
 	}
 }
+
+void ledHex(byte value) {
+	digit(0, value >> 4);
+	digit(1, value & 0x0f);
+}
+
 void digit(uint8_t channel, uint8_t number) {
 	const uint8_t digits[] = {
 	    0b0111111, // 0

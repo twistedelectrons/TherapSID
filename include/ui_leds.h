@@ -5,6 +5,7 @@
 void showVersion();
 void leds();
 void ledSet(byte number, bool value);
+void dotSet(byte dot, bool value);
 
 /// Shows the right 7segment display's dot for a brief time.
 void rightDot();
@@ -15,6 +16,7 @@ void leftDot();
 void dotTick();
 
 void ledNumber(int number);
+void ledHex(byte value);
 void digit(byte channel, byte number);
 
 #define DIGIT_A 10

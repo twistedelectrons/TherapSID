@@ -6,6 +6,7 @@
 #include "preset.h"
 #include "display.h"
 #include "globals.h"
+#include "asid.h"
 
 static UiDisplayController ui_display_controller;
 
@@ -21,7 +22,7 @@ void ui_loop() {
 
 	dotTick();
 
-	if (jumble) {
+	if (jumble && !asidState.enabled) {
 		load(1);
 		jumble = 0;
 	}
@@ -113,3 +114,5 @@ void ui_tick() {
 		}
 	} // delete LFO stuff
 }
+
+void force_display_update() { ui_display_controller.force_update(); }
