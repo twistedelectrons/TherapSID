@@ -215,7 +215,88 @@ void arpTick() {
 					}
 
 					if (lastArpNote == arpNote + (arpRound * 12)) {
-						arpTick();
+						if (arpPendulum) {
+							arpNote++;
+							if (arpNote > 127) {
+								arpNote = 126; // overtook highest note, down one
+							}
+
+							while (!voice_state.held_key(arpNote)) {
+								arpNote++;
+								if (arpNote > 127) {
+
+									arpNote = 126; // overtook highest note, down one
+									if (arpRange) {
+										arpRound++;
+										if (arpRound > arpRange) {
+											arpRound = arpRange;
+											arpPendulum = 0;
+
+											// get next note down
+											while (!voice_state.held_key(arpNote)) {
+												arpNote--;
+											}
+											// get next note down againn so as not to repeat the same note
+											while (!voice_state.held_key(arpNote)) {
+												arpNote--;
+											}
+
+										} else {
+											arpNote = 0;
+											// get next note up
+											while (!voice_state.held_key(arpNote)) {
+												arpNote++;
+											}
+										}
+									} else {
+										arpPendulum = 0;
+										// get next note down
+										while (!voice_state.held_key(arpNote)) {
+											arpNote--;
+										}
+									}
+								}
+							}
+
+						} else {
+							arpNote--;
+							if (arpNote < 1) {
+								arpNote = 0;
+							}
+
+							while (!voice_state.held_key(arpNote)) {
+								arpNote--;
+								if (arpNote < 0) {
+									arpNote = 0;
+									if (arpRange) {
+										arpRound--;
+										if (arpRound < 0) {
+											arpRound = 0;
+											arpPendulum = 1;
+
+											// get next note up
+											while (!voice_state.held_key(arpNote)) {
+												arpNote++;
+											}
+
+										} else {
+											arpNote = 127;
+											// get next note down
+											while (!voice_state.held_key(arpNote)) {
+												arpNote--;
+											}
+										}
+									} else {
+										arpPendulum = 1;
+
+										// get next note up
+										while (!voice_state.held_key(arpNote)) {
+											arpNote++;
+										}
+									}
+								}
+							}
+						}
 					}
 					lastArpNote = arp_output_note = arpNote + (arpRound * 12);
 					if (sendArp)
