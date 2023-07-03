@@ -117,6 +117,10 @@ void setSidRegisters(Preset const& preset, ParamsAfterLfo const& params_after_lf
 
 void loop() {
 
+	// Keep arp octave <= range knob
+	if (arpRound > arpRange)
+		arpRound = arpRange;
+
 	// If ASID is on, just run that and ignore everything else
 	if (asidState.enabled) {
 		midiRead();
