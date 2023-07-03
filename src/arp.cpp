@@ -75,6 +75,8 @@ void arpReset() {
 	arpTick();
 }
 
+byte lastArpNote;
+
 void arpTick() {
 	if (voice_state.n_held_keys() > 0) {
 		if (preset_data.arp_mode) {
@@ -128,43 +130,96 @@ void arpTick() {
 					break;
 
 				case 3:
-					switch (arpPendulum) {
-						case 0:
+					// UP DOWN
+					if (arpPendulum) {
+						arpNote++;
+						if (arpNote > 127) {
+							arpNote = 126; // overtook highest note, down one
+						}
+
+						while (!voice_state.held_key(arpNote)) {
 							arpNote++;
-							while (!voice_state.held_key(arpNote)) {
-								arpNote++;
-								if (arpNote > 127) {
-									arpNote = 0;
+							if (arpNote > 127) {
+
+								arpNote = 126; // overtook highest note, down one
+								if (arpRange) {
 									arpRound++;
 									if (arpRound > arpRange) {
-										arpRound--;
-										arpPendulum = 1;
+										arpRound = arpRange;
+										arpPendulum = 0;
+
+										// get next note down
+										while (!voice_state.held_key(arpNote)) {
+											arpNote--;
+										}
+										// get next note down againn so as not to repeat the same note
+										while (!voice_state.held_key(arpNote)) {
+											arpNote--;
+										}
+
+									} else {
+										arpNote = 0;
+										// get next note up
+										while (!voice_state.held_key(arpNote)) {
+											arpNote++;
+										}
+									}
+								} else {
+									arpPendulum = 0;
+									// get next note down
+									while (!voice_state.held_key(arpNote)) {
+										arpNote--;
 									}
 								}
 							}
-							arp_output_note = arpNote + (arpRound * 12);
-							if (sendArp)
-								midiOut(arp_output_note);
-							break;
+						}
 
-						case 1:
+					} else {
+						arpNote--;
+						if (arpNote < 1) {
+							arpNote = 0;
+						}
+
+						while (!voice_state.held_key(arpNote)) {
 							arpNote--;
-							while (!voice_state.held_key(arpNote)) {
-								arpNote--;
-								if (arpNote == 0) {
-									arpNote = 127;
+							if (arpNote < 0) {
+								arpNote = 0;
+								if (arpRange) {
 									arpRound--;
 									if (arpRound < 0) {
-										arpRound++;
-										arpPendulum = 0;
+										arpRound = 0;
+										arpPendulum = 1;
+
+										// get next note up
+										while (!voice_state.held_key(arpNote)) {
+											arpNote++;
+										}
+
+									} else {
+										arpNote = 127;
+										// get next note down
+										while (!voice_state.held_key(arpNote)) {
+											arpNote--;
+										}
+									}
+								} else {
+									arpPendulum = 1;
+
+									// get next note up
+									while (!voice_state.held_key(arpNote)) {
+										arpNote++;
 									}
 								}
 							}
-							arp_output_note = arpNote + (arpRound * 12);
-							if (sendArp)
-								midiOut(arp_output_note);
-							break;
+						}
 					}
+
+					if (lastArpNote == arpNote + (arpRound * 12)) {
+						arpTick();
+					}
+					lastArpNote = arp_output_note = arpNote + (arpRound * 12);
+					if (sendArp)
+						midiOut(arp_output_note);
 					break;
 
 				case 4:
