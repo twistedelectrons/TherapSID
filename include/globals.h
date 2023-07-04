@@ -4,7 +4,7 @@
 #include "voice_state.hpp"
 
 template <typename T> class optional;
-
+extern bool noArp1key;
 extern Preset preset_data;
 extern VoiceState<6> voice_state;
 extern Glide glide[6];
@@ -87,6 +87,7 @@ extern byte* voice_index; // array of size 6, set depending on preset.paraphonic
 #define EEPROM_ADDR_PRESET_DATA_START 0x0028
 #define EEPROM_ADDR_PITCH_BEND_UP 0x0029
 #define EEPROM_ADDR_PITCH_BEND_DOWN 0x002a
+#define EEPROM_ADDR_NO_ARP_1_KEY 0x002b
 // block of main storage for presets
 #define EEPROM_ADDR_PRESET(preset) (EEPROM_ADDR_PRESET_DATA_START + (preset - 1) * PRESET_DATA_SIZE)
 // one extra byte of storage per preset - located at two different places (1-96, 97-99)
@@ -109,4 +110,4 @@ struct globalSetting {
 	bool isBaseOne;
 };
 
-extern const globalSetting globalSettings[16];
+extern const globalSetting globalSettings[17];

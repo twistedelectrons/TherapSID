@@ -78,7 +78,7 @@ void arpReset() {
 byte lastArpNote;
 
 void arpTick() {
-	if (voice_state.n_held_keys() > 0) {
+	if (voice_state.n_held_keys() > noArp1key) {
 		if (preset_data.arp_mode) {
 			if (preset_data.lfo[0].retrig || voice_state.n_held_keys() == 1) { // always retrigger on the first key
 				lfoStep[0] = 0;
