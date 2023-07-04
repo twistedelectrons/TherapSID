@@ -7,6 +7,7 @@ bool sendLfo = false;
 bool sendArp = false;
 bool pwLimit;
 bool lfoNewRand[3];
+bool noArp1key;
 byte aftertouch;      // latest read afterTouch value
 bool aftertouchToLfo; // option to assign aftertouch to LFO depth 2
 int loadTimer;
@@ -86,7 +87,7 @@ optional<byte> control_voltage_note;
 byte* voice_index; // array of size 6, set depending on preset.paraphonic
 
 // Global settings, ranges and where stored in EEPROM memory
-const globalSetting globalSettings[16] = {
+const globalSetting globalSettings[17] = {
 
     {&modToLfo, EEPROM_ADDR_MW_TO_LFO1, 0, 1, true, 85, false},
     {&aftertouchToLfo, EEPROM_ADDR_AT_TO_LFO2, 0, 1, true, 86, false},
@@ -106,4 +107,5 @@ const globalSetting globalSettings[16] = {
     {&preset, EEPROM_ADDR_PRESET_LAST, PRESET_NUMBER_MIN, PRESET_NUMBER_MAX, PRESET_NUMBER_MIN, 255, false},
     {&pitchBendUp, EEPROM_ADDR_PITCH_BEND_UP, 1, 48, 2, 99, true},
     {&pitchBendDown, EEPROM_ADDR_PITCH_BEND_DOWN, 1, 48, 2, 100, true},
+    {&noArp1key, EEPROM_ADDR_NO_ARP_1_KEY, 0, 1, 0, 101, false},
 };

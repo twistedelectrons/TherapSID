@@ -130,6 +130,9 @@ static void HandleNoteOn(byte channel, byte note, byte velocity) {
 	if (channel == masterChannel) {
 		if (velocity) {
 			velocityLast = velocity;
+			if (voice_state.n_held_keys() < 1) {
+				arp_output_note = note + (arpRound * 12);
+			}
 		}
 
 		switch (voice_state.note_on(note, velocity)) {
