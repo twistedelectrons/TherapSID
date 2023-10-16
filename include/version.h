@@ -1,3 +1,3 @@
 #pragma once
 static const int version = 2;
-static const int versionDecimal = 4;
+static const int versionDecimal = 5;

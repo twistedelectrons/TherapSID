@@ -138,6 +138,12 @@ void setup() {
 	mux(7);
 	bool initialize_globals = ((PINA & _BV(4)) == 0);
 
+	// demoMode
+	mux(6);
+	PORTA |= _BV(2); //  HIGH;
+	demoMode = !digitalRead(A2);
+	PORTA &= ~_BV(2); //  LOW;
+
 	// Update all global settings from EEPROM memory
 	for (int i = 0; i < (int)(sizeof(globalSettings) / sizeof(globalSetting)); i++) {
 		const globalSetting* setting = &(globalSettings[i]);

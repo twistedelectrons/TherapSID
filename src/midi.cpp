@@ -350,7 +350,54 @@ void processSysex(byte* buffer, int size) {
 	}
 }
 
+int testCounter;
+byte testNote;
+const byte cBlues[] = {60, 63, 65, 66, 67, 70, 72, 75, 77, 78, 79, 82, 84};
+
 void midiRead() {
+
+	if (demoMode) {
+		testCounter++;
+		if (stopdemoMode == true) {
+			pedal_adapter.note_off(1, testNote);
+				stopdemoMode = demoMode = false;
+			}
+
+		if (testCounter == 70) {
+
+			pedal_adapter.note_off(1, testNote);
+
+		}
+
+		else if (testCounter == 37) {
+
+			if (random(10) < 3) {
+				pedal_adapter.note_off(1, testNote);
+				testNote += 12;
+				pedal_adapter.note_on(1, testNote, 64);
+			}
+
+		} else if (testCounter == 75) {
+
+			testNote = cBlues[random(13)] + 12 * random(3);
+			testNote -= 27;
+			pedal_adapter.note_on(1, testNote, 64);
+		}
+
+		else if (testCounter == 95) {
+			pedal_adapter.note_off(1, testNote);
+			
+		}
+
+		else if (testCounter == 100) {
+			testCounter = 0;
+
+			testNote = cBlues[random(13)] + 12 * random(4);
+
+			testNote -= 27;
+			pedal_adapter.note_on(1, testNote, 64);
+		}
+	}
 	while (Serial.available()) {
 		byte input = Serial.read();
 

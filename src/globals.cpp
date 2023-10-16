@@ -5,6 +5,8 @@
 UiState ui_state;
 bool sendLfo = false;
 bool sendArp = false;
+bool demoMode = false;
+bool stopdemoMode = false;
 bool pwLimit;
 bool lfoNewRand[3];
 bool noArp1key;

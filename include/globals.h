@@ -5,11 +5,13 @@
 
 template <typename T> class optional;
 extern bool noArp1key;
+extern bool demoMode;
 extern Preset preset_data;
 extern VoiceState<6> voice_state;
 extern Glide glide[6];
 extern byte aftertouch;
 extern bool aftertouchToLfo;
+extern bool stopdemoMode;
 extern bool sendLfo;
 extern int presetScrollTimer;
 extern bool volumeChanged;

@@ -440,10 +440,12 @@ void buttChanged(byte number, bool value) {
 				break;
 
 			case Button::ARP_MODE:
-				noArpAction = true;
-				arpModeHeld = true;
-				if (ui_state.midiSetup) {
-					ui_state.midiSetup = 3;
+				if (!demoMode) {
+					noArpAction = true;
+					arpModeHeld = true;
+					if (ui_state.midiSetup) {
+						ui_state.midiSetup = 3;
+					}
 				}
 				break;
 
@@ -555,6 +557,8 @@ void buttChanged(byte number, bool value) {
 				break;
 
 			case Button::PRESET_RESET:
+				if (demoMode)
+					stopdemoMode = true;
 				resetDown = true;
 				if (ui_state.saveMode) {
 					ui_state.saveMode = false;
@@ -589,31 +593,33 @@ void buttChanged(byte number, bool value) {
 				break;
 
 			case Button::ARP_MODE:
-				if (ui_state.filterModeHeld) {
-					fatChanged = true;
-					if (preset_data.paraphonic)
-						preset_data.fat_mode = static_cast<FatMode>(((int)preset_data.fat_mode + 1) % 6);
-					else
-						preset_data.fat_mode = static_cast<FatMode>(((int)preset_data.fat_mode + 1) % 5);
+				if (!demoMode) {
+					if (ui_state.filterModeHeld) {
+						fatChanged = true;
+						if (preset_data.paraphonic)
+							preset_data.fat_mode = static_cast<FatMode>(((int)preset_data.fat_mode + 1) % 6);
+						else
+							preset_data.fat_mode = static_cast<FatMode>(((int)preset_data.fat_mode + 1) % 5);
 
-				} else {
-					if (noArpAction) {
-						if (!ui_state.midiSetup) {
-							if (!preset_data.paraphonic) {
-								preset_data.arp_mode++;
-								if (preset_data.arp_mode > 7) {
-									preset_data.arp_mode = 0;
-									sendNoteOff(lastNote, 127, masterChannelOut);
+					} else {
+						if (noArpAction) {
+							if (!ui_state.midiSetup) {
+								if (!preset_data.paraphonic) {
+									preset_data.arp_mode++;
+									if (preset_data.arp_mode > 7) {
+										preset_data.arp_mode = 0;
+										sendNoteOff(lastNote, 127, masterChannelOut);
+									}
+									arpReset();
 								}
-								arpReset();
+							} else if (ui_state.midiSetup == 3) {
+								ui_state.midiSetup = 0;
 							}
-						} else if (ui_state.midiSetup == 3) {
-							ui_state.midiSetup = 0;
 						}
 					}
-				}
 
-				arpModeHeld = false;
+					arpModeHeld = false;
+				}
 				break;
 
 			case Button::PRESET_UP:
