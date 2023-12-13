@@ -2,6 +2,7 @@
 #include "isr.h"
 #include "ui.h"
 #include "asid.h"
+#include "sid.h"
 
 static int envCounter;
 static int lfoCounter[3];
@@ -180,7 +181,7 @@ void isr() {
 		}
 	}
 	// glides
-	for (int i = 0; i < 6; i++) {
+	for (int i = 0; i < SIDVOICES_TOTAL; i++) {
 		glide[i].glide_tick(voice_state.shall_glide(i) ? preset_data.voice[voice_index[i]].glide : 0);
 	}
 

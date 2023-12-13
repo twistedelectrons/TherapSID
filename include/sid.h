@@ -2,13 +2,27 @@
 #include <stdint.h>
 #include <Arduino.h>
 
+#define SIDCHIPS 2 // Normal case, 2 SIDs
+// #define SIDCHIPS 3 // Used for ARM2SID with third SID connected. See note:
+/*
+  To make third SID work the following patch needs to be done:
+   - Lift pin 24 of CPU (IC13) out of socket
+   - Connect pin 24 of CPU to ARM2SID top connector, pin 6
+   - Other pins of ARM2SID top connector should be connected to ARM2SID SID2 socket
+   - The above will also disable LFO CV input 3
+ */
+
+#define SIDVOICES_PER_CHIP 3
+#define SIDVOICES_TOTAL (SIDCHIPS * SIDVOICES_PER_CHIP)
+#define SID_REGISTERS 25
+
 void sidReset();
 void init1MhzClock();
 void sidSend(byte address, byte data);
 
 class Sid {
   public:
-	Sid(int chip_enable_bit);
+	Sid(int chip_enable_bit, int extra_chip_enable_bit);
 
 	/// Updates the next pair of changed registers. Call this in your main loop.
 	void send_next_update_pair();
@@ -47,10 +61,6 @@ class Sid {
 
 	uint8_t filter_mode();
 
-	/// Changes the communication timing to be out-of-spec for normal SIDs, but to improve
-	/// quality for the ARM SID replacement
-	void set_arm_sid_mode(bool value) { armSID = value; }
-
   private:
 	bool is_voice_playing(size_t voice);
 
@@ -63,10 +73,10 @@ class Sid {
 
 	size_t next_pair = 0;
 	int chip_enable_bit;
+	int extra_chip_enable_bit = -1;
 	bool force_initial_update = true;
-	byte registers[25];
-	byte registers_sent[25];
-	bool armSID = false;
+	byte registers[SID_REGISTERS];
+	byte registers_sent[SID_REGISTERS];
 };
 
-extern Sid sid_chips[2];
+extern Sid sid_chips[SIDCHIPS];

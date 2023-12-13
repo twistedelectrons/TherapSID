@@ -83,7 +83,9 @@ void digit(uint8_t channel, uint8_t number) {
 	    0b1010000, // 19 = r
 	    0b1111000, // 20 = t
 	    0b0111110, // 21 = U
-	    0b0000000, // 22 = <blank>
+	    0b0011110, // 22 = J
+	    0b0110111, // 23 = M
+	    0b0000000, // 24 = <blank>
 	};
 	const auto DIGITS_LEN = sizeof(digits) / sizeof(*digits);
 

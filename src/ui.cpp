@@ -8,7 +8,13 @@
 #include "globals.h"
 #include "asid.h"
 
+// active sensing
+#include "midi.h"
+
 static UiDisplayController ui_display_controller;
+
+static int activeSensingTimer = 0;
+extern byte turboMidiXrate;
 
 void ui_loop() {
 
@@ -50,7 +56,7 @@ void ui_loop() {
 
 	} // show CH or OF when autochord is toggled
 
-	ui_display_controller.update(preset, preset_data, ui_state);
+	ui_display_controller.update(preset, preset_data, ui_state, turboMidiXrate);
 }
 
 void ui_tick() {
@@ -113,6 +119,15 @@ void ui_tick() {
 			lfoButtPressed = false;
 		}
 	} // delete LFO stuff
+
+	// If Active Sensing not already queued up, check if it should.
+	if (!activeSensing) {
+		// 150 ms apart is within spec
+		if (activeSensingTimer++ > 10 * 150) {
+			activeSensing = true;
+			activeSensingTimer = 0;
+		}
+	}
 }
 
 void force_display_update() { ui_display_controller.force_update(); }

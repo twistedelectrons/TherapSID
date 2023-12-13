@@ -7,32 +7,7 @@
 #include "sid.h"
 #include "ui_leds.h"
 #include "asid.h"
-
-/*
- *
- *
-
-code to convert HEX to SYSEX
-cd /Users/a/Documents/bootloaderT&&cp -f /private/var/hex/TSID.ino.hex /Users/a/Documents/bootloaderT&&python
-tools/hex2sysex/hex2sysex.py --syx -o firmware.syx TSID.ino.hex
-
-TO DO:
-Add setup mode (hold arp mode for 2 seconds), press again to exit (same as megaFM)
--MIDI channel learn (map input to ouput channel)
--in setup mode use a button (square 1?) to toggle LFO MIDI CC send on/off EEPROM_ADDR_SEND_LFO
--in setup mode uss a button (triangle 1?) to toggle ARP MIDI send on/off EEPROM_ADDR_SEND_ARP
--add 6 voice mode using 2 chips, I suggest we hold a waveform for several seconds for 3 voice paramode, hold it longer
-for 6 (show P3, then P6 on display) -kill the voices when they are done singing by setting the freq to 0. Never tried
-this (too dumb to figure out when the ADSR is finished), but I read it's a solution against the ghost notes (leaky VCA)
-
-NEW in 2.0
-Swapped filter mode and arp mode long hold function. hold filter mode for fat change (hold arp mode for setup mode)
-Added PW limiter (never silent).. should we add option in setup to turn this on/off?
-New MIDI engine (ported from MEGAfm)
-
-
-
-*/
+#include "armsid.h"
 
 #include <digitalWriteFast.h>
 #include <EEPROM.h>
@@ -40,8 +15,17 @@ New MIDI engine (ported from MEGAfm)
 
 #include <TimerOne.h>
 
-void setup() {
+// Traverse through the EEPROM list and set the default value
+void setDefaultEEPROMvalue(byte reg) {
+	for (int i = 0; i < (int)(sizeof(globalSettings) / sizeof(globalSetting)); i++) {
+		const globalSetting* setting = &(globalSettings[i]);
+		if (setting->eepromAddress == reg) {
+			EEPROM.update(setting->eepromAddress, setting->defaultValue);
+		}
+	}
+}
 
+void setup() {
 	Serial.begin(31250);
 
 	preset_data.arp_speed_base = 100;
@@ -52,7 +36,13 @@ void setup() {
 	DDRD |= _BV(3); // LATCH
 
 	DDRB = 255; // data port
-	DDRC = 255; // address port
+
+	// SID address port and CV switches
+#if SIDCHIPS > 2
+	DDRC = B11111100;
+#else
+	DDRC = B11111000;
+#endif
 
 	// get the clock going for the SID
 	init1MhzClock();
@@ -72,8 +62,12 @@ void setup() {
 	digitalWrite(16, HIGH); // CV switch1
 	pinMode(17, INPUT);
 	digitalWrite(17, HIGH); // CV switch2
+#if SIDCHIPS > 2
+	pinMode(18, OUTPUT); // SID3 CS (ARM2SID)
+#else
 	pinMode(18, INPUT);
 	digitalWrite(18, HIGH); // CV switch3
+#endif
 
 	pinMode(A7, INPUT);
 	digitalWrite(A7, HIGH); // gate
@@ -82,14 +76,17 @@ void setup() {
 	mydisplay.shutdown(0, false);
 	mydisplay.setIntensity(0, 1); // 15 = brightest
 
+	// are we holding preset buttons at startup?
 	mux(9);
-
-	// are we holding preset down button at startup?
+	delay(5);
 	if ((PINA & _BV(4)) == 0) {
+		// preset up
 		sendDump();
 	} else {
 		mux(3);
+		delay(5);
 		if ((PINA & _BV(4)) == 0) {
+			// preset down
 			recieveDump();
 		}
 	}
@@ -101,8 +98,6 @@ void setup() {
 
 	Timer1.initialize(100);      //
 	Timer1.attachInterrupt(isr); // attach the service routine here
-
-	DDRC = B11111000;
 
 	// Validate EEPROM memory structure
 	uint16_t value;
@@ -130,13 +125,45 @@ void setup() {
 		for (byte i = PRESET_NUMBER_MIN; i <= PRESET_NUMBER_MAX; i++) {
 			EEPROM.update(EEPROM_ADDR_PRESET_EXTRA_BYTE(i), 0x07);
 		}
+		value = EEPROM_FORMAT_VERSION_V2;
+		EEPROM.put(EEPROM_ADDR_VERSION, value);
+	}
+	if (value == EEPROM_FORMAT_VERSION_V2) {
+		// Convert from V2 to V3:
 
-		EEPROM.put(EEPROM_ADDR_VERSION, EEPROM_FORMAT_VERSION_V2);
+		// New values
+		byte newRegsV3[] = {EEPROM_ADDR_PITCH_BEND_UP,          EEPROM_ADDR_PITCH_BEND_DOWN,
+		                    EEPROM_ADDR_NO_ARP_1_KEY,           EEPROM_ADDR_ARMSID_CHIP_EMULATION,
+		                    EEPROM_ADDR_ARMSID_ADSR_BUG_FIXED,  EEPROM_ADDR_ARMSID_6581_FILTER_STRENGTH,
+		                    EEPROM_ADDR_ARMSID_6581_FILTER_LOW, EEPROM_ADDR_ARMSID_8580_FILTER_CENTRAL,
+		                    EEPROM_ADDR_ARMSID_8580_FILTER_LOW};
+
+		for (byte r = 0; r < sizeof(newRegsV3) / sizeof(*newRegsV3); r++) {
+			setDefaultEEPROMvalue(newRegsV3[r]);
+		}
+
+		value = EEPROM_FORMAT_VERSION_V3;
+		EEPROM.put(EEPROM_ADDR_VERSION, value);
 	}
 
 	// are we holding reset (to reset globals)?
 	mux(7);
+	delay(5);
 	bool initialize_globals = ((PINA & _BV(4)) == 0);
+	if (initialize_globals) {
+		digit(0, DIGIT_D);
+		digit(1, DIGIT_F);
+		delay(500);
+	}
+
+	// Are we holding LOOP (to flash ARMSID settings)?
+	mux(1);
+	delay(5);
+	bool flash_armsid = ((PINA & _BV(4)) == 0);
+	if (flash_armsid) {
+		digit(0, DIGIT_F);
+		digit(1, DIGIT_A);
+	}
 
 	// Update all global settings from EEPROM memory
 	for (int i = 0; i < (int)(sizeof(globalSettings) / sizeof(globalSetting)); i++) {
@@ -156,9 +183,17 @@ void setup() {
 	volumeChanged = true;
 
 	setupMux();
+	midiInit();
 
-	sidReset(); // present sustained Note at startup
+	sidReset(); // prevent sustained Note at startup
 
+	// Sets up ARMSIDs or ARM2SID chips if available
+	arm2SidSetSidFmMode(false);
+	armsidConfigChip(0, flash_armsid);
+	armsidConfigChip(1, flash_armsid);
+
+	// Setup ASID without enabling it
 	asidState.enabled = false;
+	asidState.isSidFmMode = false;
 	asidInit(-1);
 }

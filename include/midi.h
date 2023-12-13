@@ -8,3 +8,7 @@ void midiRead();
 void midiOut(byte note);
 void sendDump();
 void recieveDump();
+void midiInit();
+
+extern byte activeSensing;
+extern byte turboMidiXrate;
