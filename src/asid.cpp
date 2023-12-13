@@ -556,7 +556,9 @@ void handleAsidFrameUpdate(byte currentChip, byte* buffer) {
 
 	static byte newMaskBytes[SIDCHIPS][4];
 	static byte newSidData[SIDCHIPS][SID_REGISTERS_ASID];
+	// clang-format off
 	typedef bool (*runRegFunc_t)(byte chip, byte voice, byte* data);
+	// clang-format on
 
 	struct regconfig_t {
 		byte voice;
@@ -1241,7 +1243,7 @@ void asidToggleCutoffAdjustMode(bool isPressed) {
 	}
 }
 
-/* 
+/*
  * Called at 10kHz
  */
 void asidTick() {
