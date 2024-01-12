@@ -32,25 +32,80 @@ let dataArray = [];
 let drop1;let drop2;let drop3;let drop4;let drop5;let drop6;
 let drop7;let drop8;let drop9;let drop10;let drop11;let drop12;
 
+let armsidSettingsChip0 = [];
+let armsidSettingsChip1 = [];
+
+class armsidSetting {
+  constructor(minVal, maxVal, defaultVal, chip, idx, cc, label, values) {
+    this.minVal = minVal;
+    this.maxVal = maxVal;
+    this.defaultVal = defaultVal;
+    this.x = 10+435*chip;
+    this.y = 330+50*idx;
+    this.label = label;
+    this.values = values;
+    this.cc = cc;
+    this.slider = createSlider(this.minVal, this.maxVal, this.defaultVal);
+    this.slider.position(this.x, this.y);
+    this.slider.style('width', '300px');
+  }
+
+  display() {
+    text(this.label+": "+this.values[round(map(this.slider.value(), this.minVal, this.maxVal, 0, this.values.length-1))], this.x, this.y-5);
+  }
+
+  setSlider(value) {
+    this.slider.value(value+this.minVal);
+  }
+
+  setSliderHighBit(value) {
+    this.slider.value(this.slider.value()+(value << 3));
+  }
+
+  getCC() {
+    return this.cc;
+  }
+
+  getData() {
+    return this.slider.value()-this.minVal;
+  }
+
+  needs8bitStorage() {
+    return (this.maxVal-this.minVal+1 > 8);
+  }
+}
+
+function setupArmsidSettings(chip, settings) {
+  settings.push(new armsidSetting(0, 2, 0, chip, 0, 102, "Chip Emulation", ["Auto detect", "6581", "8580"]));
+  settings.push(new armsidSetting(0, 1, 0, chip, 1, 103, "ADSR Bug", ["Not fixed", "Fixed"]));
+  settings.push(new armsidSetting(-7, 7, 0, chip, 2, 104, "6581 Filter Strength", ["Follin", "Galway", "Average", "Strong", "Extreme"]));
+  settings.push(new armsidSetting(-1, 1, 0, chip, 3, 106, "6581 Filter Low", ["150", "215", "310"]));
+  settings.push(new armsidSetting(-3, 3, 0, chip, 4, 107, "8580 Filter Central", ["12000", "9500", "7600", "6000", "4800", "3800", "3000" ]));
+  settings.push(new armsidSetting(-3, 3, 0, chip, 5, 108, "8580 Filter Low", ["30", "45", "65", "100", "150", "220", "330"]));
+}
+
+function drawArmsidTexts(chip, settings) {
+  text("ARMSID SLOT "+(chip+1)+":", 10+435*chip, 290);
+  for (n = 0; n < settings.length; n++) {
+    settings[n].display();
+  }
+}
 
 
 
 function setup(){
   
-
-  checkboxes.push(createCheckbox('').changed(updateBits));
-  checkboxes.push(createCheckbox('').changed(updateBits));
- checkboxes.push(createCheckbox('').changed(updateBits));  checkboxes.push(createCheckbox('').changed(updateBits));
-  checkboxes.push(createCheckbox('').changed(updateBits));
-  checkboxes.push(createCheckbox('').changed(updateBits));
-checkboxes.push(createCheckbox('').changed(updateBits));
-checkboxes.push(createCheckbox('').changed(updateBits));
+  for (let i = 0; i < 7; i++) {
+    checkboxes.push(createCheckbox('').changed(updateBits));
+  }
   
 centerX = width / 2;
   centerY = height / 2;
   angleMode(DEGREES); // use degrees instead of radians for angle calculations
   
  
+  setupArmsidSettings(0, armsidSettingsChip0);
+  setupArmsidSettings(1, armsidSettingsChip1);
   
   drop1 = createSelect();
   for (let i = 1; i < 17; i++) {
@@ -123,7 +178,7 @@ navigator.requestMIDIAccess({ sysex: true })
 
     
 });
-createCanvas(800, 350);
+createCanvas(800, 650);
   
    
     button1 = createButton('Read');
@@ -162,7 +217,6 @@ function draw(){
   checkboxes[4].position(5,170);
   checkboxes[5].position(5,190);
   checkboxes[6].position(5,210);
-checkboxes[7].position(5,230);
   
   background(1);
   
@@ -172,7 +226,7 @@ checkboxes[7].position(5,230);
   noStroke(); // no stroke
 
    push();
-  scale(0.4);translate(1800, 350);
+  scale(0.4);translate(1700, 350);
    let amplitude = 150;
   speed = (amplitude * sin(TWO_PI * frequency * millis() / 1000) + amplitude)/600;
  
@@ -209,7 +263,7 @@ checkboxes[7].position(5,230);
     button2.attribute('disabled', false);
     fill(150, 150, 200);
     text('This Tool requires', 8, 45);
-    text('firmware 2.4 or above!', 8, 60);
+    text('firmware 2.5 or above!', 8, 60);
     
    if(noIO==1){
     button1.attribute('disabled', false);
@@ -226,7 +280,7 @@ checkboxes[7].position(5,230);
 
   
 text('MIDI OUTPUT (to device):', 530, 25);
-text('TherapSID Tool V1.1                MIDI INPUT (from device):', 8, 25);
+text('TherapSID Tool V1.2                MIDI INPUT (from device):', 8, 25);
   
 
   text('MIDI CHANNELS:', -180+400+5, 170+70-155);
@@ -243,11 +297,12 @@ text('TherapSID Tool V1.1                MIDI INPUT (from device):', 8, 25);
   text('LFO SENDS CC', -375+400+5, 250+70-155);
   text('ARP SENDS NOTES', -375+400+5, 270+70-155);
   text('PW LIMITER', -375+400+5, 290+70-155);
-  text('ARMSID MODE', -375+400+5, 310+70-155);
-  text('NO ARP ON 1 KEY', -375+400+5, 310+90-155);
+  text('NO ARP ON 1 KEY', -375+400+5, 310+70-155);
   
   text('MASTER VOL:', -180+400+5+220, 170+70-155);
 
+  drawArmsidTexts(0, armsidSettingsChip0);
+  drawArmsidTexts(1, armsidSettingsChip1);
   
 }
 
@@ -282,10 +337,21 @@ midiOUT = WebMidi.getOutputByName(deviceOutNumber);
   channel.sendControlChange(87, int(checkboxes[2].checked()));
   channel.sendControlChange(92, int(checkboxes[3].checked()));
   channel.sendControlChange(93, int(checkboxes[4].checked()));
-  channel.sendControlChange(97, int(checkboxes[6].checked()));
-  channel.sendControlChange(101, int(checkboxes[7].checked()));
-  //channel.sendControlChange(98, int(checkboxes[7].checked()));//quantized
+  channel.sendControlChange(101, int(checkboxes[6].checked()));
 
+  for (n = 0; n < armsidSettingsChip0.length; n++) {
+    let cc = armsidSettingsChip0[n].getCC();
+    let data = armsidSettingsChip0[n].getData()+(armsidSettingsChip1[n].getData()<<4);
+
+    if (armsidSettingsChip0[n].needs8bitStorage()) {
+      // If needs to store an 8 bit value, split it up over two CCs
+      channel.sendControlChange(cc, data & 0x7f);
+      channel.sendControlChange(cc+1, (data > 0x7f ? 1 : 0));
+    } else {
+      // Max size to store is less than 8 bits, parameter uses one CC
+      channel.sendControlChange(cc, data);
+    }
+  }
    
   
 }
@@ -344,10 +410,22 @@ function HandleControlChange(e){
   case 92:if(vel>0){checkboxes[3].checked(true);}else{checkboxes[3].checked(false);}break;
   case 93:if(vel>0){checkboxes[4].checked(true);}else{checkboxes[4].checked(false);}break;
   case 88:if(vel>0){checkboxes[5].checked(true);}else{checkboxes[5].checked(false);}break;
-  case 97:if(vel>0){checkboxes[6].checked(true);}else{checkboxes[6].checked(false);}break; 
-  case 101:if(vel>0){checkboxes[7].checked(true);}else{checkboxes[7].checked(false);}break; 
- 
- //case 17:if(vel<16){drop7.elt.selectedIndex = vel-1;}break;//tune range
+  case 101:if(vel>0){checkboxes[6].checked(true);}else{checkboxes[6].checked(false);}break;
+  default:
+    // Check the ARMSID configs
+    for (n = 0; n < armsidSettingsChip0.length; n++) {
+      let cc = armsidSettingsChip0[n].getCC();
+      if (cc == note) {
+        console.log("setting:"+n+" cc:"+cc+" vel:"+vel);
+        armsidSettingsChip0[n].setSlider(vel & 0x0f);
+        armsidSettingsChip1[n].setSlider(vel >> 4);
+      } else if (armsidSettingsChip0[n].needs8bitStorage() && (note == cc+1)) {
+        console.log("setting high:"+n+" cc:"+cc+" vel:"+vel);
+        armsidSettingsChip1[n].setSliderHighBit(vel > 0);
+      }
+    }
+    break;
+
  
   }
  

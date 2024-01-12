@@ -1,5 +1,7 @@
 #pragma once
 #include <Arduino.h>
+#include "sid.h" // number of chips
+#include "opl.h"
 #include "preset.h"
 
 // #define ASID_PROFILER
@@ -18,11 +20,12 @@ void asidUpdateVolume(byte chip);
 void asidIndicateChanged(byte chip);
 void asidToggleCutoffAdjustMode(bool isPressed);
 void asidTick();
+void asidFmUpdateFeedback(byte channel);
+void asidFmUpdateOpLevel(byte oper);
+void asidAdvanceDefaultChip(bool isUp);
+void asidClearDefaultChip();
 
-#define SIDVOICES 3
-#define SIDCHIPS 2
-#define SID_REGISTERS 25
-#define SID_REGISTERS_ASID 28
+#define SID_REGISTERS_ASID (SID_REGISTERS + 3)
 
 #define POT_VALUE_TO_ASID_PW(x) (x << 1)
 #define POT_VALUE_TO_ASID_LORES(x) (x >> 5)
@@ -52,23 +55,23 @@ union selected_sids_t {
 struct asidState_t {
 	bool enabled;
 
-	bool muteChannel[SIDCHIPS][SIDVOICES];
+	bool muteChannel[SIDCHIPS][SIDVOICES_PER_CHIP];
 
-	WaveformState overrideWaveform[SIDCHIPS][SIDVOICES];
-	OverrideState overrideSync[SIDCHIPS][SIDVOICES];
-	OverrideState overrideRingMod[SIDCHIPS][SIDVOICES];
+	WaveformState overrideWaveform[SIDCHIPS][SIDVOICES_PER_CHIP];
+	OverrideState overrideSync[SIDCHIPS][SIDVOICES_PER_CHIP];
+	OverrideState overrideRingMod[SIDCHIPS][SIDVOICES_PER_CHIP];
 
-	int overridePW[SIDCHIPS][SIDVOICES];
-	bool isOverridePW[SIDCHIPS][SIDVOICES];
-	int adjustOctave[SIDCHIPS][SIDVOICES];
-	int adjustFine[SIDCHIPS][SIDVOICES];
+	int overridePW[SIDCHIPS][SIDVOICES_PER_CHIP];
+	bool isOverridePW[SIDCHIPS][SIDVOICES_PER_CHIP];
+	int adjustOctave[SIDCHIPS][SIDVOICES_PER_CHIP];
+	int adjustFine[SIDCHIPS][SIDVOICES_PER_CHIP];
 
-	int adjustAttack[SIDCHIPS][SIDVOICES];
-	int adjustDecay[SIDCHIPS][SIDVOICES];
-	int adjustSustain[SIDCHIPS][SIDVOICES];
-	int adjustRelease[SIDCHIPS][SIDVOICES];
+	int adjustAttack[SIDCHIPS][SIDVOICES_PER_CHIP];
+	int adjustDecay[SIDCHIPS][SIDVOICES_PER_CHIP];
+	int adjustSustain[SIDCHIPS][SIDVOICES_PER_CHIP];
+	int adjustRelease[SIDCHIPS][SIDVOICES_PER_CHIP];
 
-	OverrideState overrideFilterRoute[SIDCHIPS][SIDVOICES];
+	OverrideState overrideFilterRoute[SIDCHIPS][SIDVOICES_PER_CHIP];
 	int adjustCutoff[SIDCHIPS];
 	int adjustReso[SIDCHIPS];
 	FilterMode filterMode[SIDCHIPS];
@@ -85,10 +88,25 @@ struct asidState_t {
 	bool isCutoffAdjustModeScaling;
 	byte displayState;
 
-	byte lastSIDvalues[SID_REGISTERS];
+	byte lastSIDvalues[SIDCHIPS][SID_REGISTERS];
 
 	volatile long timer;
 	volatile byte slowTimer;
+
+	int8_t defaultSelectedChip;
+	bool isSoloButtonHeld;
+	int8_t soloedChannel;
+
+	byte lastDuplicatedChip;
+
+	// FM OPL stuff
+	bool isSidFmMode;
+	bool muteFMChannel[OPL_NUM_CHANNELS_MAX];
+	int adjustFMOpLevel[OPL_NUM_OPERATORS * OPL_NUM_CHANNELS_MELODY_MODE];
+	int adjustFMFeedback[OPL_NUM_CHANNELS_MELODY_MODE];
+
+	byte lastFMvaluesFeedbackConn[OPL_NUM_CHANNELS_MELODY_MODE];
+	byte lastFMvaluesKslTotalLev[OPL_SIZE_BLOCK_EXTENDED];
 };
 
 extern asidState_t asidState;

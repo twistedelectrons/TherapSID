@@ -2,12 +2,13 @@
 #include <Arduino.h>
 #include "preset.h"
 #include "voice_state.hpp"
+#include "sid.h"
 
 template <typename T> class optional;
 extern bool noArp1key;
 extern Preset preset_data;
-extern VoiceState<6> voice_state;
-extern Glide glide[6];
+extern VoiceState<SIDVOICES_TOTAL> voice_state;
+extern Glide glide[SIDVOICES_TOTAL];
 extern byte aftertouch;
 extern bool aftertouchToLfo;
 extern bool sendLfo;
@@ -25,7 +26,6 @@ extern bool chordKeys[128];
 extern byte chordRoot;
 extern bool pwLimit;
 extern bool toolMode;
-extern bool armSID;
 extern bool cvActive[3];
 extern int lfoStep[3];
 extern byte lfo[3];
@@ -65,7 +65,7 @@ extern byte arp_output_note;
 extern optional<byte> control_voltage_note;
 
 // voice_index[operator] tells you the preset's voice to read the operator's settings from.
-extern byte* voice_index; // array of size 6, set depending on preset.paraphonic
+extern byte* voice_index; // array of size SIDVOICES_TOTAL, set depending on preset.paraphonic
 
 // EEPROM Memory Mapping
 #define EEPROM_ADDR_COOKIE 0x0000  // Two bytes
@@ -83,11 +83,19 @@ extern byte* voice_index; // array of size 6, set depending on preset.paraphonic
 #define EEPROM_ADDR_MIDI_IN_CH_VOICE1 0x000e
 #define EEPROM_ADDR_MIDI_IN_CH_VOICE2 0x000f
 #define EEPROM_ADDR_MIDI_IN_CH_VOICE3 0x0010
-#define EEPROM_ADDR_ARMSID_MODE 0x0011
+#define EEPROM_ADDR_PITCH_BEND_UP 0x0011
+#define EEPROM_ADDR_PITCH_BEND_DOWN 0x0012
+#define EEPROM_ADDR_NO_ARP_1_KEY 0x0013
+// ARMSID settings are one chip per nibble
+#define EEPROM_ADDR_ARMSID_CHIP_EMULATION 0x0014
+#define EEPROM_ADDR_ARMSID_ADSR_BUG_FIXED 0x0015
+#define EEPROM_ADDR_ARMSID_6581_FILTER_STRENGTH 0x0016
+#define EEPROM_ADDR_ARMSID_6581_FILTER_LOW 0x0017
+#define EEPROM_ADDR_ARMSID_8580_FILTER_CENTRAL 0x0018
+#define EEPROM_ADDR_ARMSID_8580_FILTER_LOW 0x0019
+
+// Preset storage from here
 #define EEPROM_ADDR_PRESET_DATA_START 0x0028
-#define EEPROM_ADDR_PITCH_BEND_UP 0x0029
-#define EEPROM_ADDR_PITCH_BEND_DOWN 0x002a
-#define EEPROM_ADDR_NO_ARP_1_KEY 0x002b
 // block of main storage for presets
 #define EEPROM_ADDR_PRESET(preset) (EEPROM_ADDR_PRESET_DATA_START + (preset - 1) * PRESET_DATA_SIZE)
 // one extra byte of storage per preset - located at two different places (1-96, 97-99)
@@ -98,6 +106,9 @@ extern byte* voice_index; // array of size 6, set depending on preset.paraphonic
 #define EEPROM_COOKIE_VALUE (uint16_t)19028
 #define EEPROM_FORMAT_VERSION_V1 (uint16_t)0x0001
 #define EEPROM_FORMAT_VERSION_V2 (uint16_t)0x0002
+#define EEPROM_FORMAT_VERSION_V3 (uint16_t)0x0003
+
+#define EEPROM_SETTINGS_NUM_BYTES (EEPROM_ADDR_ARMSID_8580_FILTER_LOW - EEPROM_ADDR_PRESET_LAST + 1)
 
 // Global settings, stored in EEPROM
 struct globalSetting {
@@ -110,4 +121,4 @@ struct globalSetting {
 	bool isBaseOne;
 };
 
-extern const globalSetting globalSettings[17];
+extern const globalSetting globalSettings[EEPROM_SETTINGS_NUM_BYTES];

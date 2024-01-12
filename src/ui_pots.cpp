@@ -54,21 +54,22 @@ struct potMap {
 	byte index;
 	byte midiCC;
 	byte bindID;
+	int8_t fmOperator; // Only used in FM mode. -1 means no operator. Values over 18 is feedback
 };
 
 const potMap potMaps[] = {
-    {Pot::PW1, 0, 2, 0},          {Pot::PW2, 1, 10, 3},         {Pot::PW3, 2, 18, 6},
-    {Pot::TUNE1, 0, 3, 1},        {Pot::TUNE2, 1, 11, 4},       {Pot::TUNE3, 2, 19, 7},
-    {Pot::FINE1, 0, 4, 2},        {Pot::FINE2, 1, 12, 5},       {Pot::FINE3, 2, 20, 8},
-    {Pot::GLIDE1, 0, 5, 20},      {Pot::GLIDE2, 1, 13, 20},     {Pot::GLIDE3, 2, 21, 20},
-    {Pot::ATTACK1, 0, 6, 20},     {Pot::ATTACK2, 1, 14, 20},    {Pot::ATTACK3, 2, 22, 20},
-    {Pot::DECAY1, 0, 7, 20},      {Pot::DECAY2, 1, 15, 20},     {Pot::DECAY3, 2, 23, 20},
-    {Pot::SUSTAIN1, 0, 8, 20},    {Pot::SUSTAIN2, 1, 16, 20},   {Pot::SUSTAIN3, 2, 24, 20},
-    {Pot::RELEASE1, 0, 9, 20},    {Pot::RELEASE2, 1, 17, 20},   {Pot::RELEASE3, 2, 25, 20},
-    {Pot::LFO_RATE1, 0, 26, 9},   {Pot::LFO_RATE2, 1, 28, 11},  {Pot::LFO_RATE3, 2, 30, 13},
-    {Pot::LFO_DEPTH1, 0, 27, 10}, {Pot::LFO_DEPTH2, 1, 29, 12}, {Pot::LFO_DEPTH3, 2, 31, 14},
-    {Pot::CUTOFF, 0, 59, 15},     {Pot::RESONANCE, 0, 33, 16},  {Pot::ARP_RANGE, 0, 36, 19},
-    {Pot::ARP_RATE, 0, 35, 18},   {Pot::ARP_SCRUB, 0, 34, 17},
+    {Pot::PW1, 0, 2, 0, 0},           {Pot::PW2, 1, 10, 3, 4},          {Pot::PW3, 2, 18, 6, 8},
+    {Pot::TUNE1, 0, 3, 1, 1},         {Pot::TUNE2, 1, 11, 4, 5},        {Pot::TUNE3, 2, 19, 7, -1},
+    {Pot::FINE1, 0, 4, 2, 2},         {Pot::FINE2, 1, 12, 5, 6},        {Pot::FINE3, 2, 20, 8, -1},
+    {Pot::GLIDE1, 0, 5, 20, 3},       {Pot::GLIDE2, 1, 13, 20, 7},      {Pot::GLIDE3, 2, 21, 20, -1},
+    {Pot::ATTACK1, 0, 6, 20, 9},      {Pot::ATTACK2, 1, 14, 20, 13},    {Pot::ATTACK3, 2, 22, 20, 17},
+    {Pot::DECAY1, 0, 7, 20, 10},      {Pot::DECAY2, 1, 15, 20, 14},     {Pot::DECAY3, 2, 23, 20, -1},
+    {Pot::SUSTAIN1, 0, 8, 20, 11},    {Pot::SUSTAIN2, 1, 16, 20, 15},   {Pot::SUSTAIN3, 2, 24, 20, -1},
+    {Pot::RELEASE1, 0, 9, 20, 12},    {Pot::RELEASE2, 1, 17, 20, 16},   {Pot::RELEASE3, 2, 25, 20, -1},
+    {Pot::LFO_RATE1, 0, 26, 9, 18},   {Pot::LFO_RATE2, 1, 28, 11, 20},  {Pot::LFO_RATE3, 2, 30, 13, 22},
+    {Pot::LFO_DEPTH1, 0, 27, 10, 19}, {Pot::LFO_DEPTH2, 1, 29, 12, 21}, {Pot::LFO_DEPTH3, 2, 31, 14, 23},
+    {Pot::CUTOFF, 0, 59, 15, -1},     {Pot::RESONANCE, 0, 33, 16, -1},  {Pot::ARP_RANGE, 0, 36, 19, 26},
+    {Pot::ARP_RATE, 0, 35, 18, 25},   {Pot::ARP_SCRUB, 0, 34, 17, 24},
 };
 
 const potMap* getPotMap(Pot* pot) {
@@ -91,97 +92,114 @@ static byte octScale(int value) {
 
 void movedPotAsid(Pot pot, int value) {
 	const potMap* potmap = getPotMap(&pot);
-	bool indicateChange[] = {false, false};
-	bool useChip[] = {(asidState.selectedSids.all == 0) || asidState.selectedSids.b.sid1,
-	                  (asidState.selectedSids.all == 0) || asidState.selectedSids.b.sid2};
+	bool indicateChange[] = {false, false, false};
+	bool useChip[] = {
+	    (asidState.selectedSids.all == 0) || (asidState.selectedSids.b.sid1 && !asidState.selectedSids.b.sid2),
+	    (asidState.selectedSids.all == 0) || (asidState.selectedSids.b.sid2 && !asidState.selectedSids.b.sid1),
+	    (asidState.selectedSids.all == 0) || (asidState.selectedSids.b.sid1 && asidState.selectedSids.b.sid2)};
 
-	for (byte i = 0; i < 2; i++) {
-		// Run this twice if needed, one for each chip
-		if (useChip[i]) {
-			indicateChange[i] = true;
-			switch (pot) {
-				case Pot::PW1:
-				case Pot::PW2:
-				case Pot::PW3:
-					asidState.overridePW[i][potmap->index] = POT_VALUE_TO_ASID_PW(value);
-					asidUpdateWidth(i, potmap->index);
-					break;
+	if (asidState.isSidFmMode && asidState.selectedSids.b.sid2 && !asidState.selectedSids.b.sid1) {
+		if (potmap->fmOperator != -1) {
+			if (potmap->fmOperator < OPL_NUM_CHANNELS_MELODY_MODE * OPL_NUM_OPERATORS) {
+				asidState.adjustFMOpLevel[potmap->fmOperator] = value;
+				asidFmUpdateOpLevel(potmap->fmOperator);
+			} else {
+				asidState.adjustFMFeedback[potmap->fmOperator - OPL_NUM_CHANNELS_MELODY_MODE * OPL_NUM_OPERATORS] =
+				    value;
+				asidFmUpdateFeedback(potmap->fmOperator - OPL_NUM_CHANNELS_MELODY_MODE * OPL_NUM_OPERATORS);
+			}
+		}
+	} else {
 
-				case Pot::ATTACK1:
-				case Pot::ATTACK2:
-				case Pot::ATTACK3:
-					asidState.adjustAttack[i][potmap->index] = POT_VALUE_TO_ASID_LORES(value);
-					break;
+		for (byte i = 0; i < SIDCHIPS; i++) {
+			// Run once for each chip if needed
+			if (useChip[i]) {
+				indicateChange[i] = true;
+				switch (pot) {
+					case Pot::PW1:
+					case Pot::PW2:
+					case Pot::PW3:
+						asidState.overridePW[i][potmap->index] = POT_VALUE_TO_ASID_PW(value);
+						asidUpdateWidth(i, potmap->index);
+						break;
 
-				case Pot::DECAY1:
-				case Pot::DECAY2:
-				case Pot::DECAY3:
-					asidState.adjustDecay[i][potmap->index] = POT_VALUE_TO_ASID_LORES(value);
-					break;
+					case Pot::ATTACK1:
+					case Pot::ATTACK2:
+					case Pot::ATTACK3:
+						asidState.adjustAttack[i][potmap->index] = POT_VALUE_TO_ASID_LORES(value);
+						break;
 
-				case Pot::SUSTAIN1:
-				case Pot::SUSTAIN2:
-				case Pot::SUSTAIN3:
-					asidState.adjustSustain[i][potmap->index] = POT_VALUE_TO_ASID_LORES(value);
-					break;
+					case Pot::DECAY1:
+					case Pot::DECAY2:
+					case Pot::DECAY3:
+						asidState.adjustDecay[i][potmap->index] = POT_VALUE_TO_ASID_LORES(value);
+						break;
 
-				case Pot::RELEASE1:
-				case Pot::RELEASE2:
-				case Pot::RELEASE3:
-					asidState.adjustRelease[i][potmap->index] = POT_VALUE_TO_ASID_LORES(value);
-					break;
+					case Pot::SUSTAIN1:
+					case Pot::SUSTAIN2:
+					case Pot::SUSTAIN3:
+						asidState.adjustSustain[i][potmap->index] = POT_VALUE_TO_ASID_LORES(value);
+						break;
 
-				case Pot::CUTOFF:
-					asidState.adjustCutoff[i] = POT_VALUE_TO_ASID_CUTOFF(value);
-					asidUpdateFilterCutoff(i);
-					break;
+					case Pot::RELEASE1:
+					case Pot::RELEASE2:
+					case Pot::RELEASE3:
+						asidState.adjustRelease[i][potmap->index] = POT_VALUE_TO_ASID_LORES(value);
+						break;
 
-				case Pot::RESONANCE:
-					asidState.adjustReso[i] = POT_VALUE_TO_ASID_LORES(value);
-					asidUpdateFilterReso(i);
-					break;
+					case Pot::CUTOFF:
+						asidState.adjustCutoff[i] = POT_VALUE_TO_ASID_CUTOFF(value);
+						asidUpdateFilterCutoff(i);
+						break;
+
+					case Pot::RESONANCE:
+						asidState.adjustReso[i] = POT_VALUE_TO_ASID_LORES(value);
+						asidUpdateFilterReso(i);
+						break;
 
 #ifdef ASID_VOLUME_ADJUST
-				case Pot::ARP_SCRUB:
-					asidState.adjustVolume[i] = POT_VALUE_TO_ASID_LORES(value);
-					asidUpdateVolume(i);
+					case Pot::ARP_SCRUB:
+						asidState.adjustVolume[i] = POT_VALUE_TO_ASID_LORES(value);
+						asidUpdateVolume(i);
 #endif
-					break;
+						break;
 
-				case Pot::TUNE1:
-				case Pot::TUNE2:
-				case Pot::TUNE3: {
-					// Octaves, -1, 0, +1: even spaced
-					int8_t octave;
+					case Pot::TUNE1:
+					case Pot::TUNE2:
+					case Pot::TUNE3: {
+						// Octaves, -1, 0, +1: even spaced
+						int8_t octave;
 
-					if (value < 1 * 1023 / 3) {
-						octave = -1;
-					} else if (value < 2 * 1023 / 3) {
-						octave = 0;
-					} else {
-						octave = 1;
-					}
-					asidState.adjustOctave[i][potmap->index] = octave;
+						if (value < 1 * 1023 / 3) {
+							octave = -1;
+						} else if (value < 2 * 1023 / 3) {
+							octave = 0;
+						} else {
+							octave = 1;
+						}
+						asidState.adjustOctave[i][potmap->index] = octave;
 
-				} break;
+					} break;
 
-				case Pot::FINE1:
-				case Pot::FINE2:
-				case Pot::FINE3:
-					asidState.adjustFine[i][potmap->index] = POT_VALUE_TO_ASID_FINETUNE(value);
-					break;
+					case Pot::FINE1:
+					case Pot::FINE2:
+					case Pot::FINE3:
+						asidState.adjustFine[i][potmap->index] = POT_VALUE_TO_ASID_FINETUNE(value);
+						break;
 
-				default:
-					// Nothing was changed on this
-					indicateChange[i] = false;
-					break;
+					default:
+						// Nothing was changed on this
+						indicateChange[i] = false;
+						break;
+				}
 			}
 		}
 	}
 
 	// Update dot indication for changed SIDs, if needed
+	// Only two dots exists, so shows max two
 	for (byte i = 0; i < 2; i++) {
-		if (indicateChange[i] && !asidState.isRemixed[i]) {
+		if (indicateChange[i]) {
 			asidIndicateChanged(i);
 		}
 	}

@@ -26,7 +26,9 @@ void digit(byte channel, byte number);
 #define DIGIT_E 14
 #define DIGIT_F 15
 #define DIGIT_H 16
+#define DIGIT_J 22
 #define DIGIT_L 17
+#define DIGIT_M 23
 #define DIGIT_O 0
 #define DIGIT_P 18
 #define DIGIT_R 19

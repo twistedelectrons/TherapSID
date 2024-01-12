@@ -23,7 +23,8 @@ static FatMode uint2FatMode(uint8_t i) {
 	}
 }
 
-uint16_t Preset::fatten_pitch(uint16_t pitch) const {
+uint16_t Preset::fatten_pitch(uint16_t pitch, uint8_t chip) const {
+	uint32_t pitch_hires;
 	switch (fat_mode) {
 		case FatMode::UNISONO:
 			return pitch;
@@ -34,9 +35,21 @@ uint16_t Preset::fatten_pitch(uint16_t pitch) const {
 				return pitch;
 			}
 		case FatMode::DETUNE_SLIGHT:
-			return pitch - 15;
+			// About +/-6.5 cents
+			if (chip == 1) {
+				pitch_hires = (uint32_t)pitch * 513;
+			} else {
+				pitch_hires = (uint32_t)pitch * 510;
+			}
+			return (uint16_t)(pitch_hires >> 9);
 		case FatMode::DETUNE_MUCH:
-			return pitch - 50;
+			// About +/-27 cents
+			if (chip == 1) {
+				pitch_hires = (uint32_t)pitch * 520;
+			} else {
+				pitch_hires = (uint32_t)pitch * 504;
+			}
+			return (uint16_t)(pitch_hires >> 9);
 		default:
 			return pitch;
 	}

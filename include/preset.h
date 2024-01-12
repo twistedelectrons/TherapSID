@@ -80,6 +80,6 @@ struct Preset {
 	FilterMode filter_mode = FilterMode::LOWPASS;
 	FatMode fat_mode = FatMode::UNISONO;
 
-	uint16_t fatten_pitch(uint16_t pitch) const;
+	uint16_t fatten_pitch(uint16_t pitch, uint8_t chip) const;
 	bool is_polyphonic() const { return paraphonic || fat_mode == FatMode::MORE_VOICES; }
 };

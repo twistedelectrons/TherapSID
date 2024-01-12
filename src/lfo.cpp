@@ -472,7 +472,7 @@ ParamsAfterLfo lfoTick() {
 
 	byte temp;
 	for (int i = 0; i < 3; i++) {
-		temp = map(lfo[i], 0, 255, 0, lfoDepth[i]) >> 3;
+		temp = map(lfo[i], 0, 255, 0, max(0, lfoDepth[i])) >> 3;
 		if (temp != lfoLast[i]) {
 			lfoLast[i] = temp;
 			if (sendLfo)
