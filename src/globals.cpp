@@ -1,12 +1,15 @@
 #include "globals.h"
 #include "ui_vars.h"
 #include "util.hpp"
+#include "armsid.h"
+#include "sid.h"
 
 UiState ui_state;
 bool sendLfo = false;
 bool sendArp = false;
 bool pwLimit;
 bool lfoNewRand[3];
+bool noArp1key;
 byte aftertouch;      // latest read afterTouch value
 bool aftertouchToLfo; // option to assign aftertouch to LFO depth 2
 int loadTimer;
@@ -15,7 +18,6 @@ int presetScrollTimer;
 // LIMIT PW
 float bend, bend1, bend2, bend3;
 bool sync;
-bool armSID;
 bool velocityToLfo;
 bool toolMode; // when set high by MIDI tool we can receive settings via CC
 bool modToLfo;
@@ -51,8 +53,8 @@ int lfoTune1, lfoTune2, lfoTune3, lfoTune4, lfoTune5, lfoTune6, lfoTune7, lfoTun
 float lfoFine1, lfoFine2, lfoFine3, lfoFine4, lfoFine5, lfoFine6, lfoFine7, lfoFine8, lfoFine9;
 
 Preset preset_data;
-VoiceState<6> voice_state;
-Glide glide[6];
+VoiceState<SIDVOICES_TOTAL> voice_state;
+Glide glide[SIDVOICES_TOTAL];
 
 int frozen;
 bool jumble;
@@ -83,10 +85,10 @@ byte arp_output_note;
 optional<byte> control_voltage_note;
 
 // voice_index[operator] tells you the preset's voice to read the operator's settings from.
-byte* voice_index; // array of size 6, set depending on preset.paraphonic
+byte* voice_index; // array of size SIDVOICES_TOTAL, set depending on preset.paraphonic
 
 // Global settings, ranges and where stored in EEPROM memory
-const globalSetting globalSettings[16] = {
+const globalSetting globalSettings[EEPROM_SETTINGS_NUM_BYTES] = {
 
     {&modToLfo, EEPROM_ADDR_MW_TO_LFO1, 0, 1, true, 85, false},
     {&aftertouchToLfo, EEPROM_ADDR_AT_TO_LFO2, 0, 1, true, 86, false},
@@ -94,7 +96,7 @@ const globalSetting globalSettings[16] = {
     {&sendLfo, EEPROM_ADDR_SEND_LFO, 0, 1, false, 92, false},
     {&sendArp, EEPROM_ADDR_SEND_ARP, 0, 1, false, 93, false},
     {&pwLimit, EEPROM_ADDR_PW_LIMIT, 0, 1, true, 88, false},
-    {&armSID, EEPROM_ADDR_ARMSID_MODE, 0, 1, false, 97, false},
+    {&noArp1key, EEPROM_ADDR_NO_ARP_1_KEY, 0, 1, 0, 101, false},
 
     {&masterChannel, EEPROM_ADDR_MIDI_IN_CH_MASTER, 1, 16, 1, 90, true},
     {&masterChannelOut, EEPROM_ADDR_MIDI_OUT_CH_MASTER, 1, 16, 1, 91, true},
@@ -106,4 +108,17 @@ const globalSetting globalSettings[16] = {
     {&preset, EEPROM_ADDR_PRESET_LAST, PRESET_NUMBER_MIN, PRESET_NUMBER_MAX, PRESET_NUMBER_MIN, 255, false},
     {&pitchBendUp, EEPROM_ADDR_PITCH_BEND_UP, 1, 48, 2, 99, true},
     {&pitchBendDown, EEPROM_ADDR_PITCH_BEND_DOWN, 1, 48, 2, 100, true},
+
+    {&armsidConfig.emulation.raw, EEPROM_ADDR_ARMSID_CHIP_EMULATION, 0, 255, ARMSID_SETTING_RAW(ARMSID_EMULATION_AUTO),
+     102, false},
+    {&armsidConfig.adsrBugFixed.raw, EEPROM_ADDR_ARMSID_ADSR_BUG_FIXED, 0, 17, ARMSID_SETTING_RAW(false), 103, false},
+    {&armsidConfig.filter6581strength.raw, EEPROM_ADDR_ARMSID_6581_FILTER_STRENGTH, 0, 255,
+     ARMSID_SETTING_RAW(ARMSID_6581_FILTER_STRENGTH_DEFAULT), 104, false},
+    {&armsidConfig.filter6581low.raw, EEPROM_ADDR_ARMSID_6581_FILTER_LOW, 0, 255,
+     ARMSID_SETTING_RAW(ARMSID_6581_FILTER_LOW_DEFAULT), 106, false},
+    {&armsidConfig.filter8580central.raw, EEPROM_ADDR_ARMSID_8580_FILTER_CENTRAL, 0, 255,
+     ARMSID_SETTING_RAW(ARMSID_8580_FILTER_CENTRAL_DEFAULT), 107, false},
+    {&armsidConfig.filter8580low.raw, EEPROM_ADDR_ARMSID_8580_FILTER_LOW, 0, 255,
+     ARMSID_SETTING_RAW(ARMSID_8580_FILTER_LOW_DEFAULT), 108, false},
+
 };

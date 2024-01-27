@@ -45,7 +45,7 @@ static void calculatePitch() {
 
 	float bends[3] = {bend1, bend2, bend3};
 
-	for (int oper = 0; oper < 6; oper++) {
+	for (int oper = 0; oper < SIDVOICES_TOTAL; oper++) {
 		int oper_mod3 = oper < 3 ? oper : (oper - 3);
 		int voice_knob_idx = voice_index[oper];
 		int key;
@@ -66,9 +66,7 @@ static void calculatePitch() {
 	}
 }
 void setSidRegisters(Preset const& preset, ParamsAfterLfo const& params_after_lfo) {
-	for (int i = 0; i < 2; i++) {
-		sid_chips[i].set_arm_sid_mode(armSID);
-
+	for (int i = 0; i < SIDCHIPS; i++) {
 		for (int v = 0; v < 3; v++) {
 			int oper = v + 3 * i;
 			int pv = voice_index[oper];
@@ -78,10 +76,14 @@ void setSidRegisters(Preset const& preset, ParamsAfterLfo const& params_after_lf
 			sid_chips[i].set_pulsewidth(v, params_after_lfo.pulsewidth[pv]);
 
 			auto pitch = glide[oper].current_pitch();
-			sid_chips[i].set_freq(v, i == 0 ? pitch : preset.fatten_pitch(pitch));
+			sid_chips[i].set_freq(v, i == 0 ? pitch : preset.fatten_pitch(pitch, i));
 
-			auto gate = voice_state.gate(oper) || control_voltage_note.has_value();
-			sid_chips[i].set_reg_control(v, preset.voice[pv].reg_control | (gate ? 0x01 : 0x00));
+			// Limit Unison and Octave to two SIDs
+			if (!((i == 2) &&
+			      ((preset_data.fat_mode == FatMode::UNISONO) || (preset_data.fat_mode == FatMode::OCTAVE_UP)))) {
+				auto gate = voice_state.gate(oper) || control_voltage_note.has_value();
+				sid_chips[i].set_reg_control(v, preset.voice[pv].reg_control | (gate ? 0x01 : 0x00));
+			}
 		}
 
 		// disable voice->filter routing if voice is off or filter is off.
@@ -138,10 +140,16 @@ void loop() {
 		return;
 	}
 
+	// Keep arp octave <= range knob
+	if (arpRound > arpRange) {
+		arpRound = arpRange;
+	}
+
 	if (volumeChanged) {
 		// update volume
-		sid_chips[0].set_volume(volume);
-		sid_chips[1].set_volume(volume);
+		for (int i = 0; i < SIDCHIPS; i++) {
+			sid_chips[i].set_volume(volume);
+		}
 		EEPROM.update(EEPROM_ADDR_MASTER_VOLUME, volume);
 		volumeChanged = false;
 	}
@@ -158,9 +166,9 @@ void loop() {
 
 	midiRead();
 
-	// A MIDI message might enable ASID mode - and at that point we want to be in full
-	// control of the SIDs, so don't do more stuff if so.
 	if (asidState.enabled) {
+		// A MIDI message might enable ASID mode - and at that point we want to
+		// be in full control of the SIDs, so don't do more stuff if so.
 		return;
 	}
 
@@ -192,19 +200,29 @@ void loop() {
 	} else {
 		cvActive[1] = false;
 	}
+#if SIDCHIPS <= 2
 	if ((PINC & _BV(2)) == 0) {
 		cvActive[2] = true;
 		mux(10);
 		lfo[2] = analogRead(A2) >> 2;
 	} else {
+#endif
 		cvActive[2] = false;
+#if SIDCHIPS <= 2
 	}
+#endif
 
 	readMux();
 
+#if SIDCHIPS <= 2
 	static byte voice_index_000000[6] = {0, 0, 0, 0, 0, 0};
 	static byte voice_index_000111[6] = {0, 0, 0, 1, 1, 1};
 	static byte voice_index_012012[6] = {0, 1, 2, 0, 1, 2};
+#else
+	static byte voice_index_000000[9] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
+	static byte voice_index_000111[9] = {0, 0, 0, 0, 1, 1, 1, 1, 1};
+	static byte voice_index_012012[9] = {0, 1, 2, 0, 1, 2, 0, 1, 2};
+#endif
 	if (!preset_data.paraphonic) {
 		if (preset_data.fat_mode == FatMode::MORE_VOICES) {
 			voice_state.set_n_individual_voices(2);
@@ -215,7 +233,7 @@ void loop() {
 		}
 	} else {
 		if (preset_data.fat_mode == FatMode::MORE_VOICES) {
-			voice_state.set_n_individual_voices(6);
+			voice_state.set_n_individual_voices(SIDVOICES_TOTAL);
 			voice_index = voice_index_000000;
 		} else if (preset_data.fat_mode == FatMode::PARA_2OP) {
 			voice_state.set_n_individual_voices(3);

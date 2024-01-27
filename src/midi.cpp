@@ -9,6 +9,26 @@
 #include "voice_state.hpp"
 #include "midi_pedal.hpp"
 #include "asid.h"
+#include "armsid.h"
+
+#define TM_SPEEDREQ 0x10
+#define TM_SPEEDANSWER 0x11
+#define TM_SPEEDNEG 0x12
+#define TM_SPEEDACK 0x13
+#define TM_SPEEDTEST 0x14
+#define TM_SPEEDRESULT 0x15
+#define TM_SPEEDTEST2 0x16
+#define TM_SPEEDRESULT2 0x17
+#define EOM 0xff
+
+#define TM_HEADER_LENGTH 5
+static byte turboMidiBuffer[] = {0x00, 0x20, 0x3c, 0x00, 0x00, EOM, EOM, EOM, EOM, EOM, EOM, EOM, EOM, EOM, EOM};
+static byte turboMidiSpeed1 = 0x00;
+static byte turboMidiSpeed2 = 0x00;
+byte turboMidiXrate = 1;
+static long turboMidiBaudRates[] = {31250,  31250,  62500,  104167, 125000, 156250,
+                                    208333, 250000, 312500, 415625, 500000, 625000};
+static byte turboMidiXrates[] = {1, 1, 2, 3, 4, 5, 7, 8, 10, 13, 16, 20};
 
 static byte mStatus;
 static byte mData;
@@ -28,6 +48,8 @@ static bool alternator;
 static byte flash;
 static byte val[] = {0, 128};
 
+byte activeSensing = false;
+
 static void PrepareHandleNoteOn(byte channel, byte note, byte velocity);
 static void PrepareHandleNoteOff(byte channel, byte note);
 static void HandleNoteOn(byte channel, byte note, byte velocity);
@@ -44,6 +66,11 @@ typedef struct {
 } SysexMachine;
 
 static SysexMachine sysexMachine;
+
+void midiInit() {
+	sysexMachine.state = IDLE;
+	sysexMachine.index = 0;
+}
 
 static void PrepareHandleNoteOn(byte channel, byte note, byte velocity) {
 	heldKeys[note] = 1;
@@ -130,6 +157,9 @@ static void HandleNoteOn(byte channel, byte note, byte velocity) {
 	if (channel == masterChannel) {
 		if (velocity) {
 			velocityLast = velocity;
+			if (voice_state.n_held_keys() < 1) {
+				arp_output_note = note + (arpRound * 12);
+			}
 		}
 
 		switch (voice_state.note_on(note, velocity)) {
@@ -185,8 +215,17 @@ static void HandleControlChange(byte channel, byte data1, byte data2) {
 		for (int i = 0; i < (int)(sizeof(globalSettings) / sizeof(*globalSettings)); i++) {
 			const globalSetting* setting = &(globalSettings[i]);
 
-			if (setting->ccMessageToolMode < 128) // don't want to send last preset (CC#255)
-				sendControlChange(setting->ccMessageToolMode, *(byte*)setting->variable, 16);
+			if (setting->ccMessageToolMode < 128) {
+				// Only send data that has tool support (valid CC)
+				byte data = *(byte*)setting->variable;
+
+				sendControlChange(setting->ccMessageToolMode, data & 0x7f, 16);
+
+				if (setting->maxValue > 127) {
+					// this setting needs 8 bits, so send upper bit separately
+					sendControlChange(setting->ccMessageToolMode + 1, data > 0x7f, 16);
+				}
+			}
 		}
 
 		toolMode = true; // therapSid is listening to new settings (CC on CH16)
@@ -212,6 +251,17 @@ static void HandleControlChange(byte channel, byte data1, byte data2) {
 					*(byte*)(setting->variable) = data2;
 					EEPROM.update(setting->eepromAddress, data2);
 				}
+
+				// If received the last ARMSID command, reconfigure the chip(s)
+				if (setting->eepromAddress == EEPROM_ADDR_ARMSID_8580_FILTER_LOW && setting) {
+					// Store the settings to ARMSID RAM
+					armsidConfigChip(0, false);
+					armsidConfigChip(1, false);
+				}
+			} else if ((setting->maxValue > 127) && (setting->ccMessageToolMode + 1 == data1)) {
+				// If received the upper bit of a 8 bit value, store that
+				*(byte*)(setting->variable) += (data2 ? 0x80 : 0x00);
+				EEPROM.update(setting->eepromAddress, *(byte*)(setting->variable));
 			}
 		}
 
@@ -334,6 +384,83 @@ void sendNoteOn(byte note, byte velocity, byte channel) {
 	}
 }
 
+void sendSysex(byte* buffer) {
+	Serial.write(0xf0);
+	byte i = 0;
+	while (buffer[i] != EOM) {
+		Serial.write(buffer[i++]);
+	}
+	Serial.write(0xf7);
+}
+
+void processTurboMidiMessage(byte* buffer) {
+	byte index = TM_HEADER_LENGTH;
+	switch (buffer[TM_HEADER_LENGTH]) {
+		case TM_SPEEDREQ:
+			// Master requests speed capabilities.
+			// Reply TM_SPEEDANSWER with the possible speeds
+			// Only allow 8x, since that has been tested
+			turboMidiBuffer[index++] = TM_SPEEDANSWER;
+			turboMidiBuffer[index++] = 0x3f; // Max SPEED1 is 8x
+			turboMidiBuffer[index++] = 0x00;
+			turboMidiBuffer[index++] = 0x3f; // Max SPEED2 is 8x
+			turboMidiBuffer[index++] = 0x00;
+			turboMidiBuffer[index++] = EOM;
+			sendSysex(turboMidiBuffer);
+			break;
+
+		case TM_SPEEDNEG:
+			// Master request us to set a specific speed.
+			// Reply TM_SPEEDACK to accept and then reinit the serial port.
+			turboMidiSpeed1 = buffer[TM_HEADER_LENGTH + 1];
+			turboMidiSpeed2 = buffer[TM_HEADER_LENGTH + 2];
+
+			turboMidiBuffer[index++] = TM_SPEEDACK;
+			turboMidiBuffer[index++] = EOM;
+
+			Timer1.stop();
+			sendSysex(turboMidiBuffer);
+			Serial.flush();
+			Serial.begin(turboMidiBaudRates[turboMidiSpeed1]);
+			turboMidiXrate = turboMidiXrates[turboMidiSpeed1];
+			Timer1.resume();
+			break;
+
+		case TM_SPEEDTEST:
+			// Master sends a test message for Speed 1.
+			// Reply TM_SPEEDRESULT to it with defined response.
+
+#define REPEATS 4
+			turboMidiBuffer[index++] = TM_SPEEDRESULT;
+			for (byte i = 0; i < REPEATS; i++) {
+				turboMidiBuffer[index + REPEATS] = 0x00;
+				turboMidiBuffer[index++] = 0x55;
+			}
+			turboMidiBuffer[index + REPEATS] = EOM;
+
+			// Verify that the sent TM_SPEEDTEST message was correctly received and only reply if so
+			if (memcmp(&(buffer[TM_HEADER_LENGTH + 1]), &(turboMidiBuffer[TM_HEADER_LENGTH + 1]), REPEATS * 2) == 0) {
+				sendSysex(turboMidiBuffer);
+			}
+
+			break;
+
+		case TM_SPEEDTEST2:
+			// Master sends a test message for Speed 2.
+			// Reply TM_SPEEDRESULT2 to it and reinit serial port.
+			turboMidiBuffer[index++] = TM_SPEEDRESULT2;
+			turboMidiBuffer[index++] = EOM;
+
+			Timer1.stop();
+			sendSysex(turboMidiBuffer);
+			Serial.flush();
+			Serial.begin(turboMidiBaudRates[turboMidiSpeed2]);
+			turboMidiXrate = turboMidiXrates[turboMidiSpeed2];
+			Timer1.resume();
+			break;
+	}
+}
+
 // Handles a completed sysex buffer
 void processSysex(byte* buffer, int size) {
 	if (size > 1) {
@@ -341,6 +468,8 @@ void processSysex(byte* buffer, int size) {
 		if (buffer[0] == 45) {
 			// Manufacturer ID used for ASID (DH's favourite number)
 			asidProcessMessage(buffer, size);
+		} else if (memcmp(buffer, turboMidiBuffer, TM_HEADER_LENGTH) == 0) {
+			processTurboMidiMessage(buffer);
 		} else {
 			// Room for other sysex messages
 		}
@@ -348,6 +477,13 @@ void processSysex(byte* buffer, int size) {
 }
 
 void midiRead() {
+	// Active Sensing sent only for Turbo MIDI speeds in order not to waste bandwidth.
+	// Could be considered a bit lazy to always send, but hey... plenty of bandwidth available :)
+	if (((turboMidiSpeed1 > 1) || (turboMidiSpeed2 > 1)) && activeSensing) {
+		Serial.write(0xfe);
+		activeSensing = false;
+	}
+
 	while (Serial.available()) {
 		byte input = Serial.read();
 

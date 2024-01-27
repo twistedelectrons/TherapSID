@@ -1,6 +1,13 @@
 #pragma once
 #include "voice_allocation.hpp"
 
+// Detecting if built for target or test, to be able to do non-platformio compile
+#ifdef PLATFORMIO
+#include "sid.h"
+#else
+#define SIDVOICES_TOTAL 9
+#endif
+
 struct Glide {
 	int destination_pitch;
 	int current_pitch() const { return current_pitch_; }
@@ -168,12 +175,12 @@ template <size_t N_OPERATORS> struct VoiceState {
 	int n_held_keys() const { return _n_held_keys; }
 
   private:
-	uint8_t myLastNote[6]; // track the last note of the individual voices in an effort to fix issue #23
+	uint8_t myLastNote[SIDVOICES_TOTAL];
 	int n_individual_voices = N_OPERATORS;
 	int n_usable_operators = N_OPERATORS;
 
 	MonoNoteTracker<16> individual_override_note_tracker[N_OPERATORS];
-	PolyVoiceAllocator<6> voice_allocator;
+	PolyVoiceAllocator<SIDVOICES_TOTAL> voice_allocator;
 	MonoNoteTracker<16> mono_note_tracker;
 
 	bool _held_keys[128] = {false};

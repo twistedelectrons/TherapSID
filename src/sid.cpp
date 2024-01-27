@@ -1,5 +1,6 @@
 #include "sid.h"
 #include "util.hpp"
+#include <util/atomic.h>
 
 // COMS WITH SID CHIP
 
@@ -80,7 +81,8 @@ enum Register {
 	ENV3
 };
 
-Sid::Sid(int chip_enable_bit) : chip_enable_bit(chip_enable_bit) {
+Sid::Sid(int chip_enable_bit, int extra_chip_enable_bit = -1)
+    : chip_enable_bit(chip_enable_bit), extra_chip_enable_bit(extra_chip_enable_bit) {
 	for (auto& r : registers)
 		r = 0;
 	registers[FILTER_CUTOFF_LO] = 0xFF;
@@ -194,42 +196,72 @@ bool Sid::maybe_update_register(size_t index) {
 
 void Sid::send(size_t index, int data) {
 
-	if (armSID) {
-		// ARMSID sounds cleaner without delays
-		PORTC = index << 3;
-		PORTB = data;
-		PORTD |= _BV(3);
-		PORTD &= ~_BV(chip_enable_bit); // enable the sid chip
-		PORTD |= _BV(chip_enable_bit);  // disable the sid chip again
-		PORTD &= ~_BV(3);               // falling edge on the data latch. (ignored)
+	byte tmpPD_idle, tmpPD_withData, tmpPD_withDataAndCS;
+
+	// Note: The AVR runs at 16MHz, the SID at 1MHz.
+
+	// Set address
+#if SIDCHIPS > 2
+	if (extra_chip_enable_bit >= 0) {
+		// Also set address "chip select" for third SID-chip
+		// on ARM2SID (enabled on chip CS)
+		PORTC = (index << 3) + _BV(extra_chip_enable_bit);
 	} else {
-
-		// Note: The AVR runs at 8MHz, the SID at 1MHz.
-		// One AVR instruction takes at least 125ns.
-
 		PORTC = index << 3;
-		PORTB = data;
-		delayMicroseconds(1); // data latch input needs to be stable >= 25ns
-
-		PORTD |= _BV(3);      // rising edge on the data latch. -> latch-in the data
-		delayMicroseconds(1); // need to wait >= 25ns until latch output is propagated.
-		                      // also, the sid's data input must be stable for >=80ns
-
-		PORTD &= ~_BV(chip_enable_bit); // enable the sid chip
-		delayMicroseconds(1);           // need to wait up to 1us until next sid clock edge
-
-		PORTD |= _BV(chip_enable_bit); // disable the sid chip again
-		PORTD &= ~_BV(3);              // falling edge on the data latch. (ignored)
-		delayMicroseconds(1);          // data need to be held for >= 10ns
 	}
+#else
+	PORTC = index << 3;
+#endif
+
+	// Put data on the bus
+	PORTB = data;
+
+	// Prepare some variables for fast CS timing
+	tmpPD_idle = (PORTD & ~_BV(3)) | _BV(chip_enable_bit);
+	tmpPD_withData = tmpPD_idle | _BV(3);
+	tmpPD_withDataAndCS = tmpPD_withData & ~_BV(chip_enable_bit);
+
+	// Latch data
+	PORTD = tmpPD_withData;
+
+	// Prevent interrupts during CS to not hold too long
+	ATOMIC_BLOCK(ATOMIC_FORCEON) {
+		// Wait for clock to go low
+		while ((PIND & 0x80) == 0x80)
+			;
+		// Enable the SID chip
+		PORTD = tmpPD_withDataAndCS;
+		// Wait for clock to go high
+		while ((PIND & 0x80) == 0x00)
+			;
+		// Wait for clock to go low
+		while ((PIND & 0x80) == 0x80)
+			;
+		// Disable the SID chip
+		PORTD = tmpPD_withData;
+	}
+
+	// Falling edge on the data latch
+	PORTD = tmpPD_idle;
+
+	// Latch in a zero, for reducing ARMSID glitch sensitivity during mux moves
+	PORTB = 0x00;
+	PORTD = tmpPD_withData;
+	PORTD = tmpPD_idle;
 }
 
 void Sid::send_update_immediate(byte index, byte data) {
-	registers_sent[index] = registers[index] = data;
+	if (index < (sizeof(registers) / sizeof(*registers))) {
+		registers_sent[index] = registers[index] = data;
+	}
 	send(index, data);
 }
 
 byte Sid::get_current_register(byte index) { return registers[index]; }
 
-// Setup SID slots 1 and 2
-Sid sid_chips[2] = {Sid(2), Sid(6)};
+// Setup all SID slots 1 and 2 (and above if needed)...
+#if SIDCHIPS > 2
+Sid sid_chips[SIDCHIPS] = {Sid(2), Sid(6), Sid(2, 2)};
+#else
+Sid sid_chips[SIDCHIPS] = {Sid(2), Sid(6)};
+#endif

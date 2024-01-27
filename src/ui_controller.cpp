@@ -28,9 +28,10 @@ void UiDisplayController::temp_7seg(int digit0, int digit1, int time) {
 	last_changed_counter = time;
 }
 
-void UiDisplayController::update(int preset_number, const Preset& preset, const UiState& ui_state) {
+void UiDisplayController::update(int preset_number, const Preset& preset, const UiState& ui_state,
+                                 byte turboMidiXrate) {
 	update_leds(preset, ui_state);
-	update_7seg(preset_number, preset, ui_state);
+	update_7seg(preset_number, preset, ui_state, turboMidiXrate);
 }
 
 void UiDisplayController::update_leds(const Preset& p, const UiState& ui_state) {
@@ -160,7 +161,9 @@ void UiDisplayController::show_arp_mode(int arp_mode) {
 	}
 }
 
-void UiDisplayController::update_7seg(int preset_number, const Preset& preset, const UiState& ui_state) {
+void UiDisplayController::update_7seg(int preset_number, const Preset& preset, const UiState& ui_state,
+                                      byte turboMidiXrate) {
+
 	if (preset.fat_mode != old_preset.fat_mode)
 		temp_7seg(DIGIT_F, (int)preset.fat_mode + 1, 2000);
 
@@ -233,6 +236,11 @@ void UiDisplayController::update_7seg(int preset_number, const Preset& preset, c
 
 	old_preset = preset;
 	old_preset_number = preset_number;
+
+	if (old_turbomidi_x_rate != turboMidiXrate) {
+		temp_7seg(DIGIT_T, turboMidiXrate, 500);
+		old_turbomidi_x_rate = turboMidiXrate;
+	}
 
 	int digit0, digit1;
 	switch (ui_state.midiSetup) {
