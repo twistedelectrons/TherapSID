@@ -111,6 +111,15 @@ void setSidRegisters(Preset const& preset, ParamsAfterLfo const& params_after_lf
 			case FilterMode::NOTCH:
 				sid_chips[i].set_filter_mode(Sid::LOWPASS | Sid::HIGHPASS);
 				break;
+			case FilterMode::LB:
+				sid_chips[i].set_filter_mode(Sid::LOWPASS | Sid::BANDPASS);
+				break;
+			case FilterMode::BH:
+				sid_chips[i].set_filter_mode(Sid::BANDPASS | Sid::HIGHPASS);
+				break;
+			case FilterMode::LBH:
+				sid_chips[i].set_filter_mode(Sid::LOWPASS | Sid::BANDPASS | Sid::HIGHPASS);
+				break;
 		}
 
 		sid_chips[i].send_next_update_pair();

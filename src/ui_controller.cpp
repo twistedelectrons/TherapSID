@@ -87,6 +87,21 @@ void UiDisplayController::update_leds(const Preset& p, const UiState& ui_state) 
 			set_led(28, false);
 			set_led(29, true);
 			break;
+		case FilterMode::LB:
+			set_led(27, true);
+			set_led(28, true);
+			set_led(29, false);
+			break;
+		case FilterMode::BH:
+			set_led(27, false);
+			set_led(28, true);
+			set_led(29, true);
+			break;
+		case FilterMode::LBH:
+			set_led(27, true);
+			set_led(28, true);
+			set_led(29, true);
+			break;
 		case FilterMode::OFF:
 			set_led(27, false);
 			set_led(28, false);

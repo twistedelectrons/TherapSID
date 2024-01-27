@@ -277,6 +277,19 @@ void showFilterResoLEDs(byte data) {
 	ledSet(31, (data >> 4) > 14);
 }
 
+void asidSetNextFilterMode(byte chip) {
+	switch (asidState.filterMode[chip]) {
+		case FilterMode::LOWPASS:	asidState.filterMode[chip] = FilterMode::LB;		break;
+		case FilterMode::LB:		asidState.filterMode[chip] = FilterMode::BANDPASS;	break;
+		case FilterMode::BANDPASS:	asidState.filterMode[chip] = FilterMode::BH;		break;
+		case FilterMode::BH:		asidState.filterMode[chip] = FilterMode::HIGHPASS;	break;
+		case FilterMode::HIGHPASS:	asidState.filterMode[chip] = FilterMode::NOTCH;		break;
+		case FilterMode::NOTCH:		asidState.filterMode[chip] = FilterMode::LBH;		break;
+		case FilterMode::LBH:		asidState.filterMode[chip] = FilterMode::OFF;		break;
+		default:					asidState.filterMode[chip] = FilterMode::LOWPASS;	break;
+	}
+}
+
 /*
  * Restore the most important/seldom changed registers, used when
  * pressing RESET briefly
@@ -367,6 +380,15 @@ void updateFilterMode(byte chip, byte* data) {
 			break;
 		case FilterMode::NOTCH:
 			*data |= Sid::LOWPASS | Sid::HIGHPASS;
+			break;
+		case FilterMode::LB:
+			*data |= Sid::LOWPASS | Sid::BANDPASS;
+			break;
+		case FilterMode::BH:
+			*data |= Sid::BANDPASS | Sid::HIGHPASS;
+			break;
+		case FilterMode::LBH:
+			*data |= Sid::LOWPASS | Sid::BANDPASS | Sid::HIGHPASS;
 			break;
 		default:
 			break;
@@ -1005,6 +1027,15 @@ FilterMode getFilterMode(byte data) {
 		case Sid::LOWPASS | Sid::HIGHPASS:
 			fm = FilterMode::NOTCH;
 			break;
+		case Sid::LOWPASS | Sid::BANDPASS:
+			fm = FilterMode::LB;
+			break;
+		case Sid::BANDPASS | Sid::HIGHPASS:
+			fm = FilterMode::BH;
+			break;
+		case Sid::LOWPASS | Sid::BANDPASS | Sid::HIGHPASS:
+			fm = FilterMode::LBH;
+			break;
 		default:
 			fm = FilterMode::OFF;
 			break;
@@ -1054,7 +1085,7 @@ void asidAdvanceFilterMode(byte chip, bool copyFirst) {
 	} else {
 		// Increase the filter mode to next type
 		asidState.filterMode[chip] = getFilterMode(data);
-		asidState.filterMode[chip] = static_cast<FilterMode>((static_cast<int>(asidState.filterMode[chip]) + 1) % 5);
+		asidSetNextFilterMode(chip);
 	}
 
 	// Calculate the correct new mode

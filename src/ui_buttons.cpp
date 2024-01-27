@@ -858,9 +858,8 @@ void buttChanged(byte number, bool value) {
 
 			case Button::FILTER_MODE:
 				if ((!filterAssignmentChanged) && (!fatChanged)) {
-					preset_data.filter_mode =
-					    static_cast<FilterMode>((static_cast<int>(preset_data.filter_mode) + 1) % 5);
-					sendCC(55, map((int)preset_data.filter_mode, 0, 4, 0, 1023));
+					setNextFilterMode();
+					sendCC(55, map(getFilterModeIdx(), 0, 7, 0, 1023));
 				}
 				ui_state.filterModeHeld = false;
 
