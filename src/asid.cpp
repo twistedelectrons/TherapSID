@@ -279,14 +279,30 @@ void showFilterResoLEDs(byte data) {
 
 void asidSetNextFilterMode(byte chip) {
 	switch (asidState.filterMode[chip]) {
-		case FilterMode::LOWPASS:	asidState.filterMode[chip] = FilterMode::LB;		break;
-		case FilterMode::LB:		asidState.filterMode[chip] = FilterMode::BANDPASS;	break;
-		case FilterMode::BANDPASS:	asidState.filterMode[chip] = FilterMode::BH;		break;
-		case FilterMode::BH:		asidState.filterMode[chip] = FilterMode::HIGHPASS;	break;
-		case FilterMode::HIGHPASS:	asidState.filterMode[chip] = FilterMode::NOTCH;		break;
-		case FilterMode::NOTCH:		asidState.filterMode[chip] = FilterMode::LBH;		break;
-		case FilterMode::LBH:		asidState.filterMode[chip] = FilterMode::OFF;		break;
-		default:					asidState.filterMode[chip] = FilterMode::LOWPASS;	break;
+		case FilterMode::LOWPASS:
+			asidState.filterMode[chip] = FilterMode::LB;
+			break;
+		case FilterMode::LB:
+			asidState.filterMode[chip] = FilterMode::BANDPASS;
+			break;
+		case FilterMode::BANDPASS:
+			asidState.filterMode[chip] = FilterMode::BH;
+			break;
+		case FilterMode::BH:
+			asidState.filterMode[chip] = FilterMode::HIGHPASS;
+			break;
+		case FilterMode::HIGHPASS:
+			asidState.filterMode[chip] = FilterMode::NOTCH;
+			break;
+		case FilterMode::NOTCH:
+			asidState.filterMode[chip] = FilterMode::LBH;
+			break;
+		case FilterMode::LBH:
+			asidState.filterMode[chip] = FilterMode::OFF;
+			break;
+		default:
+			asidState.filterMode[chip] = FilterMode::LOWPASS;
+			break;
 	}
 }
 
