@@ -308,7 +308,7 @@ static void HandleControlChange(byte channel, byte data1, byte data2) {
 					break;
 
 				case 55:
-					preset_data.filter_mode = static_cast<FilterMode>(map(data2, 0, 127, 0, 4));
+					setFilterMode(map(data2, 0, 127, 0, 7));
 					break;
 
 				case 64:

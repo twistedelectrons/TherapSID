@@ -6,6 +6,11 @@
 #define PRESET_NUMBER_MAX 99
 #define PRESET_DATA_SIZE 40
 
+// filtermode helper
+void setNextFilterMode();
+void setFilterMode(uint8_t idx);
+uint8_t getFilterModeIdx();
+
 void save();
 void load(byte number);
 void saveChannels();
@@ -59,7 +64,7 @@ struct PresetLfo {
 	bool mapping[20];
 };
 
-enum class FilterMode { LOWPASS, BANDPASS, HIGHPASS, NOTCH, OFF };
+enum class FilterMode { LOWPASS, BANDPASS, HIGHPASS, NOTCH, OFF, LB, BH, LBH };
 
 enum class FatMode { UNISONO, OCTAVE_UP, DETUNE_SLIGHT, DETUNE_MUCH, MORE_VOICES, PARA_2OP };
 

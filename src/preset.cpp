@@ -8,7 +8,7 @@
 #include "globals.h"
 
 static FilterMode uint2FilterMode(uint8_t i) {
-	if (i < 5) {
+	if (i < 8) {
 		return static_cast<FilterMode>(i);
 	} else {
 		return FilterMode::OFF;
@@ -22,6 +22,53 @@ static FatMode uint2FatMode(uint8_t i) {
 		return FatMode::UNISONO;
 	}
 }
+
+//
+// filtermode helper
+//
+
+void setNextFilterMode() {
+	switch (preset_data.filter_mode) {
+		case FilterMode::LOWPASS:	preset_data.filter_mode = FilterMode::LB;		break;
+		case FilterMode::LB:		preset_data.filter_mode = FilterMode::BANDPASS;	break;
+		case FilterMode::BANDPASS:	preset_data.filter_mode = FilterMode::BH;		break;
+		case FilterMode::BH:		preset_data.filter_mode = FilterMode::HIGHPASS;	break;
+		case FilterMode::HIGHPASS:	preset_data.filter_mode = FilterMode::NOTCH;	break;
+		case FilterMode::NOTCH:		preset_data.filter_mode = FilterMode::LBH;		break;
+		case FilterMode::LBH:		preset_data.filter_mode = FilterMode::OFF;		break;
+		default:					preset_data.filter_mode = FilterMode::LOWPASS;	break;
+	}
+}
+
+void setFilterMode(uint8_t idx) {
+	switch (idx) {
+		case 0:		preset_data.filter_mode = FilterMode::LOWPASS;	break;
+		case 1:		preset_data.filter_mode = FilterMode::LB;		break;
+		case 2:		preset_data.filter_mode = FilterMode::BANDPASS;	break;
+		case 3:		preset_data.filter_mode = FilterMode::BH;		break;
+		case 4:		preset_data.filter_mode = FilterMode::HIGHPASS;	break;
+		case 5:		preset_data.filter_mode = FilterMode::NOTCH;	break;
+		case 6:		preset_data.filter_mode = FilterMode::LBH;		break;
+		default:	preset_data.filter_mode = FilterMode::OFF;		break;
+	}
+}
+
+uint8_t getFilterModeIdx() {
+	switch (preset_data.filter_mode) {
+		case FilterMode::LOWPASS:	return 0;
+		case FilterMode::LB:		return 1;
+		case FilterMode::BANDPASS:	return 2;
+		case FilterMode::BH:		return 3;
+		case FilterMode::HIGHPASS:	return 4;
+		case FilterMode::NOTCH:		return 5;
+		case FilterMode::LBH:		return 6;
+		default:					return 7;
+	}
+}
+
+//
+//
+//
 
 uint16_t Preset::fatten_pitch(uint16_t pitch, uint8_t chip) const {
 	uint32_t pitch_hires;
