@@ -1325,6 +1325,22 @@ void asidAdvanceDefaultChip(bool isUp) {
 	}
 }
 
+
+/*
+ * Select the default remix chip
+ */
+void asidSelectDefaultChip(byte chip) {
+	asidState.defaultSelectedChip = chip;
+
+	// Lock the buttons accordingly
+	asidState.selectedSids.b.sid1 = (asidState.defaultSelectedChip % 2 == 0);
+	asidState.selectedSids.b.sid2 = (asidState.defaultSelectedChip >= 1);
+
+	if (!asidState.isCleanMode) {
+		displayAsidRemixMode();
+	}
+}
+
 /*
  * Set the default remix chip as default (i.e both)
  */

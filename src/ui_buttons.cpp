@@ -171,7 +171,7 @@ void updateTriStateButtonAsid(byte chip, byte voice, bool all, OverrideState but
 	}
 }
 
-void updateChipSoloStatus() {
+bool updateChipSoloStatus() {
 	byte soloChip, shouldSolo;
 	// Find the selected chip
 	if (asidState.selectedSids.b.sid1 && !asidState.selectedSids.b.sid2) {
@@ -206,6 +206,8 @@ void updateChipSoloStatus() {
 			asidState.muteFMChannel[v] = shouldSolo && (soloChip != 1);
 		}
 	}
+
+	return asidState.soloedChannel != -1;
 }
 
 void buttChangedAsid(Button button, bool value) {
@@ -268,22 +270,22 @@ void buttChangedAsid(Button button, bool value) {
 
 			case Button::RETRIG:
 				// SID 1 select-button
-				asidClearDefaultChip();
-				asidState.selectedSids.b.sid1 = true;
-				if (asidState.isSoloButtonHeld) {
-					// Solo entire chip
-					updateChipSoloStatus();
-				}
+				asidSelectDefaultChip(0);
+
+				// Solo entire chip
+				if (asidState.isSoloButtonHeld && !updateChipSoloStatus())
+					asidClearDefaultChip();
+
 				break;
 
 			case Button::LOOP:
 				// SID 2 select-button
-				asidClearDefaultChip();
-				asidState.selectedSids.b.sid2 = true;
-				if (asidState.isSoloButtonHeld) {
-					// Solo entire chip
-					updateChipSoloStatus();
-				}
+				asidSelectDefaultChip(1);
+
+				// Solo entire chip
+				if (asidState.isSoloButtonHeld && !updateChipSoloStatus())
+					asidClearDefaultChip();
+
 				break;
 
 			case Button::ARP_MODE:
@@ -521,11 +523,13 @@ void buttChangedAsid(Button button, bool value) {
 				break;
 
 			case Button::RETRIG:
-				asidState.selectedSids.b.sid1 = false;
+				if (!asidState.isSoloButtonHeld)
+					asidClearDefaultChip();
 				break;
 
 			case Button::LOOP:
-				asidState.selectedSids.b.sid2 = false;
+				if (!asidState.isSoloButtonHeld)
+					asidClearDefaultChip();
 				break;
 
 			case Button::ARP_MODE:
