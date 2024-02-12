@@ -523,13 +523,13 @@ void buttChangedAsid(Button button, bool value) {
 				break;
 
 			case Button::RETRIG:
-				if (!asidState.isSoloButtonHeld)
-					asidClearDefaultChip();
-				break;
-
 			case Button::LOOP:
-				if (!asidState.isSoloButtonHeld)
+				if (!asidState.isSoloButtonHeld) {
 					asidClearDefaultChip();
+
+					// Reset soloed status
+					asidState.soloedChannel = -1;
+				}
 				break;
 
 			case Button::ARP_MODE:
