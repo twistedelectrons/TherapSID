@@ -277,7 +277,7 @@ void buttChangedAsid(Button button, bool value) {
 					asidClearDefaultChip();
 
 				// increment select counter
-				asidState.selectButtonCounter++;
+				if (SIDCHIPS > 2) asidState.selectButtonCounter++;
 				break;
 
 			case Button::LOOP:
@@ -289,7 +289,7 @@ void buttChangedAsid(Button button, bool value) {
 					asidClearDefaultChip();
 
 				// increment select counter
-				asidState.selectButtonCounter++;
+				if (SIDCHIPS > 2) asidState.selectButtonCounter++;
 				break;
 
 			case Button::ARP_MODE:
