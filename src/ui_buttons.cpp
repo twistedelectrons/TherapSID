@@ -269,23 +269,27 @@ void buttChangedAsid(Button button, bool value) {
 			} break;
 
 			case Button::RETRIG:
-				// SID 1 select-button
-				asidSelectDefaultChip(0);
+				// SID 1 select-button (SID 3 by combo)
+				asidSelectDefaultChip(asidState.selectButtonCounter ? 2 : 0);
 
 				// Solo entire chip
-				if (asidState.isSoloButtonHeld && !updateChipSoloStatus())
+				if (asidState.isSoloButtonHeld && !updateChipSoloStatus() && !asidState.selectButtonCounter)
 					asidClearDefaultChip();
 
+				// increment select counter
+				asidState.selectButtonCounter++;
 				break;
 
 			case Button::LOOP:
-				// SID 2 select-button
-				asidSelectDefaultChip(1);
+				// SID 2 select-button (SID 3 by combo)
+				asidSelectDefaultChip(asidState.selectButtonCounter ? 2 : 1);
 
 				// Solo entire chip
-				if (asidState.isSoloButtonHeld && !updateChipSoloStatus())
+				if (asidState.isSoloButtonHeld && !updateChipSoloStatus() && !asidState.selectButtonCounter)
 					asidClearDefaultChip();
 
+				// increment select counter
+				asidState.selectButtonCounter++;
 				break;
 
 			case Button::ARP_MODE:
@@ -525,11 +529,25 @@ void buttChangedAsid(Button button, bool value) {
 			case Button::RETRIG:
 			case Button::LOOP:
 				if (!asidState.isSoloButtonHeld) {
-					asidClearDefaultChip();
 
-					// Reset soloed status
-					asidState.soloedChannel = -1;
+					// validate selection
+					if (!asidState.selectButtonCounter) {
+						asidClearDefaultChip();
+
+						// Reset soloed status
+						asidState.soloedChannel = -1;
+
+					} else {
+
+						// Restore held button
+						asidSelectDefaultChip(button == Button::RETRIG ? 1 : 0);
+					}
 				}
+
+				// decrement select counter
+				if (asidState.selectButtonCounter)
+					asidState.selectButtonCounter--;
+
 				break;
 
 			case Button::ARP_MODE:

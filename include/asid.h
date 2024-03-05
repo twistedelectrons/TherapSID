@@ -98,6 +98,8 @@ struct asidState_t {
 	bool isSoloButtonHeld;
 	int8_t soloedChannel;
 
+	byte selectButtonCounter;
+
 	byte lastDuplicatedChip;
 
 	// FM OPL stuff

@@ -198,6 +198,7 @@ void asidInit(int chip) {
 	asidState.displayState = DISPLAY_STANDARD;
 	asidState.defaultSelectedChip = -1;
 	asidState.isSoloButtonHeld = false;
+	asidState.selectButtonCounter = 0;
 	asidState.soloedChannel = -1;
 	asidState.lastDuplicatedChip = asidState.isSidFmMode ? 0 : 1;
 
