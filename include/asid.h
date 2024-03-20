@@ -7,17 +7,24 @@
 // #define ASID_PROFILER
 // #define ASID_VOLUME_ADJUST // Sometimes useful, but 6581s might crackle
 
+enum class InitState { ALL, VOICE, WAVEFORM, PW, PITCH, ADSR, SYNC, RING, FILTER_ROUTE, FILTER_MODE };
+
 // Externally called functions
 void asidInit(int chip);
+void asidInitVoice(int chip, byte voice, InitState init);
 void asidRestore(int chip);
+void asidRestoreVoice(int chip, byte voice, InitState init);
 void asidProcessMessage(byte* buffer, int size);
 void asidUpdateFilterCutoff(byte chip);
 void asidUpdateFilterReso(byte chip);
+void asidInitFilterMode(int chip);
+void asidRestoreFilterMode(int chip);
 void asidAdvanceFilterMode(byte chip, bool copyFirst);
 void asidUpdateFilterRoute(byte chip, bool copyFirst);
 void asidUpdateWidth(byte chip, byte voice);
 void asidUpdateVolume(byte chip);
 void asidIndicateChanged(byte chip);
+void asidRestorePot(int chip, byte voice, byte potindex);
 void asidToggleCutoffAdjustMode(bool isPressed);
 void asidTick();
 void asidFmUpdateFeedback(byte channel);
@@ -36,7 +43,7 @@ void asidClearDefaultChip();
 // cents but from center position -26 (to fix PAL C64 vs 1MHz clock)
 // Thereby range = -80/+28. (i.e from 978/1024 to 1042/1024)
 
-enum class WaveformState { SIDFILE, RECT, TRI, SAW, NOISE_ONLY };
+enum class WaveformState { SIDFILE, RECT, TRI, SAW, NOISE_ONLY, RT, TS, RS, RTS };
 enum class OverrideState { SIDFILE, ON, OFF };
 
 union selected_sids_t {
@@ -76,6 +83,7 @@ struct asidState_t {
 	int adjustCutoff[SIDCHIPS];
 	int adjustReso[SIDCHIPS];
 	FilterMode filterMode[SIDCHIPS];
+	bool muteFilterMode[SIDCHIPS];
 
 #ifdef ASID_VOLUME_ADJUST
 	int adjustVolume[SIDCHIPS];
@@ -86,6 +94,7 @@ struct asidState_t {
 	selected_sids_t selectedSids;
 
 	bool isCleanMode;
+	bool isShiftMode;
 	bool isCutoffAdjustModeScaling;
 	byte displayState;
 
