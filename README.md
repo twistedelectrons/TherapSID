@@ -6,6 +6,33 @@ Find the official releases at [the official product page](https://www.twistedele
 
 ![Photo of the TherapSID](https://static.wixstatic.com/media/b8c32b_83978e994e24423d991c01e184dd30ce~mv2.jpg)
 
+# ASID - Enhancements
+
+This Fork contains ASID Enhancements which is based on the original firmware of Alex Smith and the ASID Support of Thomas Jannson:
+
+![ASID Enhancements](https://github.com/rio-rattenrudel/TherapSID/blob/asid-enhancements/doc/asid_mod.png)
+
+ * TherapSid gives direct feedback of the selected chip by pushing the RETRIG and LOOP buttons
+
+ * TherapSid's SOLO mode automatically selects the chip by RETRIG button (A1) or LOOP button (A2) or the combination of both (A3)
+
+ * TherapSid's SOLO-ed chip ensures that the filter mode for the other SID is turned off.
+   
+ * A Shift (SH) key has been introduced (LFO NOISE button) that allows you
+   to do the following:
+
+      - ```SH + WAVEFORMS   - combines waveforms (RT, TS, RS, RTS)```
+      - ```SH + NOISE       - restores VOICE params (WAVEFORM, PW, TUNE, FINE, RING/SYNC)```
+      - ```SH + SYNC        - restores PITCH (TUNE, FINE)```
+      - ```SH + RING        - restores ADSR```
+      - ```SH + LFO LINK    - restores FILTER ROUTE```
+      - ```SH + FILTER MODE - restores FILTER MODE```
+      - ```SH + POT         - restores POT values```
+
+ * Shift mode can RESET each POT value while SH is held and turned
+
+ * The dot indicator (left, right) has been re-implemented to get a real feedback about the chip's remix state
+
 ## Building and flashing the source code:
 
 Install `platformio` and `python2`. (Yes. I am so sorry :(.)
