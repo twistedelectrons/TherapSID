@@ -10,7 +10,7 @@ Find the official releases at [the official product page](https://www.twistedele
 
 This Fork contains ASID Enhancements which is based on the original firmware of Alex Smith and the ASID Support of Thomas Jannson:
 
-![ASID Enhancements](https://github.com/rio-rattenrudel/TherapSID/blob/asid-enhancements/doc/asid_mod.png)
+![ASID Enhancements](https://github.com/rio-rattenrudel/TherapSID/blob/asid-enhancements/doc/asid_enhanced_quick_guide.png)
 
  * TherapSid gives direct feedback of the selected chip by pushing the RETRIG and LOOP buttons
 
@@ -29,7 +29,7 @@ This Fork contains ASID Enhancements which is based on the original firmware of 
       - ```SH + FILTER MODE - restores FILTER MODE```
       - ```SH + POT         - restores POT values```
 
- * Shift mode can RESET each POT value while SH is held and turned
+ * Shift mode can RESET each POT value while SH is held and POT is turned
 
  * The dot indicator (left, right) has been re-implemented to get a real feedback about the chip's remix state
 
