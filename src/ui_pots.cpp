@@ -202,7 +202,9 @@ void movedPotAsid(Pot pot, int value) {
 
 	// Update dot indication for changed SIDs, if needed
 	// Only two dots exists, so shows max two
-	for (byte i = 0; i < 2; i++) asidIndicateChanged(i);
+	for (byte i = 0; i < 2; i++) {
+		asidIndicateChanged(i);
+	}
 }
 
 void movedPot(byte number, int value, bool isMidi) {

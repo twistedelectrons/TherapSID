@@ -473,8 +473,9 @@ void buttChangedAsid(Button button, bool value) {
 				case Button::RECT3:
 					waveform = WaveformState::RECT;
 
-					if (asidState.isShiftMode)
+					if (asidState.isShiftMode) {
 						waveform = combineWaveformAsid(chip, index, waveform);
+					}
 
 					updateWaveformAsid(chip, index, all, waveform);
 					break;
@@ -484,8 +485,9 @@ void buttChangedAsid(Button button, bool value) {
 				case Button::TRI3:
 					waveform = WaveformState::TRI;
 
-					if (asidState.isShiftMode)
+					if (asidState.isShiftMode) {
 						waveform = combineWaveformAsid(chip, index, waveform);
+					}
 
 					updateWaveformAsid(chip, index, all, waveform);
 					break;
@@ -495,8 +497,9 @@ void buttChangedAsid(Button button, bool value) {
 				case Button::SAW3:
 					waveform = WaveformState::SAW;
 
-					if (asidState.isShiftMode)
+					if (asidState.isShiftMode) {
 						waveform = combineWaveformAsid(chip, index, waveform);
+					}
 
 					updateWaveformAsid(chip, index, all, waveform);
 					break;
