@@ -5,6 +5,7 @@
 #include "util.hpp"
 #include "armsid.h"
 #include "opl.h"
+#include "ui_pots.h"
 
 asidState_t asidState;
 
@@ -1477,9 +1478,9 @@ void asidIndicateChanged(byte chip) {
 }
 
 /*
- * Restore the pots
+ * Restore specific pot values from original ASID state
  */
-void asidRestorePot(int chip, byte voice, byte potindex) {
+void asidRestorePot(int chip, byte voice, Pot potindex) {
 
 	byte first	= chip > -1 ? chip : 0;
 	byte last	= chip > -1 ? chip : SIDCHIPS - 1;
@@ -1487,47 +1488,58 @@ void asidRestorePot(int chip, byte voice, byte potindex) {
 	for (byte chip = first; chip <= last; chip++) {
 
 		switch (potindex) {
-			case 4:	 // PW1
-			case 24: // PW2
-			case 30: // PW3
+			case Pot::PW1:
+			case Pot::PW2:
+			case Pot::PW3:
 				asidState.overridePW[chip][voice] = POT_VALUE_TO_ASID_PW(POT_NOON);
 				asidState.isOverridePW[chip][voice] = false;
 				break;
-			case 6:  // TUNE1
-			case 26: // TUNE2
-			case 21: // TUNE3
+
+			case Pot::TUNE1:
+			case Pot::TUNE2:
+			case Pot::TUNE3:
 				asidState.adjustOctave[chip][voice] = 0;
 				break;
-			case 14: // FINE1
-			case 17: // FINE2
-			case 31: // FINE3
+
+			case Pot::FINE1:
+			case Pot::FINE2:
+			case Pot::FINE3:
 				asidState.adjustFine[chip][voice] = FINETUNE_0_CENTS;
 				break;
-			case 5:  // ATTACK1
-			case 22: // ATTACK2
-			case 29: // ATTACK3
+
+			case Pot::ATTACK1:
+			case Pot::ATTACK2:
+			case Pot::ATTACK3:
 				asidState.adjustAttack[chip][voice] = POT_VALUE_TO_ASID_LORES(POT_NOON);
 				break;
-			case 15: // DECAY1
-			case 25: // DECAY2
-			case 18: // DECAY3
+
+			case Pot::DECAY1:
+			case Pot::DECAY2:
+			case Pot::DECAY3:
 				asidState.adjustDecay[chip][voice] = POT_VALUE_TO_ASID_LORES(POT_NOON);
 				break;
-			case 13: // SUSTAIN1
-			case 23: // SUSTAIN2
-			case 28: // SUSTAIN3
+
+			case Pot::SUSTAIN1:
+			case Pot::SUSTAIN2:
+			case Pot::SUSTAIN3:
 				asidState.adjustSustain[chip][voice] = POT_VALUE_TO_ASID_LORES(POT_NOON);
 				break;
-			case 16: // RELEASE1
-			case 20: // RELEASE2
-			case 3:  // RELEASE3
+
+			case Pot::RELEASE1:
+			case Pot::RELEASE2:
+			case Pot::RELEASE3:
 				asidState.adjustRelease[chip][voice] = POT_VALUE_TO_ASID_LORES(POT_NOON);
 				break;
-			case 8: // CUTOFF
+
+			case Pot::CUTOFF:
 				asidState.adjustCutoff[chip] = POT_VALUE_TO_ASID_CUTOFF(POT_NOON);
 				break;
-			case 0: // RESONANCE
+
+			case Pot::RESONANCE:
 				asidState.adjustReso[chip] = POT_VALUE_TO_ASID_LORES(POT_NOON);
+				break;
+
+			default:
 				break;
 		}
 	}

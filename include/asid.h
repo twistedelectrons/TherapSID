@@ -3,6 +3,7 @@
 #include "sid.h" // number of chips
 #include "opl.h"
 #include "preset.h"
+#include "ui_pots.h"
 
 // #define ASID_PROFILER
 // #define ASID_VOLUME_ADJUST // Sometimes useful, but 6581s might crackle
@@ -24,7 +25,7 @@ void asidUpdateFilterRoute(byte chip, bool copyFirst);
 void asidUpdateWidth(byte chip, byte voice);
 void asidUpdateVolume(byte chip);
 void asidIndicateChanged(byte chip);
-void asidRestorePot(int chip, byte voice, byte potindex);
+void asidRestorePot(int chip, byte voice, Pot potindex);
 void asidToggleCutoffAdjustMode(bool isPressed);
 void asidTick();
 void asidFmUpdateFeedback(byte channel);
