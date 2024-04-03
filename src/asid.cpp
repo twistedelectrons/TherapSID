@@ -349,7 +349,9 @@ void updateLastSIDValues(int chip, byte voice, InitState init) {
 
 		// cast size_t to byte
 		byte r = static_cast<byte>(reg);
+		byte voiceBase = voice * 7;
 
+		// If specific register not covered by requested init, skip it
 		switch (init) {
 
 			case InitState::ALL:
@@ -364,34 +366,40 @@ void updateLastSIDValues(int chip, byte voice, InitState init) {
 				return;
 
 			case InitState::VOICE:			// [WAVEFORMS, PW, SYNC/RING, PITCH]
-				if (r != voice*7 &&			// TUNE
-					r != voice*7+1 &&		// FINE
-					r != voice*7+2 &&		// PW_LO
-					r != voice*7+3 &&		// PW_HI
-					r != voice*7+4)			// CTRL (WF-TEST-SYNC-RING-GATE)
+				if (r != voiceBase + SID_VC_PITCH_LO &&
+					r != voiceBase + SID_VC_PITCH_HI &&
+					r != voiceBase + SID_VC_PULSE_WIDTH_LO &&
+					r != voiceBase + SID_VC_PULSE_WIDTH_HI &&
+					r != voiceBase + SID_VC_CONTROL) {
 					continue;
+				}
 				break;
 
 			case InitState::PITCH:
-				if (r != voice*7 &&			// TUNE
-					r != voice*7+1) 		// FINE
+				if (r != voiceBase + SID_VC_PITCH_LO &&
+					r != voiceBase + SID_VC_PITCH_HI) {
 					continue;
+				}
 				break;
 
 			case InitState::PW:
-				if (r != voice*7+2 &&		// PW_LO
-					r != voice*7+3)			// PW_HI
+				if (r != voiceBase + SID_VC_PULSE_WIDTH_LO &&
+					r != voiceBase + SID_VC_PULSE_WIDTH_HI) {
 					continue;
+				}
 				break;
 
 			case InitState::ADSR:
-				if (r != voice*7+5 &&		// AD
-					r != voice*7+6)			// SR
-					continue;
+				if (r != voiceBase + SID_VC_ENVELOPE_AD &&
+					r != voiceBase + SID_VC_ENVELOPE_SR) {
+						continue;
+				}
 				break;
 
 			case InitState::FILTER_MODE:
-				if (r != 24) continue;		// FLT_MODE REG COUPLED: +VOL
+				if (r != SID_FILTER_MODE_VOLUME) {
+					continue;
+				}
 				break;
 		}
 
