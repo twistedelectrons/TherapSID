@@ -42,4 +42,3 @@ enum class Pot {
 	ARP_RATE = 41,
 	ARP_RANGE = 32
 };
-
