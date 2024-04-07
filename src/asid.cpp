@@ -87,7 +87,8 @@ In addition there is the possibility to remix the SID files live:
  * NOISE waveform button mutes/unmutes the corresponding track
 
  * RECT/TRI/SAW/SYNC/RING waveform buttons force that feature on/off (ignoring
-   incoming changes from the SID file). Noise will always be let through.
+   incoming changes from the SID file). RECT/TRI/SAW combinations are possible 
+   with the shift button (LFO NOISE) held down. Noise will always be let through.
 
  * WIDTH forces the pulse width to that value (ignoring incoming)
 
@@ -127,14 +128,23 @@ In addition there is the possibility to remix the SID files live:
 
  * Holding ENV3 when pressing on a channel mute button will instead solo it. If
    holding ENV3 and pressing RETRIG or LOOP (i.e the SID1/SID2 selectors), that
-   whole SID chip will be soloed.
+   whole SID chip will be soloed and selected.
 
  * PRESET UP/DOWN will change the default chip for remixing - from affecting
    both to only one of them (useful for one-handed remixing of one chip, not
    needing to hold RETRIG/LOOP). This will be indicated by A1, A2 - as opposed
    to AS which means both.
 
-In the SID+FM mode, the follwing buttons apply for remixing:
+ * Holding the shift button (LFO NOISE) allows you to restore individual 
+   parameter areas like:
+  - SH + NOISE restores VOICE parameters (WAVEFORM, PW, TUNE, FINE, RING/SYNC)
+  - SH + SYNC restores PITCH (TUNE, FINE)
+  - SH + RING restores ADSR
+  - SH + LFO LINK restores FILTER ROUTE
+  - SH + FILTER MODE restores FILTER MODE
+  - SH + POT restores individual values by turning the POT
+
+In the SID+FM mode, the following buttons apply for remixing:
  * Voice 1 SQR to NOISE, Voice 2 SQR to NOISE and Voice 3 SQR to SAW works as
    indication LEDs and mute on/off buttons for the 9 (or 11) FM channels
 
