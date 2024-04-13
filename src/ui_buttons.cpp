@@ -145,35 +145,74 @@ WaveformState combineWaveformAsid(byte chip, byte voice, WaveformState waveform)
 
 	if (waveform == WaveformState::RECT) {
 		switch (asidState.overrideWaveform[chip][voice]) {
-			case WaveformState::TRI:	waveform = WaveformState::RT;	break;
-			case WaveformState::SAW:	waveform = WaveformState::RS;	break;
-			case WaveformState::RT:		waveform = WaveformState::TRI;	break;
-			case WaveformState::TS:		waveform = WaveformState::RTS;	break;
-			case WaveformState::RS:		waveform = WaveformState::SAW;	break;
-			case WaveformState::RTS:	waveform = WaveformState::TS;	break;
-			default:					break;
+			case WaveformState::TRI:
+				waveform = WaveformState::RT;
+				break;
+			case WaveformState::SAW:
+				waveform = WaveformState::RS;
+				break;
+			case WaveformState::RT:
+				waveform = WaveformState::TRI;
+				break;
+			case WaveformState::TS:
+				waveform = WaveformState::RTS;
+				break;
+			case WaveformState::RS:
+				waveform = WaveformState::SAW;
+				break;
+			case WaveformState::RTS:
+				waveform = WaveformState::TS;
+				break;
+			default:
+				break;
 		}
 
 	} else if (waveform == WaveformState::TRI) {
 		switch (asidState.overrideWaveform[chip][voice]) {
-			case WaveformState::RECT:	waveform = WaveformState::RT;	break;
-			case WaveformState::SAW:	waveform = WaveformState::TS;	break;
-			case WaveformState::RT:		waveform = WaveformState::RECT;	break;
-			case WaveformState::TS:		waveform = WaveformState::SAW;	break;
-			case WaveformState::RS:		waveform = WaveformState::RTS;	break;
-			case WaveformState::RTS:	waveform = WaveformState::RS;	break;
-			default:					break;
+			case WaveformState::RECT:
+				waveform = WaveformState::RT;
+				break;
+			case WaveformState::SAW:
+				waveform = WaveformState::TS;
+				break;
+			case WaveformState::RT:
+				waveform = WaveformState::RECT;
+				break;
+			case WaveformState::TS:
+				waveform = WaveformState::SAW;
+				break;
+			case WaveformState::RS:
+				waveform = WaveformState::RTS;
+				break;
+			case WaveformState::RTS:
+				waveform = WaveformState::RS;
+				break;
+			default:
+				break;
 		}
 
 	} else if (waveform == WaveformState::SAW) {
 		switch (asidState.overrideWaveform[chip][voice]) {
-			case WaveformState::RECT:	waveform = WaveformState::RS;	break;
-			case WaveformState::TRI:	waveform = WaveformState::TS;	break;
-			case WaveformState::RT:		waveform = WaveformState::RTS;	break;
-			case WaveformState::TS:		waveform = WaveformState::TRI;	break;
-			case WaveformState::RS:		waveform = WaveformState::RECT;	break;
-			case WaveformState::RTS:	waveform = WaveformState::RT;	break;
-			default:					break;
+			case WaveformState::RECT:
+				waveform = WaveformState::RS;
+				break;
+			case WaveformState::TRI:
+				waveform = WaveformState::TS;
+				break;
+			case WaveformState::RT:
+				waveform = WaveformState::RTS;
+				break;
+			case WaveformState::TS:
+				waveform = WaveformState::TRI;
+				break;
+			case WaveformState::RS:
+				waveform = WaveformState::RECT;
+				break;
+			case WaveformState::RTS:
+				waveform = WaveformState::RT;
+				break;
+			default:
+				break;
 		}
 	}
 
@@ -283,7 +322,9 @@ void buttChangedAsid(Button button, bool value) {
 		switch (button) {
 			case Button::PRESET_RESET:
 				// prevent short circuit combo (LFO_NOISE+FILTER_MODE)
-				if (asidState.isShiftMode) break;
+				if (asidState.isShiftMode) {
+					break;
+				}
 
 				// Clear remix parameters
 				resetDown = true;
@@ -312,11 +353,14 @@ void buttChangedAsid(Button button, bool value) {
 				asidSelectDefaultChip(asidState.selectButtonCounter ? 2 : 0);
 
 				// Solo entire chip
-				if (asidState.isSoloButtonHeld && !updateChipSoloStatus() && !asidState.selectButtonCounter)
+				if (asidState.isSoloButtonHeld && !updateChipSoloStatus() && !asidState.selectButtonCounter) {
 					asidClearDefaultChip();
+				}
 
 				// increment select counter
-				if (SIDCHIPS > 2) asidState.selectButtonCounter++;
+				if (SIDCHIPS > 2) {
+					asidState.selectButtonCounter++;
+				}
 				break;
 
 			case Button::LOOP:
@@ -324,11 +368,14 @@ void buttChangedAsid(Button button, bool value) {
 				asidSelectDefaultChip(asidState.selectButtonCounter ? 2 : 1);
 
 				// Solo entire chip
-				if (asidState.isSoloButtonHeld && !updateChipSoloStatus() && !asidState.selectButtonCounter)
+				if (asidState.isSoloButtonHeld && !updateChipSoloStatus() && !asidState.selectButtonCounter) {
 					asidClearDefaultChip();
+				}
 
 				// increment select counter
-				if (SIDCHIPS > 2) asidState.selectButtonCounter++;
+				if (SIDCHIPS > 2) {
+					asidState.selectButtonCounter++;
+				}
 				break;
 
 			case Button::ARP_MODE:
@@ -554,17 +601,21 @@ void buttChangedAsid(Button button, bool value) {
 				case Button::SYNC1:
 				case Button::SYNC2:
 				case Button::SYNC3:
-					if (asidState.isShiftMode)
+					if (asidState.isShiftMode) {
 						asidRestoreVoice(all ? -1 : chip, index, InitState::PITCH);
-					else updateTriStateButtonAsid(chip, index, all, asidState.overrideSync);
+					} else {
+						updateTriStateButtonAsid(chip, index, all, asidState.overrideSync);
+					}
 					break;
 
 				case Button::RING1:
 				case Button::RING2:
 				case Button::RING3:
-					if (asidState.isShiftMode)
+					if (asidState.isShiftMode) {
 						asidRestoreVoice(all ? -1 : chip, index, InitState::ADSR);
-					else updateTriStateButtonAsid(chip, index, all, asidState.overrideRingMod);
+					} else {
+						updateTriStateButtonAsid(chip, index, all, asidState.overrideRingMod);
+					}
 					break;
 
 				case Button::LFO_CHAIN1:
@@ -605,14 +656,18 @@ void buttChangedAsid(Button button, bool value) {
 		}
 
 		// Update dot indication for changed SIDs, if needed
-		for (byte i = 0; i < 2; i++) asidIndicateChanged(i);
+		for (byte i = 0; i < 2; i++) {
+			asidIndicateChanged(i);
+		}
 
 	} else {
 		// Released events, global
 		switch (button) {
 			case Button::PRESET_RESET:
 				// prevent short circuit combo (LFO_NOISE+FILTER_MODE)
-				if (asidState.isShiftMode) break;
+				if (asidState.isShiftMode) {
+					break;
+				}
 
 				resetDown = false;
 				break;
@@ -636,8 +691,9 @@ void buttChangedAsid(Button button, bool value) {
 				}
 
 				// decrement select counter
-				if (asidState.selectButtonCounter)
+				if (asidState.selectButtonCounter) {
 					asidState.selectButtonCounter--;
+				}
 
 				break;
 
