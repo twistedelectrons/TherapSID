@@ -10,7 +10,8 @@ Find the official releases at [the official product page](https://www.twistedele
 
 This Fork contains ASID Enhancements which is based on the original firmware of Alex Smith and the ASID Support of Thomas Jannson:
 
-![ASID Enhancements](https://github.com/rio-rattenrudel/TherapSID/blob/asid-enhancements/doc/asid_enhanced_quick_guide.png)
+![ASID Enhancements](https://github.com/rio-rattenrudel/TherapSID/blob/asid-enhancements/doc/asid_quick_guide_01.png)
+![ASID Enhancements](https://github.com/rio-rattenrudel/TherapSID/blob/asid-enhancements/doc/asid_quick_guide_02.png)
 
  * TherapSid gives direct feedback of the selected chip by pushing the RETRIG and LOOP buttons
 
