@@ -6,34 +6,26 @@ Find the official releases at [the official product page](https://www.twistedele
 
 ![Photo of the TherapSID](https://static.wixstatic.com/media/b8c32b_83978e994e24423d991c01e184dd30ce~mv2.jpg)
 
-# ASID - Enhancements
+## ASID support - remix sid tunes however you like
 
-This Fork contains ASID Enhancements which is based on the original firmware of Alex Smith and the ASID Support of Thomas Jannson:
+This Fork contains ASID Enhancements which is based on the original firmware of Alex Smith and the ASID Support of Thomas Jansson:
 
-![ASID Enhancements](https://github.com/rio-rattenrudel/TherapSID/blob/asid-enhancements/doc/asid_quick_guide_01.png)
+![ASID Quick Guide - Page 1](https://github.com/rio-rattenrudel/TherapSID/blob/asid-enhancements/doc/asid_quick_guide_01.png)
 
-![ASID Enhancements](https://github.com/rio-rattenrudel/TherapSID/blob/asid-enhancements/doc/asid_quick_guide_02.png)
 
- * TherapSid gives direct feedback of the selected chip by pushing the RETRIG and LOOP buttons
+![ASID Quick Guide - Page 2](https://github.com/rio-rattenrudel/TherapSID/blob/asid-enhancements/doc/asid_quick_guide_02.png)
 
- * TherapSid's SOLO mode automatically selects the chip by RETRIG button (A1) or LOOP button (A2) or the combination of both (A3)
+Some of the topics that were focussed on:
 
- * TherapSid's SOLO-ed chip ensures that the filter mode for the other SID is turned off.
+ * TherapSid gives direct visual feedback on the chip selection
+
+ * TherapSid's SOLO mode automatically selects the chip by RETRIG (A1) or LOOP (A2) or the combination of both (A3)
    
- * A Shift (SH) key has been introduced (LFO NOISE button) that allows you
-   to do the following:
+ * A Shift (SH) key has been introduced (LFO NOISE button) that allows you to combine waveforms or restore individual areas
 
-      - ```SH + WAVEFORMS   - combines waveforms (RT, TS, RS, RTS)```
-      - ```SH + NOISE       - restores VOICE params (WAVEFORM, PW, TUNE, FINE, RING/SYNC)```
-      - ```SH + SYNC        - restores PITCH (TUNE, FINE)```
-      - ```SH + RING        - restores ADSR```
-      - ```SH + LFO LINK    - restores FILTER ROUTE```
-      - ```SH + FILTER MODE - restores FILTER MODE```
-      - ```SH + POT         - restores POT values```
+ * Shift can RESET each POT value while SH is held and POT is turned
 
- * Shift mode can RESET each POT value while SH is held and POT is turned
-
- * The dot indicator (left, right) has been re-implemented to get a real feedback about the chip's remix state
+ * The dot indicator (left, right) gives real feedback on the remix status of the chip
 
 ## Building and flashing the source code:
 
