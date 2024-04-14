@@ -8,7 +8,7 @@ Find the official releases at [the official product page](https://www.twistedele
 
 ## ASID support - remix sid tunes however you like
 
-This Fork contains ASID Enhancements which is based on the original firmware of Alex Smith and the ASID Support of Thomas Jansson:
+This fork contains ASID enhancements which is based on the original firmware of Alex Smith and the ASID support of Thomas Jansson:
 
 ![ASID Quick Guide - Page 1](https://github.com/rio-rattenrudel/TherapSID/blob/asid-enhancements/doc/asid_quick_guide_01.png)
 
@@ -17,11 +17,11 @@ This Fork contains ASID Enhancements which is based on the original firmware of 
 
 Some of the topics that were focussed on:
 
- * TherapSid gives direct visual feedback on the chip selection
+ * TherapSID gives direct visual feedback on the chip selection
 
- * TherapSid's SOLO mode automatically selects the chip by RETRIG (A1) or LOOP (A2) or the combination of both (A3)
+ * TherapSID's SOLO mode automatically selects the chip by RETRIG (A1) or LOOP (A2) or the combination of both (A3)
    
- * A Shift (SH) key has been introduced (LFO NOISE button) that allows you to combine waveforms or restore individual areas
+ * A shift (SH) key has been introduced (LFO NOISE button) that allows you to combine waveforms or restore individual areas
 
  * Shift can RESET each POT value while SH is held and POT is turned
 
