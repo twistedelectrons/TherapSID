@@ -15,6 +15,9 @@ This fork contains ASID enhancements which is based on the original firmware of 
 
 ![ASID Quick Guide - Page 2](https://github.com/rio-rattenrudel/TherapSID/blob/asid-enhancements/doc/asid_quick_guide_02.png)
 
+
+![ASID Quick Guide - Page 3](https://github.com/rio-rattenrudel/TherapSID/blob/asid-enhancements/doc/asid_quick_guide_03.png)
+
 Some of the topics that were focussed on:
 
  * TherapSID gives direct visual feedback on the chip selection
