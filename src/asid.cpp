@@ -119,7 +119,7 @@ In addition there is the possibility to remix the SID files live:
    Left dot means SID1 and right dot means SID2.
 
  * Pressing LFO SQUARE will put the player in a "clean" mode (indicated by
-   "AC"), not accepting any remixed parameters
+   "AC"), accepts any remixed parameters, but plays sid tune unchanged
 
  * Brief press on RESET restores remix parameters to original. This also works
    with the SID1/2 separation.
