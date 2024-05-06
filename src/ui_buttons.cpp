@@ -337,16 +337,32 @@ void buttChangedAsid(Button button, bool value) {
 				}
 				break;
 
-			case Button::LFO_RECT: {
+			case Button::LFO_RECT:
 				// Clean mode - no remixing possible
-				bool tmpMode;
 				asidState.isCleanMode = !asidState.isCleanMode;
-				tmpMode = asidState.isCleanMode;
-				asidRestore(-1); // restore both
 
-				// Restore will affect clean mode itself, so need to keep the state
-				asidState.isCleanMode = tmpMode;
-			} break;
+				// full restore by shift
+				if (asidState.isShiftMode) {
+
+					bool tmpMode = asidState.isCleanMode;
+					asidRestore(-1); // restore both
+
+					// Restore will affect clean mode itself, so need to keep the state
+					asidState.isCleanMode = tmpMode;
+				
+				} else {
+
+					// restore isOverride States
+					if (!asidState.isCleanMode) {
+
+						for (byte chip = 0; chip <= SIDCHIPS - 1; chip++) {
+							for (byte voice = 0; voice < 3; voice++) {
+								if (asidState.isOverridePW[chip][voice]) asidUpdateWidth(chip, voice);
+							}
+						}
+					}
+				}
+				break;
 
 			case Button::RETRIG:
 				// SID 1 select-button (SID 3 by combo)
