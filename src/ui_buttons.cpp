@@ -357,7 +357,9 @@ void buttChangedAsid(Button button, bool value) {
 
 						for (byte chip = 0; chip <= SIDCHIPS - 1; chip++) {
 							for (byte voice = 0; voice < 3; voice++) {
-								if (asidState.isOverridePW[chip][voice]) asidUpdateWidth(chip, voice);
+								if (asidState.isOverridePW[chip][voice]) {
+									asidUpdateWidth(chip, voice);
+								}
 							}
 						}
 					}

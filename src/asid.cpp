@@ -1447,12 +1447,9 @@ void asidIndicateChanged(byte chip) {
 	bool isRemixed = false;
 
 	// verify (with tolerance)
-	if (asidState.overridePW[chip][0] < POT_VALUE_TO_ASID_PW(POT_NOON) - 50 ||
-	    asidState.overridePW[chip][0] > POT_VALUE_TO_ASID_PW(POT_NOON) + 50 ||
-	    asidState.overridePW[chip][1] < POT_VALUE_TO_ASID_PW(POT_NOON) - 50 ||
-	    asidState.overridePW[chip][1] > POT_VALUE_TO_ASID_PW(POT_NOON) + 50 ||
-	    asidState.overridePW[chip][2] < POT_VALUE_TO_ASID_PW(POT_NOON) - 50 ||
-	    asidState.overridePW[chip][2] > POT_VALUE_TO_ASID_PW(POT_NOON) + 50 ||
+	if (asidState.isOverridePW[chip][0] ||
+		asidState.isOverridePW[chip][1] ||
+		asidState.isOverridePW[chip][2] ||
 	    asidState.overrideWaveform[chip][0] != WaveformState::SIDFILE ||
 	    asidState.overrideWaveform[chip][1] != WaveformState::SIDFILE ||
 	    asidState.overrideWaveform[chip][2] != WaveformState::SIDFILE ||
@@ -1461,9 +1458,12 @@ void asidIndicateChanged(byte chip) {
 	    asidState.overrideSync[chip][2] != OverrideState::SIDFILE ||
 	    asidState.overrideRingMod[chip][0] != OverrideState::SIDFILE ||
 	    asidState.overrideRingMod[chip][1] != OverrideState::SIDFILE ||
-	    asidState.overrideRingMod[chip][2] != OverrideState::SIDFILE || asidState.adjustOctave[chip][0] ||
-	    asidState.adjustOctave[chip][1] || asidState.adjustOctave[chip][2] ||
-	    asidState.adjustFine[chip][0] != FINETUNE_0_CENTS || asidState.adjustFine[chip][1] != FINETUNE_0_CENTS ||
+	    asidState.overrideRingMod[chip][2] != OverrideState::SIDFILE || 
+	    asidState.adjustOctave[chip][0] || 
+	    asidState.adjustOctave[chip][1] || 
+	    asidState.adjustOctave[chip][2] ||
+	    asidState.adjustFine[chip][0] != FINETUNE_0_CENTS || 
+	    asidState.adjustFine[chip][1] != FINETUNE_0_CENTS ||
 	    asidState.adjustFine[chip][2] != FINETUNE_0_CENTS ||
 	    asidState.adjustAttack[chip][0] != POT_VALUE_TO_ASID_LORES(POT_NOON) ||
 	    asidState.adjustAttack[chip][1] != POT_VALUE_TO_ASID_LORES(POT_NOON) ||
@@ -1479,7 +1479,8 @@ void asidIndicateChanged(byte chip) {
 	    asidState.adjustRelease[chip][2] != POT_VALUE_TO_ASID_LORES(POT_NOON) ||
 	    asidState.adjustCutoff[chip] < POT_VALUE_TO_ASID_CUTOFF(POT_NOON) - 10 ||
 	    asidState.adjustCutoff[chip] > POT_VALUE_TO_ASID_CUTOFF(POT_NOON) + 10 ||
-	    asidState.adjustReso[chip] != POT_VALUE_TO_ASID_LORES(POT_NOON) || asidState.isOverrideFilterMode[chip] ||
+	    asidState.adjustReso[chip] != POT_VALUE_TO_ASID_LORES(POT_NOON) || 
+	    asidState.isOverrideFilterMode[chip] ||
 	    asidState.overrideFilterRoute[chip][0] != OverrideState::SIDFILE ||
 	    asidState.overrideFilterRoute[chip][1] != OverrideState::SIDFILE ||
 	    asidState.overrideFilterRoute[chip][2] != OverrideState::SIDFILE) {
