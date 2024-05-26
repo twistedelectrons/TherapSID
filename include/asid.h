@@ -33,6 +33,7 @@ void asidFmUpdateOpLevel(byte oper);
 void asidAdvanceDefaultChip(bool isUp);
 void asidSelectDefaultChip(byte chip);
 void asidClearDefaultChip();
+void asidUpdateOverrides();
 
 #define SID_REGISTERS_ASID (SID_REGISTERS + 3)
 

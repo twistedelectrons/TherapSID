@@ -1044,12 +1044,24 @@ void asidProcessMessage(byte* buffer, int size) {
 	switch (buffer[1]) {
 		case 0x4c:
 			// Start play .SID
-			// Not implemented.
+			// playback is controlled by incoming data 0x4e, but
+			// if it was stopped before, it should restore remix
+			if (asidState.enabled) {
+				updateLastSIDValues(-1, 0, InitState::ALL);
+				asidUpdateOverrides();
+			}
 			break;
 
 		case 0x4d:
 			// Stop playback
-			// Not implemented.
+			// reset registers raw, so remix state is kept
+			for (size_t reg = 0; reg < SID_REGISTERS; reg++) {
+				for (byte chip = 0; chip < SIDCHIPS; chip++) {
+					// take care about active fm chips > 0
+					if (chip > 0 && asidState.isSidFmMode) break;
+					sid_chips[chip].send_update_immediate(reg, 0);
+				}
+			}
 			break;
 
 		case 0x4f:
@@ -1651,6 +1663,23 @@ void asidClearDefaultChip() {
 
 		if (!asidState.isCleanMode) {
 			displayAsidRemixMode();
+		}
+	}
+}
+
+/*
+ * Updates the override states which are independent of lastSIDvalues (like PW)
+ */
+void asidUpdateOverrides() {
+	// recover override states to chips
+	if (!asidState.isCleanMode) {
+
+		for (byte chip = 0; chip <= SIDCHIPS - 1; chip++) {
+			for (byte voice = 0; voice < 3; voice++) {
+				if (asidState.isOverridePW[chip][voice]) {
+					asidUpdateWidth(chip, voice);
+				}
+			}
 		}
 	}
 }
