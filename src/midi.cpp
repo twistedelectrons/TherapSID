@@ -196,7 +196,9 @@ static void HandleNoteOn(byte channel, byte note, byte velocity) {
 			voice_state.note_off_individual(voice + 3, note);
 		}
 	}
-	leftDot();
+	if (!asidState.enabled) {
+		leftDot();
+	}
 }
 
 static void HandleNoteOff(byte channel, byte note) { HandleNoteOn(channel, note, 0); }
@@ -204,7 +206,9 @@ static void HandleNoteOff(byte channel, byte note) { HandleNoteOn(channel, note,
 static byte lastData1, lastData2; // keep track of last CC and Value for handshake with tool.
 
 static void HandleControlChange(byte channel, byte data1, byte data2) {
-	leftDot();
+	if (!asidState.enabled) {
+		leftDot();
+	}
 
 	if (channel == 16 && lastData1 == 19 && lastData2 == 82 && data1 == 19 && data2 == 82) {
 		// Transmit device ID & Firmware version
