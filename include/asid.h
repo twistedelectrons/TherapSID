@@ -33,7 +33,9 @@ void asidFmUpdateOpLevel(byte oper);
 void asidAdvanceDefaultChip(bool isUp);
 void asidSelectDefaultChip(byte chip);
 void asidClearDefaultChip();
-void asidUpdateOverrides();
+void asidUpdateLastRemixState(int chip);
+void asidUpdateOverrides(int chip);
+void asidRawResetRegisterChip(byte chip);
 
 #define SID_REGISTERS_ASID (SID_REGISTERS + 3)
 
@@ -87,7 +89,7 @@ struct asidState_t {
 	int adjustCutoff[SIDCHIPS];
 	int adjustReso[SIDCHIPS];
 	FilterMode filterMode[SIDCHIPS];
-	bool muteFilterMode[SIDCHIPS];
+	bool muteChip[SIDCHIPS];
 
 #ifdef ASID_VOLUME_ADJUST
 	int adjustVolume[SIDCHIPS];
