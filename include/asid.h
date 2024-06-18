@@ -39,6 +39,8 @@ void asidUpdateOverrides();
 
 #define POT_VALUE_TO_ASID_PW(x) (x << 1)
 #define POT_VALUE_TO_ASID_LORES(x) (x >> 5)
+#define POT_VALUE_TO_ASID_FM_LORES(x) (x >> 6)
+#define POT_VALUE_TO_ASID_FM_HIRES(x) (x >> 3)
 #define POT_VALUE_TO_ASID_CUTOFF(x) (x >> 1)
 #define POT_VALUE_TO_ASID_FINETUNE(x) ((value >> 4) + 978)
 // Finetune is multiplication value to be divided by 1024. This means +/-53

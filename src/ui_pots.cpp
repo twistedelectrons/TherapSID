@@ -59,11 +59,11 @@ void movedPotAsid(Pot pot, int value) {
 	if (asidState.isSidFmMode && asidState.selectedSids.b.sid2 && !asidState.selectedSids.b.sid1) {
 		if (potmap->fmOperator != -1) {
 			if (potmap->fmOperator < OPL_NUM_CHANNELS_MELODY_MODE * OPL_NUM_OPERATORS) {
-				asidState.adjustFMOpLevel[potmap->fmOperator] = value;
+				asidState.adjustFMOpLevel[potmap->fmOperator] = POT_VALUE_TO_ASID_FM_HIRES(value);
 				asidFmUpdateOpLevel(potmap->fmOperator);
 			} else {
 				asidState.adjustFMFeedback[potmap->fmOperator - OPL_NUM_CHANNELS_MELODY_MODE * OPL_NUM_OPERATORS] =
-				    value;
+				    POT_VALUE_TO_ASID_FM_LORES(value);
 				asidFmUpdateFeedback(potmap->fmOperator - OPL_NUM_CHANNELS_MELODY_MODE * OPL_NUM_OPERATORS);
 			}
 		}
