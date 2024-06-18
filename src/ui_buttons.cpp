@@ -219,7 +219,11 @@ WaveformState combineWaveformAsid(byte chip, byte voice, WaveformState waveform)
 	return waveform;
 }
 
-void updateWaveformAsid(byte chip, byte voice, bool all, WaveformState waveform) {
+void updateWaveformAsid(byte chip, byte voice, bool all, WaveformState waveform, bool isCombineMode) {
+	if (isCombineMode) {
+		waveform = combineWaveformAsid(chip, voice, waveform);
+	}
+
 	if (asidState.overrideWaveform[chip][voice] == waveform) {
 		asidState.overrideWaveform[chip][voice] = WaveformState::NOISE_ONLY;
 	} else {
@@ -349,7 +353,7 @@ void buttChangedAsid(Button button, bool value) {
 
 					// Restore will affect clean mode itself, so need to keep the state
 					asidState.isCleanMode = tmpMode;
-				
+
 				} else {
 
 					// Restore isOverride States
@@ -519,45 +523,24 @@ void buttChangedAsid(Button button, bool value) {
 			}
 
 		} else {
-
-			WaveformState waveform;
-
 			// Handling of buttons for a SID chip
 			switch (button) {
 				case Button::RECT1:
 				case Button::RECT2:
 				case Button::RECT3:
-					waveform = WaveformState::RECT;
-
-					if (asidState.isShiftMode) {
-						waveform = combineWaveformAsid(chip, index, waveform);
-					}
-
-					updateWaveformAsid(chip, index, all, waveform);
+					updateWaveformAsid(chip, index, all, WaveformState::RECT, asidState.isShiftMode);
 					break;
 
 				case Button::TRI1:
 				case Button::TRI2:
 				case Button::TRI3:
-					waveform = WaveformState::TRI;
-
-					if (asidState.isShiftMode) {
-						waveform = combineWaveformAsid(chip, index, waveform);
-					}
-
-					updateWaveformAsid(chip, index, all, waveform);
+					updateWaveformAsid(chip, index, all, WaveformState::TRI, asidState.isShiftMode);
 					break;
 
 				case Button::SAW1:
 				case Button::SAW2:
 				case Button::SAW3:
-					waveform = WaveformState::SAW;
-
-					if (asidState.isShiftMode) {
-						waveform = combineWaveformAsid(chip, index, waveform);
-					}
-
-					updateWaveformAsid(chip, index, all, waveform);
+					updateWaveformAsid(chip, index, all, WaveformState::SAW, asidState.isShiftMode);
 					break;
 
 				case Button::NOISE1:
