@@ -200,9 +200,9 @@ void asidInit(int chip) {
 	}
 
 	for (byte i = 0; i < OPL_NUM_CHANNELS_MELODY_MODE; i++) {
-		asidState.adjustFMOpLevel[i] = POT_NOON;
-		asidState.adjustFMOpLevel[i + OPL_NUM_CHANNELS_MELODY_MODE] = POT_NOON;
-		asidState.adjustFMFeedback[i] = POT_NOON;
+		asidState.adjustFMOpLevel[i] = POT_VALUE_TO_ASID_FM_HIRES(POT_NOON);
+		asidState.adjustFMOpLevel[i + OPL_NUM_CHANNELS_MELODY_MODE] = POT_VALUE_TO_ASID_FM_HIRES(POT_NOON);
+		asidState.adjustFMFeedback[i] = POT_VALUE_TO_ASID_FM_LORES(POT_NOON);
 	}
 }
 
@@ -966,7 +966,7 @@ void handleAsidFmFrameUpdate(byte* buffer) {
 						}
 					} else if ((addr & 0xf0) == OPL_ADDRESS_BASE_FEEDBACK) {
 						// Feedback
-						adjustData = ((data & 0x0e) >> 1) + (asidState.adjustFMFeedback[addr & 0x0f] >> 6) - 8;
+						adjustData = ((data & 0x0e) >> 1) + (asidState.adjustFMFeedback[addr & 0x0f]) - 8;
 						adjustData = max(0, min(7, adjustData));
 						asidState.lastFMvaluesFeedbackConn[addr - 0xc0] = data;
 						data = (data & 0xf1) + (adjustData << 1);
@@ -974,8 +974,7 @@ void handleAsidFmFrameUpdate(byte* buffer) {
 					           (addr < (OPL_ADDRESS_BASE_LEVELS + OPL_SIZE_BLOCK_EXTENDED))) {
 						// Levels (0x40 or 0x50)
 						// Level is reversed...
-						adjustData =
-						    (data & 0x3f) - (asidState.adjustFMOpLevel[regOpMapToVoice[addr & 0x1f]] >> 3) + 64;
+						adjustData = (data & 0x3f) - (asidState.adjustFMOpLevel[regOpMapToVoice[addr & 0x1f]]) + 64;
 						adjustData = max(0, min(63, adjustData));
 						asidState.lastFMvaluesKslTotalLev[addr - OPL_ADDRESS_BASE_LEVELS] = data;
 						data = (data & 0xc0) + adjustData;
@@ -1424,7 +1423,7 @@ void asidFmUpdateFeedback(byte channel) {
 	int adjustData;
 	byte data = asidState.lastFMvaluesFeedbackConn[channel];
 
-	adjustData = ((data & 0x0e) >> 1) + (asidState.adjustFMFeedback[channel] >> 6) - 8;
+	adjustData = ((data & 0x0e) >> 1) + (asidState.adjustFMFeedback[channel]) - 8;
 	adjustData = max(0, min(7, adjustData));
 	data = (data & 0xf1) + (adjustData << 1);
 
@@ -1445,7 +1444,7 @@ void asidFmUpdateOpLevel(byte oper) {
 	static byte channelToReg[] = {0x40, 0x41, 0x42, 0x48, 0x49, 0x4a, 0x50, 0x51, 0x52,
 	                              0x43, 0x44, 0x45, 0x4b, 0x4c, 0x4d, 0x53, 0x54, 0x55};
 
-	adjustData = (data & 0x3f) - (asidState.adjustFMOpLevel[oper] >> 3) + 64;
+	adjustData = (data & 0x3f) - (asidState.adjustFMOpLevel[oper]) + 64;
 	adjustData = max(0, min(63, adjustData));
 	data = (data & 0xc0) + adjustData;
 
@@ -1465,9 +1464,9 @@ void asidIndicateChanged(byte chip) {
 	if (asidState.isSidFmMode && chip != 0) {
 		for (byte i = 0; i < OPL_NUM_CHANNELS_MELODY_MODE; i++) {
 			if (asidState.muteFMChannel[i] ||
-				asidState.adjustFMOpLevel[i << 1] != POT_NOON ||
-			    asidState.adjustFMOpLevel[(i << 1) + 1] != POT_NOON ||
-				asidState.adjustFMFeedback[i] != POT_NOON) {
+				asidState.adjustFMOpLevel[i << 1] != POT_VALUE_TO_ASID_FM_HIRES(POT_NOON) ||
+			    asidState.adjustFMOpLevel[(i << 1) + 1] != POT_VALUE_TO_ASID_FM_HIRES(POT_NOON) ||
+				asidState.adjustFMFeedback[i] != POT_VALUE_TO_ASID_FM_LORES(POT_NOON)) {
 				isRemixed = true;
 				break;
 			}
