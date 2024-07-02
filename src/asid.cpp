@@ -193,7 +193,7 @@ void asidInit(int chip) {
 	asidState.defaultSelectedChip = -1;
 	asidState.isSoloButtonHeld = false;
 	asidState.selectButtonCounter = 0;
-	asidState.soloedChannel = -1;
+	asidState.soloedChannel = ASID_SOLO_FLAG_NO_SOLO;
 	asidState.lastDuplicatedChip = asidState.isSidFmMode ? 0 : 1;
 
 	// FM Channels
@@ -904,7 +904,10 @@ void handleAsidFrameUpdate(byte currentChip, byte* buffer) {
 	// Send all updated SID registers
 	for (chip = currentChip; chip <= max(currentChip, asidState.lastDuplicatedChip); chip++) {
 
-		if (asidState.muteChip[chip]) continue;
+		if (asidState.muteChip[chip]) {
+			// Ignore sending SID data to chip if muted, as some changes can cause pops
+			continue;
+		}
 
 		asidReg = 0;
 		for (maskByte = 0; maskByte < 4; maskByte++) {
@@ -1054,7 +1057,7 @@ void asidProcessMessage(byte* buffer, int size) {
 			// Stop playback
 			// reset registers raw, so remix state is kept
 			for (byte chip = 0; chip < SIDCHIPS; chip++) {
-				asidRawResetRegisterChip(chip);
+				asidMuteSidChip(chip);
 			}
 			break;
 
@@ -1688,15 +1691,16 @@ void asidUpdateLastRemixState(int chip) {
 }
 
 /*
- * Reset register raw
+ * Mute the SID chip by killing the voices
  */
-void asidRawResetRegisterChip(byte chip) {
+void asidMuteSidChip(byte chip) {
 	// take care about active fm chips > 0
 	if (chip > 0 && asidState.isSidFmMode) {
 		return;
 	}
 
-	for (size_t reg = 0; reg < SID_REGISTERS; reg++) {
-		sid_chips[chip].send_update_immediate(reg, 0);
+	// Mute each SID voice in this chip
+	for (byte v = 0; v < SIDVOICES_PER_CHIP; v++) {
+		sid_chips[chip].send_update_immediate(SID_VC_CONTROL + 7 * v, 0);
 	}
 }

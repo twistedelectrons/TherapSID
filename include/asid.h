@@ -35,7 +35,7 @@ void asidSelectDefaultChip(byte chip);
 void asidClearDefaultChip();
 void asidUpdateLastRemixState(int chip);
 void asidUpdateOverrides(int chip);
-void asidRawResetRegisterChip(byte chip);
+void asidMuteSidChip(byte chip);
 
 #define SID_REGISTERS_ASID (SID_REGISTERS + 3)
 
@@ -48,6 +48,10 @@ void asidRawResetRegisterChip(byte chip);
 // Finetune is multiplication value to be divided by 1024. This means +/-53
 // cents but from center position -26 (to fix PAL C64 vs 1MHz clock)
 // Thereby range = -80/+28. (i.e from 978/1024 to 1042/1024)
+
+#define ASID_SOLO_FLAG_SID_CHIP 0x10
+#define ASID_SOLO_FLAG_FM_CHANNEL 0x20
+#define ASID_SOLO_FLAG_NO_SOLO 0x40
 
 enum class WaveformState { SIDFILE, RECT, TRI, SAW, NOISE_ONLY, RT, TS, RS, RTS };
 enum class OverrideState { SIDFILE, ON, OFF };
@@ -111,7 +115,7 @@ struct asidState_t {
 
 	int8_t defaultSelectedChip;
 	bool isSoloButtonHeld;
-	int8_t soloedChannel;
+	byte soloedChannel;
 
 	byte selectButtonCounter;
 
