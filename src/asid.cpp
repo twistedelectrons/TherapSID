@@ -1686,8 +1686,15 @@ void asidUpdateOverrides(int chip) {
  * Updates last remix state (include overrides)
  */
 void asidUpdateLastRemixState(int chip) {
-	updateLastSIDValues(chip, 0, InitState::ALL);
-	asidUpdateOverrides(chip);
+	byte first = chip > -1 ? chip : 0;
+	byte last = chip > -1 ? chip : SIDCHIPS - 1;
+
+	for (byte chip = first; chip <= last; chip++) {
+		if (asidState.muteChip[chip]) continue;
+
+		updateLastSIDValues(chip, 0, InitState::ALL);
+		asidUpdateOverrides(chip);
+	}
 }
 
 /*
