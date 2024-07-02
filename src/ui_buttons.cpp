@@ -551,14 +551,10 @@ void buttChangedAsid(Button button, bool value) {
 
 						// Mute all but the soloed SID channel (or unmute all)
 						for (byte c = 0; c < SIDCHIPS; c++) {
-
-							if (asidState.muteChip[c]) {
-								// When the chip is muted, don't modify its solo channel settings
-								continue;
-							}
-
 							for (byte v = 0; v < SIDVOICES_PER_CHIP; v++) {
-								asidState.muteChannel[c][v] = shouldSolo && !((c == chip || all) && (v == index));
+
+								// When the chip is muted, solo channel settings are copied to the muted chip
+								asidState.muteChannel[c][v] = shouldSolo && !((c == chip || asidState.muteChip[c] || all) && (v == index));
 							}
 						}
 
