@@ -266,27 +266,36 @@ bool updateChipSoloStatus() {
 	}
 
 	// Find out if a chip should be soloed or umute all
-	if (asidState.soloedChannel == 16 + soloChip) {
+	if (asidState.soloedChannel == ASID_SOLO_FLAG_SID_CHIP + soloChip) {
 		// This chip is already soloed => unmute all
 		shouldSolo = false;
-		asidState.soloedChannel = -1;
+		asidState.soloedChannel = ASID_SOLO_FLAG_NO_SOLO;
 	} else {
 		// Solo the selected chip
 		shouldSolo = true;
-		asidState.soloedChannel = 16 + soloChip;
+		asidState.soloedChannel = ASID_SOLO_FLAG_SID_CHIP + soloChip;
 	}
 
-	// Update SID chip channels & filtermode mute status
+	// Update SID chip channels & chip mute status
 	for (byte c = 0; c < SIDCHIPS; c++) {
+		bool shouldMuteChip = shouldSolo && (soloChip != c);
 
-		bool shouldMute = shouldSolo && (soloChip != c);
-
-		asidState.muteChip[c] = shouldMute;
-
-		if (shouldMute) {
-			asidRawResetRegisterChip(c);
+		if (asidState.lastDuplicatedChip == 0) {
+			// SID chips are not duplicated (2SID/3SID/SID+FM-mode)
+			// Handle chip solo like channel mutes
+			for (byte v = 0; v < SIDVOICES_PER_CHIP; v++) {
+				asidState.muteChannel[c][v] = shouldMuteChip;
+			}
 		} else {
-			asidUpdateLastRemixState(c);
+			// SID chips are duplicated (1SID-mode)
+			// Handle chip solo as chip mute (keeping channel mutes intact)
+			asidState.muteChip[c] = shouldMuteChip;
+
+			if (shouldMuteChip) {
+				asidMuteSidChip(c);
+			} else {
+				asidUpdateLastRemixState(c);
+			}
 		}
 	}
 
@@ -297,7 +306,7 @@ bool updateChipSoloStatus() {
 		}
 	}
 
-	return asidState.soloedChannel != -1;
+	return asidState.soloedChannel != ASID_SOLO_FLAG_NO_SOLO;
 }
 
 void buttChangedAsid(Button button, bool value) {
@@ -307,7 +316,6 @@ void buttChangedAsid(Button button, bool value) {
 		byte chip;
 
 		bool all = false;
-		bool checkMoreButtons = false;
 
 		// Find out what chips are selected
 		// If one pressed - execute actions only on that chip
@@ -368,29 +376,16 @@ void buttChangedAsid(Button button, bool value) {
 
 			case Button::RETRIG:
 				// SID 1 select-button (SID 3 by combo)
-				asidSelectDefaultChip(asidState.selectButtonCounter ? 2 : 0);
-
-				// Solo entire chip
-				if (asidState.isSoloButtonHeld && !updateChipSoloStatus() && !asidState.selectButtonCounter) {
-					asidClearDefaultChip();
-				}
-
-				// increment select counter
-				if (SIDCHIPS > 2) {
-					asidState.selectButtonCounter++;
-				}
-				break;
-
 			case Button::LOOP:
 				// SID 2 select-button (SID 3 by combo)
-				asidSelectDefaultChip(asidState.selectButtonCounter ? 2 : 1);
+				asidSelectDefaultChip(asidState.selectButtonCounter ? 2 : (button == Button::RETRIG ? 0 : 1));
 
 				// Solo entire chip
 				if (asidState.isSoloButtonHeld && !updateChipSoloStatus() && !asidState.selectButtonCounter) {
 					asidClearDefaultChip();
 				}
 
-				// increment select counter
+				// Increment select counter to handle SID 3
 				if (SIDCHIPS > 2) {
 					asidState.selectButtonCounter++;
 				}
@@ -444,13 +439,7 @@ void buttChangedAsid(Button button, bool value) {
 
 			default:
 				// Other press => continue to check buttons
-				checkMoreButtons = true;
 				break;
-		}
-
-		if (!checkMoreButtons) {
-			// Done, no indication update
-			return;
 		}
 
 		// Check chip-specific buttons
@@ -494,21 +483,18 @@ void buttChangedAsid(Button button, bool value) {
 					// If already soloed, unmute all
 
 					bool shouldSolo;
-					if (asidState.soloedChannel == 32 + muteFMChannelIdx) {
+					if (asidState.soloedChannel == ASID_SOLO_FLAG_FM_CHANNEL + muteFMChannelIdx) {
 						// The pressed channel is already soloed => remove solo and unmute all
 						shouldSolo = false;
-						asidState.soloedChannel = -1;
+						asidState.soloedChannel = ASID_SOLO_FLAG_NO_SOLO;
 					} else {
 						// Store solo state and mute all other channels
 						shouldSolo = true;
-						asidState.soloedChannel = 32 + muteFMChannelIdx;
+						asidState.soloedChannel = ASID_SOLO_FLAG_FM_CHANNEL + muteFMChannelIdx;
 					}
 
 					// Mute/unmute all SID channels
 					for (byte c = 0; c < SIDCHIPS; c++) {
-
-						if (asidState.muteChip[c]) continue;
-
 						for (byte v = 0; v < SIDVOICES_PER_CHIP; v++) {
 							asidState.muteChannel[c][v] = shouldSolo;
 						}
@@ -523,7 +509,7 @@ void buttChangedAsid(Button button, bool value) {
 					asidState.muteFMChannel[muteFMChannelIdx] = !asidState.muteFMChannel[muteFMChannelIdx];
 
 					// Reset soloed status
-					asidState.soloedChannel = -1;
+					asidState.soloedChannel = ASID_SOLO_FLAG_NO_SOLO;
 				}
 			}
 
@@ -556,7 +542,7 @@ void buttChangedAsid(Button button, bool value) {
 						if (asidState.soloedChannel == (chip * 3 + index)) {
 							// The pressed channel is already soloed => remove solo and unmute all
 							shouldSolo = false;
-							asidState.soloedChannel = -1;
+							asidState.soloedChannel = ASID_SOLO_FLAG_NO_SOLO;
 						} else {
 							// Store solo state and mute all other channels
 							shouldSolo = true;
@@ -566,7 +552,10 @@ void buttChangedAsid(Button button, bool value) {
 						// Mute all but the soloed SID channel (or unmute all)
 						for (byte c = 0; c < SIDCHIPS; c++) {
 
-							if (asidState.muteChip[c]) continue;
+							if (asidState.muteChip[c]) {
+								// When the chip is muted, don't modify its solo channel settings
+								continue;
+							}
 
 							for (byte v = 0; v < SIDVOICES_PER_CHIP; v++) {
 								asidState.muteChannel[c][v] = shouldSolo && !((c == chip || all) && (v == index));
@@ -592,7 +581,7 @@ void buttChangedAsid(Button button, bool value) {
 							}
 
 							// Reset soloed status
-							asidState.soloedChannel = -1;
+							asidState.soloedChannel = ASID_SOLO_FLAG_NO_SOLO;
 						}
 					}
 
@@ -674,6 +663,11 @@ void buttChangedAsid(Button button, bool value) {
 
 			case Button::RETRIG:
 			case Button::LOOP:
+				// Decrement select counter, for SID 3 usage
+				if ((SIDCHIPS > 2) && (asidState.selectButtonCounter)) {
+					asidState.selectButtonCounter--;
+				}
+
 				if (!asidState.isSoloButtonHeld) {
 
 					// validate selection
@@ -681,7 +675,7 @@ void buttChangedAsid(Button button, bool value) {
 						asidClearDefaultChip();
 
 						// Reset soloed status
-						asidState.soloedChannel = -1;
+						asidState.soloedChannel = ASID_SOLO_FLAG_NO_SOLO;
 
 					} else {
 
@@ -689,12 +683,6 @@ void buttChangedAsid(Button button, bool value) {
 						asidSelectDefaultChip(button == Button::RETRIG ? 1 : 0);
 					}
 				}
-
-				// decrement select counter
-				if (asidState.selectButtonCounter) {
-					asidState.selectButtonCounter--;
-				}
-
 				break;
 
 			case Button::ARP_MODE:
