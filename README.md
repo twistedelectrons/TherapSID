@@ -6,30 +6,6 @@ Find the official releases at [the official product page](https://www.twistedele
 
 ![Photo of the TherapSID](https://static.wixstatic.com/media/b8c32b_83978e994e24423d991c01e184dd30ce~mv2.jpg)
 
-## ASID support - remix sid tunes however you like
-
-This fork contains ASID enhancements which is based on the original firmware of Alex Smith and the ASID support of Thomas Jansson:
-
-![ASID Quick Guide - Page 1](https://github.com/rio-rattenrudel/TherapSID/blob/asid-enhancements/doc/asid_quick_guide_01.png)
-
-
-![ASID Quick Guide - Page 2](https://github.com/rio-rattenrudel/TherapSID/blob/asid-enhancements/doc/asid_quick_guide_02.png)
-
-
-![ASID Quick Guide - Page 3](https://github.com/rio-rattenrudel/TherapSID/blob/asid-enhancements/doc/asid_quick_guide_03.png)
-
-Some of the topics that were focussed on:
-
- * TherapSID gives direct visual feedback on the chip selection
-
- * TherapSID's SOLO mode automatically selects the chip by RETRIG (A1) or LOOP (A2) or the combination of both (A3)
-   
- * A shift (SH) key has been introduced (LFO NOISE button) that allows you to combine waveforms or restore individual areas
-
- * Shift can RESET each POT value while SH is held and POT is turned
-
- * The dot indicator (left, right) gives real feedback on the remix status of the chip
-
 ## Building and flashing the source code:
 
 Install `platformio` and `python2`. (Yes. I am so sorry :(.)
