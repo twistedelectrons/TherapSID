@@ -554,7 +554,8 @@ void buttChangedAsid(Button button, bool value) {
 							for (byte v = 0; v < SIDVOICES_PER_CHIP; v++) {
 
 								// When the chip is muted, solo channel settings are copied to the muted chip
-								asidState.muteChannel[c][v] = shouldSolo && !((c == chip || asidState.muteChip[c] || all) && (v == index));
+								asidState.muteChannel[c][v] =
+								    shouldSolo && !((c == chip || asidState.muteChip[c] || all) && (v == index));
 							}
 						}
 

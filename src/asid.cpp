@@ -1690,7 +1690,9 @@ void asidUpdateLastRemixState(int chip) {
 	byte last = chip > -1 ? chip : SIDCHIPS - 1;
 
 	for (byte chip = first; chip <= last; chip++) {
-		if (asidState.muteChip[chip]) continue;
+		if (asidState.muteChip[chip]) {
+			continue;
+		}
 
 		updateLastSIDValues(chip, 0, InitState::ALL);
 		asidUpdateOverrides(chip);
