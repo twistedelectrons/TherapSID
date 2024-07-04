@@ -128,7 +128,9 @@ In addition there is the possibility to remix the SID files live:
 
  * Holding ENV3 when pressing on a channel mute button will instead solo it. If
    holding ENV3 and pressing RETRIG or LOOP (i.e the SID1/SID2 selectors), that
-   whole SID chip will be soloed and selected.
+   whole SID chip will be soloed and selected. Note: Switching a channel to solo 
+   also sets the channels of the duplicated SIDs to solo too. This allows you to 
+   switch between the chips without losing the solo configuration.
 
  * PRESET UP/DOWN will change the default chip for remixing - from affecting
    both to only one of them (useful for one-handed remixing of one chip, not
