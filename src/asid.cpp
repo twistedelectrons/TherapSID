@@ -5,6 +5,7 @@
 #include "util.hpp"
 #include "armsid.h"
 #include "opl.h"
+#include "ui_pots.h"
 
 asidState_t asidState;
 
@@ -26,6 +27,8 @@ asidState_t asidState;
 #define DISPLAY_STANDARD 0
 #define DISPLAY_ASID_REMIX 1
 #define DISPLAY_ASID_CLEAN 2
+#define DISPLAY_ASID_SHIFT 3 // shift indicator
+
 #define FINETUNE_0_CENTS 31 + 978 // corresponds to -26 cents, to simulate PAL C64 on TS 1MHz
 
 #define SLOW_TIMER_INIT_2_SEC (39 * 2) // 39 Hz
@@ -84,7 +87,8 @@ In addition there is the possibility to remix the SID files live:
  * NOISE waveform button mutes/unmutes the corresponding track
 
  * RECT/TRI/SAW/SYNC/RING waveform buttons force that feature on/off (ignoring
-   incoming changes from the SID file). Noise will always be let through.
+   incoming changes from the SID file). RECT/TRI/SAW combinations are possible
+   with the shift button (LFO NOISE) held down. Noise will always be let through.
 
  * WIDTH forces the pulse width to that value (ignoring incoming)
 
@@ -115,7 +119,7 @@ In addition there is the possibility to remix the SID files live:
    Left dot means SID1 and right dot means SID2.
 
  * Pressing LFO SQUARE will put the player in a "clean" mode (indicated by
-   "AC"), not accepting any remixed parameters
+   "AC"), accepts any remixed parameters, but plays sid tune unchanged
 
  * Brief press on RESET restores remix parameters to original. This also works
    with the SID1/2 separation.
@@ -124,14 +128,25 @@ In addition there is the possibility to remix the SID files live:
 
  * Holding ENV3 when pressing on a channel mute button will instead solo it. If
    holding ENV3 and pressing RETRIG or LOOP (i.e the SID1/SID2 selectors), that
-   whole SID chip will be soloed.
+   whole SID chip will be soloed and selected. Note: Switching a channel to solo
+   also sets the channels of the duplicated SIDs to solo too. This allows you to
+   switch between the chips without losing the solo configuration.
 
  * PRESET UP/DOWN will change the default chip for remixing - from affecting
    both to only one of them (useful for one-handed remixing of one chip, not
    needing to hold RETRIG/LOOP). This will be indicated by A1, A2 - as opposed
    to AS which means both.
 
-In the SID+FM mode, the follwing buttons apply for remixing:
+ * Holding the shift button (LFO NOISE) allows you to restore individual
+   parameter areas like:
+  - SH + NOISE restores VOICE parameters (WAVEFORM, PW, TUNE, FINE, RING/SYNC)
+  - SH + SYNC restores PITCH (TUNE, FINE)
+  - SH + RING restores ADSR
+  - SH + LFO LINK restores FILTER ROUTE
+  - SH + FILTER MODE restores FILTER MODE
+  - SH + POT restores individual values by turning the POT
+
+In the SID+FM mode, the following buttons apply for remixing:
  * Voice 1 SQR to NOISE, Voice 2 SQR to NOISE and Voice 3 SQR to SAW works as
    indication LEDs and mute on/off buttons for the 9 (or 11) FM channels
 
@@ -147,39 +162,19 @@ In the SID+FM mode, the follwing buttons apply for remixing:
  * Initialize data structures for a certain chip. -1 means all chips.
  */
 void asidInit(int chip) {
-	byte first, last;
-	if (chip < 0) {
-		first = 0;
-		last = SIDCHIPS - 1;
-	} else {
-		first = last = chip;
-	}
+
+	byte first = chip > -1 ? chip : 0;
+	byte last = chip > -1 ? chip : SIDCHIPS - 1;
 
 	for (byte chip = first; chip <= last; chip++) {
 
 		for (byte i = 0; i < SIDVOICES_PER_CHIP; i++) {
-			asidState.muteChannel[chip][i] = false;
-
-			asidState.overrideWaveform[chip][i] = WaveformState::SIDFILE;
-
-			asidState.overrideSync[chip][i] = OverrideState::SIDFILE;
-			asidState.overrideRingMod[chip][i] = OverrideState::SIDFILE;
-
-			asidState.overridePW[chip][i] = POT_VALUE_TO_ASID_PW(POT_NOON);
-			asidState.isOverridePW[chip][i] = false;
-			asidState.adjustOctave[chip][i] = 0;
-			asidState.adjustFine[chip][i] = FINETUNE_0_CENTS;
-
-			asidState.adjustAttack[chip][i] = POT_VALUE_TO_ASID_LORES(POT_NOON);
-			asidState.adjustSustain[chip][i] = POT_VALUE_TO_ASID_LORES(POT_NOON);
-			asidState.adjustDecay[chip][i] = POT_VALUE_TO_ASID_LORES(POT_NOON);
-			asidState.adjustRelease[chip][i] = POT_VALUE_TO_ASID_LORES(POT_NOON);
-
-			asidState.overrideFilterRoute[chip][i] = OverrideState::SIDFILE;
+			asidInitVoice(chip, i, InitState::ALL);
 		}
 
-		asidState.filterMode[chip] = FilterMode::OFF;
-		asidState.isOverrideFilterMode[chip] = false;
+		asidState.muteChip[chip] = false;
+
+		asidInitFilterMode(chip);
 
 		asidState.adjustCutoff[chip] = POT_VALUE_TO_ASID_CUTOFF(POT_NOON);
 		asidState.adjustReso[chip] = POT_VALUE_TO_ASID_LORES(POT_NOON);
@@ -194,11 +189,13 @@ void asidInit(int chip) {
 
 	asidState.selectedSids.all = 0;
 	asidState.isCleanMode = false;
+	asidState.isShiftMode = false;
 	asidState.slowTimer = SLOW_TIMER_INIT_2_SEC;
 	asidState.displayState = DISPLAY_STANDARD;
 	asidState.defaultSelectedChip = -1;
 	asidState.isSoloButtonHeld = false;
-	asidState.soloedChannel = -1;
+	asidState.selectButtonCounter = 0;
+	asidState.soloedChannel = ASID_SOLO_FLAG_NO_SOLO;
 	asidState.lastDuplicatedChip = asidState.isSidFmMode ? 0 : 1;
 
 	// FM Channels
@@ -207,9 +204,64 @@ void asidInit(int chip) {
 	}
 
 	for (byte i = 0; i < OPL_NUM_CHANNELS_MELODY_MODE; i++) {
-		asidState.adjustFMOpLevel[i] = POT_NOON;
-		asidState.adjustFMOpLevel[i + OPL_NUM_CHANNELS_MELODY_MODE] = POT_NOON;
-		asidState.adjustFMFeedback[i] = POT_NOON;
+		asidState.adjustFMOpLevel[i] = POT_VALUE_TO_ASID_FM_HIRES(POT_NOON);
+		asidState.adjustFMOpLevel[i + OPL_NUM_CHANNELS_MELODY_MODE] = POT_VALUE_TO_ASID_FM_HIRES(POT_NOON);
+		asidState.adjustFMFeedback[i] = POT_VALUE_TO_ASID_FM_LORES(POT_NOON);
+	}
+}
+
+/*
+ * Initialize SIDs single voice
+ */
+void asidInitVoice(int chip, byte voice, InitState init) {
+
+	byte first = chip > -1 ? chip : 0;
+	byte last = chip > -1 ? chip : SIDCHIPS - 1;
+
+	for (byte chip = first; chip <= last; chip++) {
+		// clang-format off
+		bool initWaveForm		= init == InitState::ALL || init == InitState::VOICE || init == InitState::WAVEFORM;
+		bool initPW				= init == InitState::ALL || init == InitState::VOICE || init == InitState::PW;
+		bool initPitch			= init == InitState::ALL || init == InitState::VOICE || init == InitState::PITCH;
+		bool initSync			= init == InitState::ALL || init == InitState::VOICE || init == InitState::SYNC;
+		bool initRing			= init == InitState::ALL || init == InitState::VOICE || init == InitState::RING;
+		bool initADSR			= init == InitState::ALL || init == InitState::ADSR;
+		bool initFilterRoute	= init == InitState::ALL || init == InitState::FILTER_ROUTE;
+		// clang-format on
+
+		if (initWaveForm) {
+			asidState.muteChannel[chip][voice] = false;
+			asidState.overrideWaveform[chip][voice] = WaveformState::SIDFILE;
+		}
+
+		if (initSync) {
+			asidState.overrideSync[chip][voice] = OverrideState::SIDFILE;
+		}
+
+		if (initRing) {
+			asidState.overrideRingMod[chip][voice] = OverrideState::SIDFILE;
+		}
+
+		if (initPW) {
+			asidState.overridePW[chip][voice] = POT_VALUE_TO_ASID_PW(POT_NOON);
+			asidState.isOverridePW[chip][voice] = false;
+		}
+
+		if (initPitch) {
+			asidState.adjustOctave[chip][voice] = 0;
+			asidState.adjustFine[chip][voice] = FINETUNE_0_CENTS;
+		}
+
+		if (initADSR) {
+			asidState.adjustAttack[chip][voice] = POT_VALUE_TO_ASID_LORES(POT_NOON);
+			asidState.adjustSustain[chip][voice] = POT_VALUE_TO_ASID_LORES(POT_NOON);
+			asidState.adjustDecay[chip][voice] = POT_VALUE_TO_ASID_LORES(POT_NOON);
+			asidState.adjustRelease[chip][voice] = POT_VALUE_TO_ASID_LORES(POT_NOON);
+		}
+
+		if (initFilterRoute) {
+			asidState.overrideFilterRoute[chip][voice] = OverrideState::SIDFILE;
+		}
 	}
 }
 
@@ -306,13 +358,60 @@ void asidSetNextFilterMode(byte chip) {
 	}
 }
 
-/*
- * Restore the most important/seldom changed registers, used when
- * pressing RESET briefly
- */
-void asidRestore(int chip) {
-	asidInit(chip);
+void updateLastSIDValues(int chip, byte voice, InitState init) {
 	for (size_t reg = 0; reg < sizeof(asidState.lastSIDvalues[0]) / (sizeof(*asidState.lastSIDvalues[0])); reg++) {
+
+		// cast size_t to byte
+		byte r = static_cast<byte>(reg);
+		byte voiceBase = voice * 7;
+
+		// If specific register not covered by requested init, skip it
+		switch (init) {
+
+			case InitState::ALL:
+				// default
+				break;
+
+			case InitState::WAVEFORM:     // REG COUPLED: +SYNC, RING, GATE...
+			case InitState::SYNC:         // REG COUPLED: +WAVEFORMS
+			case InitState::RING:         // REG COUPLED: +WAVEFORMS
+			case InitState::FILTER_ROUTE: // REG COUPLED: +RESO
+				// not supported
+				return;
+
+			case InitState::VOICE: // [WAVEFORMS, PW, SYNC/RING, PITCH]
+				if (r != voiceBase + SID_VC_PITCH_LO && r != voiceBase + SID_VC_PITCH_HI &&
+				    r != voiceBase + SID_VC_PULSE_WIDTH_LO && r != voiceBase + SID_VC_PULSE_WIDTH_HI &&
+				    r != voiceBase + SID_VC_CONTROL) {
+					continue;
+				}
+				break;
+
+			case InitState::PITCH:
+				if (r != voiceBase + SID_VC_PITCH_LO && r != voiceBase + SID_VC_PITCH_HI) {
+					continue;
+				}
+				break;
+
+			case InitState::PW:
+				if (r != voiceBase + SID_VC_PULSE_WIDTH_LO && r != voiceBase + SID_VC_PULSE_WIDTH_HI) {
+					continue;
+				}
+				break;
+
+			case InitState::ADSR:
+				if (r != voiceBase + SID_VC_ENVELOPE_AD && r != voiceBase + SID_VC_ENVELOPE_SR) {
+					continue;
+				}
+				break;
+
+			case InitState::FILTER_MODE:
+				if (r != SID_FILTER_MODE_VOLUME) {
+					continue;
+				}
+				break;
+		}
+
 		if (chip <= 0) {
 			sid_chips[0].send_update_immediate(reg, asidState.lastSIDvalues[0][reg]);
 		}
@@ -325,6 +424,15 @@ void asidRestore(int chip) {
 		}
 #endif
 	}
+}
+
+/*
+ * Restore the most important/seldom changed registers, used when
+ * pressing RESET briefly
+ */
+void asidRestore(int chip) {
+	asidInit(chip);
+	updateLastSIDValues(chip, 0, InitState::ALL);
 
 	// ARMSID FM (OPL) chip registers
 	if (asidState.isSidFmMode) {
@@ -342,10 +450,26 @@ void asidRestore(int chip) {
 	}
 
 	// Reset LEDs for SID
-	showFilterModeLEDs(asidState.lastSIDvalues[0][SID_FILTER_MODE_VOLUME]);
-	showFilterResoLEDs(asidState.lastSIDvalues[0][SID_FILTER_RESONANCE_ROUTING]);
-	showFilterRouteLEDs(asidState.lastSIDvalues[0][SID_FILTER_RESONANCE_ROUTING]);
-	showFilterCutoffLEDs(asidState.lastSIDvalues[0][SID_FILTER_CUTOFF_HI]);
+	byte first = chip > -1 ? chip : 0;
+	showFilterModeLEDs(asidState.lastSIDvalues[first][SID_FILTER_MODE_VOLUME]);
+	showFilterResoLEDs(asidState.lastSIDvalues[first][SID_FILTER_RESONANCE_ROUTING]);
+	showFilterRouteLEDs(asidState.lastSIDvalues[first][SID_FILTER_RESONANCE_ROUTING]);
+	showFilterCutoffLEDs(asidState.lastSIDvalues[first][SID_FILTER_CUTOFF_HI]);
+}
+
+/*
+ * Restore the most important/seldom changed registers, used when
+ * pressing SHIFT + WAVEFORMS briefly
+ */
+void asidRestoreVoice(int chip, byte voice, InitState init) {
+	asidInitVoice(chip, voice, init);
+
+	// update voice related values
+	if (init == InitState::ALL || init == InitState::FILTER_MODE) {
+		return;
+	}
+
+	updateLastSIDValues(chip, voice, init);
 }
 
 void displayAsidRemixMode() {
@@ -355,6 +479,13 @@ void displayAsidRemixMode() {
 	digit(1, asidState.defaultSelectedChip == -1 ? (asidState.isSidFmMode ? DIGIT_F : DIGIT_S)
 	                                             : asidState.defaultSelectedChip + 1);
 	asidState.displayState = DISPLAY_ASID_REMIX;
+}
+
+void displayAsidShiftMode() {
+	// "SH"
+	digit(0, DIGIT_S);
+	digit(1, DIGIT_H);
+	asidState.displayState = DISPLAY_ASID_SHIFT;
 }
 
 void displayAsidCleanMode() {
@@ -384,6 +515,7 @@ byte calculateFilterRoute(byte chip, byte data) {
 
 void updateFilterMode(byte chip, byte* data) {
 	*data &= 0b10001111;
+
 	switch (asidState.filterMode[chip]) {
 		case FilterMode::LOWPASS:
 			*data |= Sid::LOWPASS;
@@ -488,6 +620,23 @@ bool runControl(byte chip, byte voice, byte* data) {
 
 				case WaveformState::TRI:
 					*data |= 0b00010000;
+					break;
+
+				// combined waveforms
+				case WaveformState::RT:
+					*data |= 0b01010000;
+					break;
+
+				case WaveformState::TS:
+					*data |= 0b00110000;
+					break;
+
+				case WaveformState::RS:
+					*data |= 0b01100000;
+					break;
+
+				case WaveformState::RTS:
+					*data |= 0b01110000;
 					break;
 
 				default:
@@ -667,7 +816,11 @@ void handleAsidFrameUpdate(byte currentChip, byte* buffer) {
 	}
 
 	// Display the right mode (but update only once)
-	if (asidState.isCleanMode) {
+	if (asidState.isShiftMode) {
+		if (asidState.displayState != DISPLAY_ASID_SHIFT) {
+			displayAsidShiftMode();
+		}
+	} else if (asidState.isCleanMode) {
 		if (asidState.displayState != DISPLAY_ASID_CLEAN) {
 			displayAsidCleanMode();
 		}
@@ -752,6 +905,12 @@ void handleAsidFrameUpdate(byte currentChip, byte* buffer) {
 
 	// Send all updated SID registers
 	for (chip = currentChip; chip <= max(currentChip, asidState.lastDuplicatedChip); chip++) {
+
+		if (asidState.muteChip[chip]) {
+			// Ignore sending SID data to chip if muted, as some changes can cause pops
+			continue;
+		}
+
 		asidReg = 0;
 		for (maskByte = 0; maskByte < 4; maskByte++) {
 			field = 0x01;
@@ -812,7 +971,7 @@ void handleAsidFmFrameUpdate(byte* buffer) {
 						}
 					} else if ((addr & 0xf0) == OPL_ADDRESS_BASE_FEEDBACK) {
 						// Feedback
-						adjustData = ((data & 0x0e) >> 1) + (asidState.adjustFMFeedback[addr & 0x0f] >> 6) - 8;
+						adjustData = ((data & 0x0e) >> 1) + (asidState.adjustFMFeedback[addr & 0x0f]) - 8;
 						adjustData = max(0, min(7, adjustData));
 						asidState.lastFMvaluesFeedbackConn[addr - 0xc0] = data;
 						data = (data & 0xf1) + (adjustData << 1);
@@ -820,8 +979,7 @@ void handleAsidFmFrameUpdate(byte* buffer) {
 					           (addr < (OPL_ADDRESS_BASE_LEVELS + OPL_SIZE_BLOCK_EXTENDED))) {
 						// Levels (0x40 or 0x50)
 						// Level is reversed...
-						adjustData =
-						    (data & 0x3f) - (asidState.adjustFMOpLevel[regOpMapToVoice[addr & 0x1f]] >> 3) + 64;
+						adjustData = (data & 0x3f) - (asidState.adjustFMOpLevel[regOpMapToVoice[addr & 0x1f]]) + 64;
 						adjustData = max(0, min(63, adjustData));
 						asidState.lastFMvaluesKslTotalLev[addr - OPL_ADDRESS_BASE_LEVELS] = data;
 						data = (data & 0xc0) + adjustData;
@@ -890,12 +1048,19 @@ void asidProcessMessage(byte* buffer, int size) {
 	switch (buffer[1]) {
 		case 0x4c:
 			// Start play .SID
-			// Not implemented.
+			// playback is controlled by incoming data 0x4e, but
+			// if it was stopped before, it should restore remix
+			if (asidState.enabled) {
+				asidUpdateLastRemixState(-1);
+			}
 			break;
 
 		case 0x4d:
 			// Stop playback
-			// Not implemented.
+			// reset registers raw, so remix state is kept
+			for (byte chip = 0; chip < SIDCHIPS; chip++) {
+				asidMuteSidChip(chip);
+			}
 			break;
 
 		case 0x4f:
@@ -1084,14 +1249,37 @@ void asidUpdateVolume(byte chip) {
 #endif
 
 /*
+ * Initialize SIDs filter mode
+ */
+void asidInitFilterMode(int chip) {
+
+	byte first = chip > -1 ? chip : 0;
+	byte last = chip > -1 ? chip : SIDCHIPS - 1;
+
+	for (byte chip = first; chip <= last; chip++) {
+		asidState.filterMode[chip] = FilterMode::OFF;
+		asidState.isOverrideFilterMode[chip] = false;
+	}
+}
+
+/*
+ * Restore the filter mode
+ */
+void asidRestoreFilterMode(int chip) {
+	asidInitFilterMode(chip);
+	updateLastSIDValues(chip, 0, InitState::FILTER_MODE);
+
+	byte first = chip > -1 ? chip : 0;
+	showFilterModeLEDs(asidState.lastSIDvalues[first][SID_FILTER_MODE_VOLUME]);
+}
+
+/*
  * Adjust the filter mode according to remix-parameter, then display it
  */
 void asidAdvanceFilterMode(byte chip, bool copyFirst) {
-	if (asidState.isCleanMode || (asidState.isSidFmMode && chip != 0)) {
+	if (asidState.isSidFmMode && chip != 0) {
 		return;
 	}
-
-	asidState.isOverrideFilterMode[chip] = true;
 
 	// Get currently used filter mode for this chip (also including volume)
 	byte data = sid_chips[chip].get_current_register(SID_FILTER_MODE_VOLUME);
@@ -1099,9 +1287,20 @@ void asidAdvanceFilterMode(byte chip, bool copyFirst) {
 	if (copyFirst) {
 		asidState.filterMode[chip] = asidState.filterMode[0];
 	} else {
+
+		// get current filter mode (initial)
+		if (!asidState.isOverrideFilterMode[chip]) {
+			asidState.filterMode[chip] = getFilterMode(data);
+		}
+
 		// Increase the filter mode to next type
-		asidState.filterMode[chip] = getFilterMode(data);
 		asidSetNextFilterMode(chip);
+	}
+
+	asidState.isOverrideFilterMode[chip] = true;
+
+	if (asidState.isCleanMode) {
+		return;
 	}
 
 	// Calculate the correct new mode
@@ -1220,7 +1419,7 @@ void asidFmUpdateFeedback(byte channel) {
 	int adjustData;
 	byte data = asidState.lastFMvaluesFeedbackConn[channel];
 
-	adjustData = ((data & 0x0e) >> 1) + (asidState.adjustFMFeedback[channel] >> 6) - 8;
+	adjustData = ((data & 0x0e) >> 1) + (asidState.adjustFMFeedback[channel]) - 8;
 	adjustData = max(0, min(7, adjustData));
 	data = (data & 0xf1) + (adjustData << 1);
 
@@ -1241,7 +1440,7 @@ void asidFmUpdateOpLevel(byte oper) {
 	static byte channelToReg[] = {0x40, 0x41, 0x42, 0x48, 0x49, 0x4a, 0x50, 0x51, 0x52,
 	                              0x43, 0x44, 0x45, 0x4b, 0x4c, 0x4d, 0x53, 0x54, 0x55};
 
-	adjustData = (data & 0x3f) - (asidState.adjustFMOpLevel[oper] >> 3) + 64;
+	adjustData = (data & 0x3f) - (asidState.adjustFMOpLevel[oper]) + 64;
 	adjustData = max(0, min(63, adjustData));
 	data = (data & 0xc0) + adjustData;
 
@@ -1254,10 +1453,120 @@ void asidFmUpdateOpLevel(byte oper) {
  * Left = SID1, Right = SID2
  */
 void asidIndicateChanged(byte chip) {
-	if (!asidState.isCleanMode) {
-		if (!asidState.isRemixed[chip]) {
-			dotSet(chip, true);
-			asidState.isRemixed[chip] = true;
+	bool isRemixed = false;
+
+	// Verify if a certain parameter is remixed, within tolerances for some
+	// clang-format off
+	if (asidState.isSidFmMode && chip != 0) {
+		for (byte i = 0; i < OPL_NUM_CHANNELS_MELODY_MODE; i++) {
+			if (asidState.muteFMChannel[i] ||
+				asidState.adjustFMOpLevel[i << 1] != POT_VALUE_TO_ASID_FM_HIRES(POT_NOON) ||
+			    asidState.adjustFMOpLevel[(i << 1) + 1] != POT_VALUE_TO_ASID_FM_HIRES(POT_NOON) ||
+				asidState.adjustFMFeedback[i] != POT_VALUE_TO_ASID_FM_LORES(POT_NOON)) {
+				isRemixed = true;
+				break;
+			}
+		}
+
+	} else {
+		for (byte i = 0; i < SIDVOICES_PER_CHIP; i++) {
+			if (asidState.isOverridePW[chip][i] ||
+				asidState.muteChannel[chip][i] ||
+				asidState.overrideWaveform[chip][i] != WaveformState::SIDFILE ||
+			    asidState.overrideSync[chip][i] != OverrideState::SIDFILE ||
+			    asidState.overrideRingMod[chip][i] != OverrideState::SIDFILE ||
+				asidState.adjustOctave[chip][i] ||
+			    asidState.adjustFine[chip][i] != FINETUNE_0_CENTS ||
+			    asidState.adjustAttack[chip][i] != POT_VALUE_TO_ASID_LORES(POT_NOON) ||
+			    asidState.adjustSustain[chip][i] != POT_VALUE_TO_ASID_LORES(POT_NOON) ||
+			    asidState.adjustDecay[chip][i] != POT_VALUE_TO_ASID_LORES(POT_NOON) ||
+			    asidState.adjustRelease[chip][i] != POT_VALUE_TO_ASID_LORES(POT_NOON) ||
+			    asidState.overrideFilterRoute[chip][i] != OverrideState::SIDFILE) {
+				isRemixed = true;
+				break;
+			}
+		}
+		if (!isRemixed &&
+		    (asidState.adjustCutoff[chip] < POT_VALUE_TO_ASID_CUTOFF(POT_NOON) - 10 ||
+		     asidState.adjustCutoff[chip] > POT_VALUE_TO_ASID_CUTOFF(POT_NOON) + 10 ||
+		     asidState.adjustReso[chip] != POT_VALUE_TO_ASID_LORES(POT_NOON) ||
+			 asidState.isOverrideFilterMode[chip])) {
+			isRemixed = true;
+		}
+	}
+	// clang-format on
+
+	// update
+	if (asidState.isRemixed[chip] != isRemixed) {
+		asidState.isRemixed[chip] = isRemixed;
+		dotSet(chip, isRemixed);
+	}
+}
+
+/*
+ * Restore specific pot values from original ASID state
+ */
+void asidRestorePot(int chip, byte voice, Pot potindex) {
+
+	byte first = chip > -1 ? chip : 0;
+	byte last = chip > -1 ? chip : SIDCHIPS - 1;
+
+	for (byte chip = first; chip <= last; chip++) {
+
+		switch (potindex) {
+			case Pot::PW1:
+			case Pot::PW2:
+			case Pot::PW3:
+				asidState.overridePW[chip][voice] = POT_VALUE_TO_ASID_PW(POT_NOON);
+				asidState.isOverridePW[chip][voice] = false;
+				break;
+
+			case Pot::TUNE1:
+			case Pot::TUNE2:
+			case Pot::TUNE3:
+				asidState.adjustOctave[chip][voice] = 0;
+				break;
+
+			case Pot::FINE1:
+			case Pot::FINE2:
+			case Pot::FINE3:
+				asidState.adjustFine[chip][voice] = FINETUNE_0_CENTS;
+				break;
+
+			case Pot::ATTACK1:
+			case Pot::ATTACK2:
+			case Pot::ATTACK3:
+				asidState.adjustAttack[chip][voice] = POT_VALUE_TO_ASID_LORES(POT_NOON);
+				break;
+
+			case Pot::DECAY1:
+			case Pot::DECAY2:
+			case Pot::DECAY3:
+				asidState.adjustDecay[chip][voice] = POT_VALUE_TO_ASID_LORES(POT_NOON);
+				break;
+
+			case Pot::SUSTAIN1:
+			case Pot::SUSTAIN2:
+			case Pot::SUSTAIN3:
+				asidState.adjustSustain[chip][voice] = POT_VALUE_TO_ASID_LORES(POT_NOON);
+				break;
+
+			case Pot::RELEASE1:
+			case Pot::RELEASE2:
+			case Pot::RELEASE3:
+				asidState.adjustRelease[chip][voice] = POT_VALUE_TO_ASID_LORES(POT_NOON);
+				break;
+
+			case Pot::CUTOFF:
+				asidState.adjustCutoff[chip] = POT_VALUE_TO_ASID_CUTOFF(POT_NOON);
+				break;
+
+			case Pot::RESONANCE:
+				asidState.adjustReso[chip] = POT_VALUE_TO_ASID_LORES(POT_NOON);
+				break;
+
+			default:
+				break;
 		}
 	}
 }
@@ -1326,6 +1635,21 @@ void asidAdvanceDefaultChip(bool isUp) {
 }
 
 /*
+ * Select the default remix chip
+ */
+void asidSelectDefaultChip(byte chip) {
+	asidState.defaultSelectedChip = chip;
+
+	// Lock the buttons accordingly
+	asidState.selectedSids.b.sid1 = (asidState.defaultSelectedChip % 2 == 0);
+	asidState.selectedSids.b.sid2 = (asidState.defaultSelectedChip >= 1);
+
+	if (!asidState.isCleanMode) {
+		displayAsidRemixMode();
+	}
+}
+
+/*
  * Set the default remix chip as default (i.e both)
  */
 void asidClearDefaultChip() {
@@ -1337,5 +1661,57 @@ void asidClearDefaultChip() {
 		if (!asidState.isCleanMode) {
 			displayAsidRemixMode();
 		}
+	}
+}
+
+/*
+ * Updates the override states which are independent of lastSIDvalues (like PW)
+ */
+void asidUpdateOverrides(int chip) {
+	// recover override states to chips
+	if (!asidState.isCleanMode) {
+
+		byte first = chip > -1 ? chip : 0;
+		byte last = chip > -1 ? chip : SIDCHIPS - 1;
+
+		for (byte chip = first; chip <= last; chip++) {
+			for (byte voice = 0; voice < 3; voice++) {
+				if (asidState.isOverridePW[chip][voice]) {
+					asidUpdateWidth(chip, voice);
+				}
+			}
+		}
+	}
+}
+
+/*
+ * Updates last remix state (include overrides)
+ */
+void asidUpdateLastRemixState(int chip) {
+	byte first = chip > -1 ? chip : 0;
+	byte last = chip > -1 ? chip : SIDCHIPS - 1;
+
+	for (byte chip = first; chip <= last; chip++) {
+		if (asidState.muteChip[chip]) {
+			continue;
+		}
+
+		updateLastSIDValues(chip, 0, InitState::ALL);
+		asidUpdateOverrides(chip);
+	}
+}
+
+/*
+ * Mute the SID chip by killing the voices
+ */
+void asidMuteSidChip(byte chip) {
+	// take care about active fm chips > 0
+	if (chip > 0 && asidState.isSidFmMode) {
+		return;
+	}
+
+	// Mute each SID voice in this chip
+	for (byte v = 0; v < SIDVOICES_PER_CHIP; v++) {
+		sid_chips[chip].send_update_immediate(SID_VC_CONTROL + 7 * v, 0);
 	}
 }
