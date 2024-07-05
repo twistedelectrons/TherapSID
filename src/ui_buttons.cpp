@@ -140,7 +140,90 @@ byte indexFromButton(Button button) {
 	return index;
 }
 
-void updateWaveformAsid(byte chip, byte voice, bool all, WaveformState waveform) {
+// combine waveforms (sorry no mask used, but it should fit into waveform enum)
+WaveformState combineWaveformAsid(byte chip, byte voice, WaveformState waveform) {
+
+	if (waveform == WaveformState::RECT) {
+		switch (asidState.overrideWaveform[chip][voice]) {
+			case WaveformState::TRI:
+				waveform = WaveformState::RT;
+				break;
+			case WaveformState::SAW:
+				waveform = WaveformState::RS;
+				break;
+			case WaveformState::RT:
+				waveform = WaveformState::TRI;
+				break;
+			case WaveformState::TS:
+				waveform = WaveformState::RTS;
+				break;
+			case WaveformState::RS:
+				waveform = WaveformState::SAW;
+				break;
+			case WaveformState::RTS:
+				waveform = WaveformState::TS;
+				break;
+			default:
+				break;
+		}
+
+	} else if (waveform == WaveformState::TRI) {
+		switch (asidState.overrideWaveform[chip][voice]) {
+			case WaveformState::RECT:
+				waveform = WaveformState::RT;
+				break;
+			case WaveformState::SAW:
+				waveform = WaveformState::TS;
+				break;
+			case WaveformState::RT:
+				waveform = WaveformState::RECT;
+				break;
+			case WaveformState::TS:
+				waveform = WaveformState::SAW;
+				break;
+			case WaveformState::RS:
+				waveform = WaveformState::RTS;
+				break;
+			case WaveformState::RTS:
+				waveform = WaveformState::RS;
+				break;
+			default:
+				break;
+		}
+
+	} else if (waveform == WaveformState::SAW) {
+		switch (asidState.overrideWaveform[chip][voice]) {
+			case WaveformState::RECT:
+				waveform = WaveformState::RS;
+				break;
+			case WaveformState::TRI:
+				waveform = WaveformState::TS;
+				break;
+			case WaveformState::RT:
+				waveform = WaveformState::RTS;
+				break;
+			case WaveformState::TS:
+				waveform = WaveformState::TRI;
+				break;
+			case WaveformState::RS:
+				waveform = WaveformState::RECT;
+				break;
+			case WaveformState::RTS:
+				waveform = WaveformState::RT;
+				break;
+			default:
+				break;
+		}
+	}
+
+	return waveform;
+}
+
+void updateWaveformAsid(byte chip, byte voice, bool all, WaveformState waveform, bool isCombineMode) {
+	if (isCombineMode) {
+		waveform = combineWaveformAsid(chip, voice, waveform);
+	}
+
 	if (asidState.overrideWaveform[chip][voice] == waveform) {
 		asidState.overrideWaveform[chip][voice] = WaveformState::NOISE_ONLY;
 	} else {
@@ -171,7 +254,7 @@ void updateTriStateButtonAsid(byte chip, byte voice, bool all, OverrideState but
 	}
 }
 
-void updateChipSoloStatus() {
+bool updateChipSoloStatus() {
 	byte soloChip, shouldSolo;
 	// Find the selected chip
 	if (asidState.selectedSids.b.sid1 && !asidState.selectedSids.b.sid2) {
@@ -183,20 +266,36 @@ void updateChipSoloStatus() {
 	}
 
 	// Find out if a chip should be soloed or umute all
-	if (asidState.soloedChannel == 16 + soloChip) {
+	if (asidState.soloedChannel == ASID_SOLO_FLAG_SID_CHIP + soloChip) {
 		// This chip is already soloed => unmute all
 		shouldSolo = false;
-		asidState.soloedChannel = -1;
+		asidState.soloedChannel = ASID_SOLO_FLAG_NO_SOLO;
 	} else {
 		// Solo the selected chip
 		shouldSolo = true;
-		asidState.soloedChannel = 16 + soloChip;
+		asidState.soloedChannel = ASID_SOLO_FLAG_SID_CHIP + soloChip;
 	}
 
-	// Update SID chip channels mute status
+	// Update SID chip channels & chip mute status
 	for (byte c = 0; c < SIDCHIPS; c++) {
-		for (byte v = 0; v < SIDVOICES_PER_CHIP; v++) {
-			asidState.muteChannel[c][v] = shouldSolo && (soloChip != c);
+		bool shouldMuteChip = shouldSolo && (soloChip != c);
+
+		if (asidState.lastDuplicatedChip == 0) {
+			// SID chips are not duplicated (2SID/3SID/SID+FM-mode)
+			// Handle chip solo like channel mutes
+			for (byte v = 0; v < SIDVOICES_PER_CHIP; v++) {
+				asidState.muteChannel[c][v] = shouldMuteChip;
+			}
+		} else {
+			// SID chips are duplicated (1SID-mode)
+			// Handle chip solo as chip mute (keeping channel mutes intact)
+			asidState.muteChip[c] = shouldMuteChip;
+
+			if (shouldMuteChip) {
+				asidMuteSidChip(c);
+			} else {
+				asidUpdateLastRemixState(c);
+			}
 		}
 	}
 
@@ -206,6 +305,8 @@ void updateChipSoloStatus() {
 			asidState.muteFMChannel[v] = shouldSolo && (soloChip != 1);
 		}
 	}
+
+	return asidState.soloedChannel != ASID_SOLO_FLAG_NO_SOLO;
 }
 
 void buttChangedAsid(Button button, bool value) {
@@ -213,9 +314,8 @@ void buttChangedAsid(Button button, bool value) {
 		// Pressed
 		byte index = indexFromButton(button);
 		byte chip;
-		bool indicateChange[] = {false, false, false};
+
 		bool all = false;
-		bool checkMoreButtons = false;
 
 		// Find out what chips are selected
 		// If one pressed - execute actions only on that chip
@@ -224,11 +324,6 @@ void buttChangedAsid(Button button, bool value) {
 			// All chips should be affected
 			all = true;
 			chip = 0;
-			for (byte i = 0; i < SIDCHIPS; i++) {
-				if (!(asidState.isSidFmMode && (i == 1))) {
-					indicateChange[i] = true;
-				}
-			}
 		} else {
 			// One chip selected
 			if (asidState.selectedSids.b.sid1 && !asidState.selectedSids.b.sid2) {
@@ -238,12 +333,16 @@ void buttChangedAsid(Button button, bool value) {
 			} else {
 				chip = 2;
 			}
-			indicateChange[chip] = true;
 		}
 
 		// Check global buttons
 		switch (button) {
 			case Button::PRESET_RESET:
+				// prevent short circuit combo (LFO_NOISE+FILTER_MODE)
+				if (asidState.isShiftMode) {
+					break;
+				}
+
 				// Clear remix parameters
 				resetDown = true;
 				resetDownTimer = 0;
@@ -255,34 +354,40 @@ void buttChangedAsid(Button button, bool value) {
 				}
 				break;
 
-			case Button::LFO_RECT: {
+			case Button::LFO_RECT:
 				// Clean mode - no remixing possible
-				bool tmpMode;
 				asidState.isCleanMode = !asidState.isCleanMode;
-				tmpMode = asidState.isCleanMode;
-				asidRestore(-1); // restore both
 
-				// Restore will affect clean mode itself, so need to keep the state
-				asidState.isCleanMode = tmpMode;
-			} break;
+				// full restore by shift
+				if (asidState.isShiftMode) {
 
-			case Button::RETRIG:
-				// SID 1 select-button
-				asidClearDefaultChip();
-				asidState.selectedSids.b.sid1 = true;
-				if (asidState.isSoloButtonHeld) {
-					// Solo entire chip
-					updateChipSoloStatus();
+					bool tmpMode = asidState.isCleanMode;
+					asidRestore(-1); // restore both
+
+					// Restore will affect clean mode itself, so need to keep the state
+					asidState.isCleanMode = tmpMode;
+
+				} else {
+
+					// Restore isOverride States
+					asidUpdateOverrides(-1);
 				}
 				break;
 
+			case Button::RETRIG:
+				// SID 1 select-button (SID 3 by combo)
 			case Button::LOOP:
-				// SID 2 select-button
-				asidClearDefaultChip();
-				asidState.selectedSids.b.sid2 = true;
-				if (asidState.isSoloButtonHeld) {
-					// Solo entire chip
-					updateChipSoloStatus();
+				// SID 2 select-button (SID 3 by combo)
+				asidSelectDefaultChip(asidState.selectButtonCounter ? 2 : (button == Button::RETRIG ? 0 : 1));
+
+				// Solo entire chip
+				if (asidState.isSoloButtonHeld && !updateChipSoloStatus() && !asidState.selectButtonCounter) {
+					asidClearDefaultChip();
+				}
+
+				// Increment select counter to handle SID 3
+				if (SIDCHIPS > 2) {
+					asidState.selectButtonCounter++;
 				}
 				break;
 
@@ -314,6 +419,18 @@ void buttChangedAsid(Button button, bool value) {
 				asidState.selectedSids.b.dbg4 = true;
 				break;
 #else
+
+			case Button::LFO_TRI:
+				break;
+
+			case Button::LFO_SAW:
+				break;
+
+			case Button::LFO_NOISE:
+				// Engage Shift function
+				asidState.isShiftMode = true;
+				break;
+
 			case Button::LFO_ENV3:
 				// Engage Solo function
 				asidState.isSoloButtonHeld = true;
@@ -322,13 +439,7 @@ void buttChangedAsid(Button button, bool value) {
 
 			default:
 				// Other press => continue to check buttons
-				checkMoreButtons = true;
 				break;
-		}
-
-		if (!checkMoreButtons) {
-			// Done, no indication update
-			return;
 		}
 
 		// Check chip-specific buttons
@@ -361,7 +472,7 @@ void buttChangedAsid(Button button, bool value) {
 					break;
 
 				default:
-					indicateChange[chip] = false;
+					// nothing to do..
 					break;
 			}
 
@@ -372,14 +483,14 @@ void buttChangedAsid(Button button, bool value) {
 					// If already soloed, unmute all
 
 					bool shouldSolo;
-					if (asidState.soloedChannel == 32 + muteFMChannelIdx) {
+					if (asidState.soloedChannel == ASID_SOLO_FLAG_FM_CHANNEL + muteFMChannelIdx) {
 						// The pressed channel is already soloed => remove solo and unmute all
 						shouldSolo = false;
-						asidState.soloedChannel = -1;
+						asidState.soloedChannel = ASID_SOLO_FLAG_NO_SOLO;
 					} else {
 						// Store solo state and mute all other channels
 						shouldSolo = true;
-						asidState.soloedChannel = 32 + muteFMChannelIdx;
+						asidState.soloedChannel = ASID_SOLO_FLAG_FM_CHANNEL + muteFMChannelIdx;
 					}
 
 					// Mute/unmute all SID channels
@@ -398,7 +509,7 @@ void buttChangedAsid(Button button, bool value) {
 					asidState.muteFMChannel[muteFMChannelIdx] = !asidState.muteFMChannel[muteFMChannelIdx];
 
 					// Reset soloed status
-					asidState.soloedChannel = -1;
+					asidState.soloedChannel = ASID_SOLO_FLAG_NO_SOLO;
 				}
 			}
 
@@ -408,19 +519,19 @@ void buttChangedAsid(Button button, bool value) {
 				case Button::RECT1:
 				case Button::RECT2:
 				case Button::RECT3:
-					updateWaveformAsid(chip, index, all, WaveformState::RECT);
+					updateWaveformAsid(chip, index, all, WaveformState::RECT, asidState.isShiftMode);
 					break;
 
 				case Button::TRI1:
 				case Button::TRI2:
 				case Button::TRI3:
-					updateWaveformAsid(chip, index, all, WaveformState::TRI);
+					updateWaveformAsid(chip, index, all, WaveformState::TRI, asidState.isShiftMode);
 					break;
 
 				case Button::SAW1:
 				case Button::SAW2:
 				case Button::SAW3:
-					updateWaveformAsid(chip, index, all, WaveformState::SAW);
+					updateWaveformAsid(chip, index, all, WaveformState::SAW, asidState.isShiftMode);
 					break;
 
 				case Button::NOISE1:
@@ -431,7 +542,7 @@ void buttChangedAsid(Button button, bool value) {
 						if (asidState.soloedChannel == (chip * 3 + index)) {
 							// The pressed channel is already soloed => remove solo and unmute all
 							shouldSolo = false;
-							asidState.soloedChannel = -1;
+							asidState.soloedChannel = ASID_SOLO_FLAG_NO_SOLO;
 						} else {
 							// Store solo state and mute all other channels
 							shouldSolo = true;
@@ -441,7 +552,10 @@ void buttChangedAsid(Button button, bool value) {
 						// Mute all but the soloed SID channel (or unmute all)
 						for (byte c = 0; c < SIDCHIPS; c++) {
 							for (byte v = 0; v < SIDVOICES_PER_CHIP; v++) {
-								asidState.muteChannel[c][v] = shouldSolo && !((c == chip || all) && (v == index));
+
+								// When the chip is muted, solo channel settings are copied to the muted chip
+								asidState.muteChannel[c][v] =
+								    shouldSolo && !((c == chip || asidState.muteChip[c] || all) && (v == index));
 							}
 						}
 
@@ -451,16 +565,21 @@ void buttChangedAsid(Button button, bool value) {
 						}
 
 					} else {
-						asidState.muteChannel[chip][index] = !asidState.muteChannel[chip][index];
-						if (all) {
-							// Same thing for other chips
-							for (byte i = 1; i < SIDCHIPS; i++) {
-								asidState.muteChannel[i][index] = asidState.muteChannel[0][index];
-							}
-						}
 
-						// Reset soloed status
-						asidState.soloedChannel = -1;
+						if (asidState.isShiftMode) {
+							asidRestoreVoice(all ? -1 : chip, index, InitState::VOICE);
+						} else {
+							asidState.muteChannel[chip][index] = !asidState.muteChannel[chip][index];
+							if (all) {
+								// Same thing for other chips
+								for (byte i = 1; i < SIDCHIPS; i++) {
+									asidState.muteChannel[i][index] = asidState.muteChannel[0][index];
+								}
+							}
+
+							// Reset soloed status
+							asidState.soloedChannel = ASID_SOLO_FLAG_NO_SOLO;
+						}
 					}
 
 					break;
@@ -468,64 +587,99 @@ void buttChangedAsid(Button button, bool value) {
 				case Button::SYNC1:
 				case Button::SYNC2:
 				case Button::SYNC3:
-					updateTriStateButtonAsid(chip, index, all, asidState.overrideSync);
+					if (asidState.isShiftMode) {
+						asidRestoreVoice(all ? -1 : chip, index, InitState::PITCH);
+					} else {
+						updateTriStateButtonAsid(chip, index, all, asidState.overrideSync);
+					}
 					break;
 
 				case Button::RING1:
 				case Button::RING2:
 				case Button::RING3:
-					updateTriStateButtonAsid(chip, index, all, asidState.overrideRingMod);
+					if (asidState.isShiftMode) {
+						asidRestoreVoice(all ? -1 : chip, index, InitState::ADSR);
+					} else {
+						updateTriStateButtonAsid(chip, index, all, asidState.overrideRingMod);
+					}
 					break;
 
 				case Button::LFO_CHAIN1:
 				case Button::LFO_CHAIN2:
 				case Button::LFO_CHAIN3:
-					updateTriStateButtonAsid(chip, index, all, asidState.overrideFilterRoute);
-					asidUpdateFilterRoute(chip, false);
-					if (all) {
-						// Same thing for other chips
-						for (byte i = 1; i < SIDCHIPS; i++) {
-							asidUpdateFilterRoute(i, all);
+					if (asidState.isShiftMode) {
+						asidRestoreVoice(all ? -1 : chip, index, InitState::FILTER_ROUTE);
+					} else {
+						updateTriStateButtonAsid(chip, index, all, asidState.overrideFilterRoute);
+						asidUpdateFilterRoute(chip, false);
+						if (all) {
+							// Same thing for other chips
+							for (byte i = 1; i < SIDCHIPS; i++) {
+								asidUpdateFilterRoute(i, all);
+							}
 						}
 					}
 					break;
 
 				case Button::FILTER_MODE:
-					asidAdvanceFilterMode(chip, false);
-					if (all) {
-						// Same thing for other chips
-						for (byte i = 1; i < SIDCHIPS; i++) {
-							asidAdvanceFilterMode(i, all);
+					if (asidState.isShiftMode) {
+						asidRestoreFilterMode(all ? -1 : chip);
+					} else {
+						asidAdvanceFilterMode(chip, false);
+						if (all) {
+							// Same thing for other chips
+							for (byte i = 1; i < SIDCHIPS; i++) {
+								asidAdvanceFilterMode(i, all);
+							}
 						}
 					}
 					break;
 
 				default:
-					indicateChange[chip] = false;
+					// nothing to do..
 					break;
 			}
 		}
 
 		// Update dot indication for changed SIDs, if needed
 		for (byte i = 0; i < 2; i++) {
-			if (indicateChange[i]) {
-				asidIndicateChanged(i);
-			}
+			asidIndicateChanged(i);
 		}
 
 	} else {
 		// Released events, global
 		switch (button) {
 			case Button::PRESET_RESET:
+				// prevent short circuit combo (LFO_NOISE+FILTER_MODE)
+				if (asidState.isShiftMode) {
+					break;
+				}
+
 				resetDown = false;
 				break;
 
 			case Button::RETRIG:
-				asidState.selectedSids.b.sid1 = false;
-				break;
-
 			case Button::LOOP:
-				asidState.selectedSids.b.sid2 = false;
+				// Decrement select counter, for SID 3 usage
+				if ((SIDCHIPS > 2) && (asidState.selectButtonCounter)) {
+					asidState.selectButtonCounter--;
+				}
+
+				if (!asidState.isSoloButtonHeld) {
+
+					// validate selection
+					if (!asidState.selectButtonCounter) {
+						asidClearDefaultChip();
+
+						// Reset soloed status
+						asidState.soloedChannel = ASID_SOLO_FLAG_NO_SOLO;
+
+					} else {
+
+						// Restore held button
+						asidSelectDefaultChip(button == Button::RETRIG ? 1 : 0);
+					}
+				}
 				break;
 
 			case Button::ARP_MODE:
@@ -533,6 +687,11 @@ void buttChangedAsid(Button button, bool value) {
 				break;
 
 #ifndef ASID_PROFILER
+
+			case Button::LFO_NOISE:
+				asidState.isShiftMode = false;
+				break;
+
 			case Button::LFO_ENV3:
 				// Disengage Solo function
 				asidState.isSoloButtonHeld = false;

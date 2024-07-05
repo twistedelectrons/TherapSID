@@ -6,48 +6,6 @@
 
 static int arpDivisions[] = {1, 3, 6, 8, 12, 24, 32, 48};
 
-enum class Pot {
-	PW1 = 4,
-	TUNE1 = 6,
-	FINE1 = 14,
-	GLIDE1 = 1,
-	ATTACK1 = 5,
-	DECAY1 = 15,
-	SUSTAIN1 = 13,
-	RELEASE1 = 16,
-
-	PW2 = 24,
-	TUNE2 = 26,
-	FINE2 = 17,
-	GLIDE2 = 27,
-	ATTACK2 = 22,
-	DECAY2 = 25,
-	SUSTAIN2 = 23,
-	RELEASE2 = 20,
-
-	PW3 = 30,
-	TUNE3 = 21,
-	FINE3 = 31,
-	GLIDE3 = 19,
-	ATTACK3 = 29,
-	DECAY3 = 18,
-	SUSTAIN3 = 28,
-	RELEASE3 = 3,
-
-	LFO_RATE1 = 11,
-	LFO_DEPTH1 = 12,
-	LFO_RATE2 = 10,
-	LFO_DEPTH2 = 9,
-	LFO_RATE3 = 36,
-	LFO_DEPTH3 = 2,
-
-	CUTOFF = 8,
-	RESONANCE = 0,
-	ARP_SCRUB = 7,
-	ARP_RATE = 41,
-	ARP_RANGE = 32
-};
-
 // Maps hardware potentiometer number to other properties such as MIDI CC and mapping
 struct potMap {
 	Pot hwPot;
@@ -92,7 +50,7 @@ static byte octScale(int value) {
 
 void movedPotAsid(Pot pot, int value) {
 	const potMap* potmap = getPotMap(&pot);
-	bool indicateChange[] = {false, false, false};
+
 	bool useChip[] = {
 	    (asidState.selectedSids.all == 0) || (asidState.selectedSids.b.sid1 && !asidState.selectedSids.b.sid2),
 	    (asidState.selectedSids.all == 0) || (asidState.selectedSids.b.sid2 && !asidState.selectedSids.b.sid1),
@@ -101,11 +59,11 @@ void movedPotAsid(Pot pot, int value) {
 	if (asidState.isSidFmMode && asidState.selectedSids.b.sid2 && !asidState.selectedSids.b.sid1) {
 		if (potmap->fmOperator != -1) {
 			if (potmap->fmOperator < OPL_NUM_CHANNELS_MELODY_MODE * OPL_NUM_OPERATORS) {
-				asidState.adjustFMOpLevel[potmap->fmOperator] = value;
+				asidState.adjustFMOpLevel[potmap->fmOperator] = POT_VALUE_TO_ASID_FM_HIRES(value);
 				asidFmUpdateOpLevel(potmap->fmOperator);
 			} else {
 				asidState.adjustFMFeedback[potmap->fmOperator - OPL_NUM_CHANNELS_MELODY_MODE * OPL_NUM_OPERATORS] =
-				    value;
+				    POT_VALUE_TO_ASID_FM_LORES(value);
 				asidFmUpdateFeedback(potmap->fmOperator - OPL_NUM_CHANNELS_MELODY_MODE * OPL_NUM_OPERATORS);
 			}
 		}
@@ -114,7 +72,12 @@ void movedPotAsid(Pot pot, int value) {
 		for (byte i = 0; i < SIDCHIPS; i++) {
 			// Run once for each chip if needed
 			if (useChip[i]) {
-				indicateChange[i] = true;
+
+				if (asidState.isShiftMode) {
+					asidRestorePot(asidState.selectedSids.all == 0 ? -1 : i, potmap->index, pot);
+					continue;
+				}
+
 				switch (pot) {
 					case Pot::PW1:
 					case Pot::PW2:
@@ -188,8 +151,7 @@ void movedPotAsid(Pot pot, int value) {
 						break;
 
 					default:
-						// Nothing was changed on this
-						indicateChange[i] = false;
+						// nothing to do
 						break;
 				}
 			}
@@ -199,9 +161,7 @@ void movedPotAsid(Pot pot, int value) {
 	// Update dot indication for changed SIDs, if needed
 	// Only two dots exists, so shows max two
 	for (byte i = 0; i < 2; i++) {
-		if (indicateChange[i]) {
-			asidIndicateChanged(i);
-		}
+		asidIndicateChanged(i);
 	}
 }
 
