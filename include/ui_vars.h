@@ -6,6 +6,7 @@ struct UiState {
 	byte lastPot;
 	byte selectedLfo;
 	byte midiSetup = 0;
+	bool filterSetupMode;
 	bool saveMode;
 };
 
@@ -20,8 +21,12 @@ extern int presetLast;            // UI??
 extern bool fatChanged;           // UI
 extern bool resetDown;            // UI
 extern int frozen;                // UI
-extern bool lfoButtPressed;       // UI
+extern byte lfoButtPressed;       // UI
 extern int lfoButtTimer;          // UI
+extern int filterSetupTimer;      // UI
+extern bool filterSetupBlink;     // UI
+extern byte filterSetupShowOfSid; // UI
+extern byte filterSetupShowIndex; // UI
 
 extern int loadTimer;
 extern bool arpModeHeld;

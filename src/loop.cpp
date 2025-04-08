@@ -168,6 +168,17 @@ void loop() {
 		if (millis() > 1400) {
 			load(preset);
 			loadedAfterStartup = true;
+
+			// init filter setup
+			for (int i = 0; i < SIDCHIPS; i++) {
+
+				// untouched EEPROM value indicator: 0xFF; fallback to center (0x7F)
+				byte offset = filterSetupSidOffset[i];
+				byte range = filterSetupSidRange[i];
+
+				sid_chips[i].set_filtersetup_offset(offset < 0xFF ? offset : 0x7F);
+				sid_chips[i].set_filtersetup_range(range < 0xFF ? range : 0x7F);
+			}
 		}
 	}
 

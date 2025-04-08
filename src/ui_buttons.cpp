@@ -421,6 +421,9 @@ void buttChangedAsid(Button button, bool value) {
 #else
 
 			case Button::LFO_TRI:
+				// Switch filter calibration
+				asidToggleFilterSetup();
+				asidState.isFilterSetupMode = true;
 				break;
 
 			case Button::LFO_SAW:
@@ -688,6 +691,10 @@ void buttChangedAsid(Button button, bool value) {
 
 #ifndef ASID_PROFILER
 
+			case Button::LFO_TRI:
+				asidState.isFilterSetupMode = false;
+				break;
+
 			case Button::LFO_NOISE:
 				asidState.isShiftMode = false;
 				break;
@@ -725,10 +732,10 @@ void buttChanged(byte number, bool value) {
 		return buttChangedAsid(button, value);
 	}
 
+	byte index = indexFromButton(button);
+
 	if (!value) {
 		//  PRESSED
-		byte index = indexFromButton(button);
-
 		switch (button) {
 			case Button::RECT1:
 			case Button::RECT2:
@@ -771,12 +778,29 @@ void buttChanged(byte number, bool value) {
 			case Button::LFO_CHAIN1:
 			case Button::LFO_CHAIN2:
 			case Button::LFO_CHAIN3:
-				lfoButtPressed = true;
-				ui_state.selectedLfo = index;
-				if (ui_state.lastPot != (9 + index * 2) && ui_state.lastPot != (10 + index * 2) &&
-				    ui_state.lastPot != 20) {
-					preset_data.lfo[ui_state.selectedLfo].mapping[ui_state.lastPot] =
-					    !preset_data.lfo[ui_state.selectedLfo].mapping[ui_state.lastPot];
+				lfoButtPressed = index+1;
+				if (!arpModeHeld) {
+					if (ui_state.filterSetupMode && index < SIDCHIPS) {
+
+						// for temp display filter setup values on the 7-segment display:
+						//	- lastPot must be reset
+						//	- filterSetupShowOfSid must be assigned to the LFO-CHAIN button (sid 1,2 or 3)
+						//	- filterSetupShowIndex should be resetted if an "even" lastPot ID was previously selected
+
+						if (ui_state.lastPot != POT_NONE && ui_state.lastPot % 2 == 0)
+							filterSetupShowIndex = 0;
+
+						ui_state.lastPot = POT_NONE;
+						filterSetupShowOfSid = lfoButtPressed;
+
+					} else {
+						ui_state.selectedLfo = index;
+						if (ui_state.lastPot != (9 + index * 2) && ui_state.lastPot != (10 + index * 2) &&
+						    ui_state.lastPot != 20) {
+							preset_data.lfo[ui_state.selectedLfo].mapping[ui_state.lastPot] =
+							    !preset_data.lfo[ui_state.selectedLfo].mapping[ui_state.lastPot];
+						}
+					}
 				}
 				break;
 
@@ -799,6 +823,14 @@ void buttChanged(byte number, bool value) {
 				arpModeHeld = true;
 				if (ui_state.midiSetup) {
 					ui_state.midiSetup = 3;
+				}
+
+				// exit filter mode setup
+				if (ui_state.filterSetupMode) {
+					ui_state.filterSetupMode = false;
+
+					// ignore default action by button release
+					noArpAction = false;
 				}
 				break;
 
@@ -914,8 +946,21 @@ void buttChanged(byte number, bool value) {
 				if (ui_state.saveMode) {
 					ui_state.saveMode = false;
 				} else {
-					load(1);
-					resetDownTimer = 0;
+
+					// handling reset for filter setup mode in the synth engine
+					if (ui_state.filterSetupMode) {
+
+						// resets every filter calibration
+						for (int i = 0; i < SIDCHIPS; i++) {
+							sid_chips[i].reset_filtersetup();
+							sid_chips[i].send_update_immediate(0x16, preset_data.cutoff);
+						}
+
+					} else {
+
+						load(1);
+						resetDownTimer = 0;
+					}
 				}
 				break;
 
@@ -939,7 +984,7 @@ void buttChanged(byte number, bool value) {
 			case Button::LFO_CHAIN1:
 			case Button::LFO_CHAIN2:
 			case Button::LFO_CHAIN3:
-				lfoButtPressed = false;
+				lfoButtPressed = 0;
 				lfoButtTimer = 0;
 				break;
 
@@ -954,13 +999,15 @@ void buttChanged(byte number, bool value) {
 				} else {
 					if (noArpAction) {
 						if (!ui_state.midiSetup) {
-							if (!preset_data.paraphonic) {
-								preset_data.arp_mode++;
-								if (preset_data.arp_mode > 7) {
-									preset_data.arp_mode = 0;
-									sendNoteOff(lastNote, 127, masterChannelOut);
+							if (!ui_state.filterSetupMode) {
+								if (!preset_data.paraphonic) {							
+									preset_data.arp_mode++;
+									if (preset_data.arp_mode > 7) {
+										preset_data.arp_mode = 0;
+										sendNoteOff(lastNote, 127, masterChannelOut);
+									}
+									arpReset();
 								}
-								arpReset();
 							}
 						} else if (ui_state.midiSetup == 3) {
 							ui_state.midiSetup = 0;

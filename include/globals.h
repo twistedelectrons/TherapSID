@@ -41,6 +41,8 @@ extern float lfoFine1, lfoFine2, lfoFine3, lfoFine4, lfoFine5, lfoFine6, lfoFine
 extern bool jumble;
 extern byte masterChannel;
 extern byte masterChannelOut;
+extern byte filterSetupSidOffset[3];
+extern byte filterSetupSidRange[3];
 extern byte voice1Channel;
 extern byte voice2Channel;
 extern byte voice3Channel;
@@ -93,6 +95,13 @@ extern byte* voice_index; // array of size SIDVOICES_TOTAL, set depending on pre
 #define EEPROM_ADDR_ARMSID_6581_FILTER_LOW 0x0017
 #define EEPROM_ADDR_ARMSID_8580_FILTER_CENTRAL 0x0018
 #define EEPROM_ADDR_ARMSID_8580_FILTER_LOW 0x0019
+// FILTER SETUP
+#define EEPROM_ADDR_SID1_OFFSET 0x001a
+#define EEPROM_ADDR_SID1_RANGE 0x001b
+#define EEPROM_ADDR_SID2_OFFSET 0x001c
+#define EEPROM_ADDR_SID2_RANGE 0x001d
+#define EEPROM_ADDR_SID3_OFFSET 0x001e
+#define EEPROM_ADDR_SID3_RANGE 0x001f
 
 // Preset storage from here
 #define EEPROM_ADDR_PRESET_DATA_START 0x0028
@@ -108,7 +117,7 @@ extern byte* voice_index; // array of size SIDVOICES_TOTAL, set depending on pre
 #define EEPROM_FORMAT_VERSION_V2 (uint16_t)0x0002
 #define EEPROM_FORMAT_VERSION_V3 (uint16_t)0x0003
 
-#define EEPROM_SETTINGS_NUM_BYTES (EEPROM_ADDR_ARMSID_8580_FILTER_LOW - EEPROM_ADDR_PRESET_LAST + 1)
+#define EEPROM_SETTINGS_NUM_BYTES (EEPROM_ADDR_SID3_RANGE - EEPROM_ADDR_PRESET_LAST + 1)
 
 // Global settings, stored in EEPROM
 struct globalSetting {
