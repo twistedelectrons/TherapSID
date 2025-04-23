@@ -116,6 +116,7 @@ extern byte* voice_index; // array of size SIDVOICES_TOTAL, set depending on pre
 #define EEPROM_FORMAT_VERSION_V1 (uint16_t)0x0001
 #define EEPROM_FORMAT_VERSION_V2 (uint16_t)0x0002
 #define EEPROM_FORMAT_VERSION_V3 (uint16_t)0x0003
+#define EEPROM_FORMAT_VERSION_V4 (uint16_t)0x0004
 
 #define EEPROM_SETTINGS_NUM_BYTES (EEPROM_ADDR_SID3_RANGE - EEPROM_ADDR_PRESET_LAST + 1)
 
