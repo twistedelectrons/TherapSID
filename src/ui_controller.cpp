@@ -106,7 +106,7 @@ void UiDisplayController::update_leds(const Preset& p, const UiState& ui_state) 
 			break;
 	}
 
-	// display filter setup state / lfo mapping (default)
+		// display filter setup state / lfo mapping (default)
 #if SIDCHIPS > 2
 	if (ui_state.lastPot != POT_NONE) {
 		// lastPot != none
@@ -154,7 +154,8 @@ void UiDisplayController::show_changed(int value) {
 }
 
 void UiDisplayController::show_byte(byte value, bool center) {
-	if (center) value = (value - 0x7F < 0) ? (0x7F - value) : (value - 0x7F);
+	if (center)
+		value = (value - 0x7F < 0) ? (0x7F - value) : (value - 0x7F);
 
 	temp_7seg(value / 16, value % 16, 250);
 }
@@ -163,9 +164,7 @@ void UiDisplayController::show_filterSetupOffset(byte chip) {
 	show_byte(sid_chips[chip].get_filtersetup_offset(), true);
 }
 
-void UiDisplayController::show_filterSetupRange(byte chip) {
-	show_byte(sid_chips[chip].get_filtersetup_range(), true);
-}
+void UiDisplayController::show_filterSetupRange(byte chip) { show_byte(sid_chips[chip].get_filtersetup_range(), true); }
 
 void UiDisplayController::show_arp_mode(int arp_mode) {
 	switch (arp_mode) {
@@ -248,9 +247,12 @@ void UiDisplayController::update_7seg(int preset_number, const Preset& preset, c
 		// detect pot offset
 		byte chip = 0xFF; // NONE
 
-		if (ui_state.lastPot == 9) chip = 0;
-		if (ui_state.lastPot == 11) chip = 1;
-		if (ui_state.lastPot == 13) chip = 2;
+		if (ui_state.lastPot == 9)
+			chip = 0;
+		if (ui_state.lastPot == 11)
+			chip = 1;
+		if (ui_state.lastPot == 13)
+			chip = 2;
 
 		if (chip != 0xFF)
 			show_filterSetupOffset(chip);
@@ -258,9 +260,12 @@ void UiDisplayController::update_7seg(int preset_number, const Preset& preset, c
 		// detect pot range
 		chip = 0xFF; // NONE
 
-		if (ui_state.lastPot == 10) chip = 0;
-		if (ui_state.lastPot == 12) chip = 1;
-		if (ui_state.lastPot == 14) chip = 2;
+		if (ui_state.lastPot == 10)
+			chip = 0;
+		if (ui_state.lastPot == 12)
+			chip = 1;
+		if (ui_state.lastPot == 14)
+			chip = 2;
 
 		if (chip != 0xFF)
 			show_filterSetupRange(chip);
@@ -281,7 +286,7 @@ void UiDisplayController::update_7seg(int preset_number, const Preset& preset, c
 	// display filter setup current values
 	if (ui_state.filterSetupMode && filterSetupShowOfSid) {
 
-		byte chip = filterSetupShowOfSid-1;
+		byte chip = filterSetupShowOfSid - 1;
 
 		if (filterSetupShowIndex) {
 			show_filterSetupRange(chip);

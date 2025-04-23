@@ -138,18 +138,18 @@ void ui_tick() {
 		if (lfoButtTimer == 6000) {
 
 			// holding ARP Mode + LFO CHAIN button
-			if (arpModeHeld && lfoButtPressed-1 < SIDCHIPS) {
+			if (arpModeHeld && lfoButtPressed - 1 < SIDCHIPS) {
 #if SID_FILTER_CALIBRATION == 1
 				// enter filterSetupMode
 				ui_state.filterSetupMode = true;
 
-				// reset last pot and display "FC" 
+				// reset last pot and display "FC"
 				ui_state.lastPot = POT_NONE;
 				ui_display_controller.temp_7seg(DIGIT_F, DIGIT_C, 500);
 
 #endif
 			} else {
-				if (ui_state.filterSetupMode && lfoButtPressed-1 < SIDCHIPS) {
+				if (ui_state.filterSetupMode && lfoButtPressed - 1 < SIDCHIPS) {
 
 					// store filterSetupMode
 					saveFilterSetup();

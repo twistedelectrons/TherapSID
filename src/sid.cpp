@@ -165,17 +165,11 @@ void Sid::set_filtersetup_range(uint8_t value) {
 	filtersetup_range = min(0xFE, value);
 }
 
-uint8_t Sid::get_filtersetup_offset() {
-	return filtersetup_offset;
-}
+uint8_t Sid::get_filtersetup_offset() { return filtersetup_offset; }
 
-uint8_t Sid::get_filtersetup_range() {
-	return filtersetup_range;
-}
+uint8_t Sid::get_filtersetup_range() { return filtersetup_range; }
 
-void Sid::enable_filtersetup(bool value) {
-	filtersetup_enabled = value;
-}
+void Sid::enable_filtersetup(bool value) { filtersetup_enabled = value; }
 
 void Sid::reset_filtersetup() {
 	filtersetup_offset = 0x7F;

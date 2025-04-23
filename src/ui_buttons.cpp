@@ -778,7 +778,7 @@ void buttChanged(byte number, bool value) {
 			case Button::LFO_CHAIN1:
 			case Button::LFO_CHAIN2:
 			case Button::LFO_CHAIN3:
-				lfoButtPressed = index+1;
+				lfoButtPressed = index + 1;
 				if (!arpModeHeld) {
 					if (ui_state.filterSetupMode && index < SIDCHIPS) {
 
@@ -1000,7 +1000,7 @@ void buttChanged(byte number, bool value) {
 					if (noArpAction) {
 						if (!ui_state.midiSetup) {
 							if (!ui_state.filterSetupMode) {
-								if (!preset_data.paraphonic) {							
+								if (!preset_data.paraphonic) {
 									preset_data.arp_mode++;
 									if (preset_data.arp_mode > 7) {
 										preset_data.arp_mode = 0;
