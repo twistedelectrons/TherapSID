@@ -58,7 +58,7 @@ Glide glide[SIDVOICES_TOTAL];
 
 int frozen;
 bool jumble;
-bool lfoButtPressed;
+byte lfoButtPressed;
 byte masterChannel = 1;
 byte masterChannelOut = 1;
 byte voice1Channel = 2; // channel for voice 1 only
@@ -86,6 +86,13 @@ optional<byte> control_voltage_note;
 
 // voice_index[operator] tells you the preset's voice to read the operator's settings from.
 byte* voice_index; // array of size SIDVOICES_TOTAL, set depending on preset.paraphonic
+
+int filterSetupTimer;
+bool filterSetupBlink;
+byte filterSetupShowOfSid;
+byte filterSetupShowIndex;
+byte filterSetupSidOffset[3];
+byte filterSetupSidRange[3];
 
 // Global settings, ranges and where stored in EEPROM memory
 const globalSetting globalSettings[EEPROM_SETTINGS_NUM_BYTES] = {
@@ -121,4 +128,10 @@ const globalSetting globalSettings[EEPROM_SETTINGS_NUM_BYTES] = {
     {&armsidConfig.filter8580low.raw, EEPROM_ADDR_ARMSID_8580_FILTER_LOW, 0, 255,
      ARMSID_SETTING_RAW(ARMSID_8580_FILTER_LOW_DEFAULT), 108, false},
 
+    {&filterSetupSidOffset[0], EEPROM_ADDR_SID1_OFFSET, 0, 0xFF, 0x7F, 255, false},
+    {&filterSetupSidRange[0], EEPROM_ADDR_SID1_RANGE, 0, 0xFF, 0x7F, 255, false},
+    {&filterSetupSidOffset[1], EEPROM_ADDR_SID2_OFFSET, 0, 0xFF, 0x7F, 255, false},
+    {&filterSetupSidRange[1], EEPROM_ADDR_SID2_RANGE, 0, 0xFF, 0x7F, 255, false},
+    {&filterSetupSidOffset[2], EEPROM_ADDR_SID3_OFFSET, 0, 0xFF, 0x7F, 255, false},
+    {&filterSetupSidRange[2], EEPROM_ADDR_SID3_RANGE, 0, 0xFF, 0x7F, 255, false},
 };

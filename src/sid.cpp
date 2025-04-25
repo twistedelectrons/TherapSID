@@ -155,6 +155,27 @@ void Sid::set_volume(uint8_t value) {
 	registers[FILTER_MODE_VOLUME] = (registers[FILTER_MODE_VOLUME] & 0xF0) | (value & 0x0F);
 }
 
+void Sid::set_filtersetup_offset(uint8_t value) {
+	// avoid carryover (range 0..0xFE)
+	filtersetup_offset = min(0xFE, value);
+}
+
+void Sid::set_filtersetup_range(uint8_t value) {
+	// treat identically as offset (range 0..0xFE)
+	filtersetup_range = min(0xFE, value);
+}
+
+uint8_t Sid::get_filtersetup_offset() { return filtersetup_offset; }
+
+uint8_t Sid::get_filtersetup_range() { return filtersetup_range; }
+
+void Sid::enable_filtersetup(bool value) { filtersetup_enabled = value; }
+
+void Sid::reset_filtersetup() {
+	filtersetup_offset = 0x7F;
+	filtersetup_range = 0x7F;
+}
+
 uint8_t Sid::filter_mode() { return registers[FILTER_MODE_VOLUME] & (HIGHPASS | BANDPASS | LOWPASS); }
 
 bool Sid::is_voice_playing(size_t voice) { return registers[7 * voice + CONTROL] & 1; }
@@ -211,6 +232,32 @@ void Sid::send(size_t index, int data) {
 	}
 #else
 	PORTC = index << 3;
+#endif
+
+	// linear conversion of filter curve
+#if SID_FILTER_CALIBRATION == 1
+	if (filtersetup_enabled && index == FILTER_CUTOFF_HI) {
+
+		int offset = (filtersetup_offset - 0x7F) * SID_FILTER_CALIBRATION_OFFSET_FACTOR; // offset upscaled integer
+		char range = (filtersetup_range - 0x7F);
+
+		if (offset || range) {
+
+			// add offset
+			int val = data + offset;
+
+			// set frame (+off)
+			int minO = 0x00 + offset;
+			int maxO = 0xFF + offset;
+
+			// resize frame (+range 2x max - zoom out)
+			int minN = minO + (range << 1);
+			int maxN = maxO - (range << 1);
+
+			// rescale within a byte frame
+			data = max(0, min(0xFF, rescale(val, minO, maxO, minN, maxN)));
+		}
+	}
 #endif
 
 	// Put data on the bus

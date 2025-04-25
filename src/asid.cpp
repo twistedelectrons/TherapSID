@@ -28,6 +28,7 @@ asidState_t asidState;
 #define DISPLAY_ASID_REMIX 1
 #define DISPLAY_ASID_CLEAN 2
 #define DISPLAY_ASID_SHIFT 3 // shift indicator
+#define DISPLAY_ASID_SETUP 4 // (filter) setup indicator
 
 #define FINETUNE_0_CENTS 31 + 978 // corresponds to -26 cents, to simulate PAL C64 on TS 1MHz
 
@@ -121,6 +122,9 @@ In addition there is the possibility to remix the SID files live:
  * Pressing LFO SQUARE will put the player in a "clean" mode (indicated by
    "AC"), accepts any remixed parameters, but plays sid tune unchanged
 
+ * Pressing LFO TRI will turn the filter calibration on/off (indicated by
+   "nC" - no calibration, "uC" - use filter calibration)
+
  * Brief press on RESET restores remix parameters to original. This also works
    with the SID1/2 separation.
 
@@ -190,6 +194,7 @@ void asidInit(int chip) {
 	asidState.selectedSids.all = 0;
 	asidState.isCleanMode = false;
 	asidState.isShiftMode = false;
+	asidState.isFilterSetupMode = false;
 	asidState.slowTimer = SLOW_TIMER_INIT_2_SEC;
 	asidState.displayState = DISPLAY_STANDARD;
 	asidState.defaultSelectedChip = -1;
@@ -197,6 +202,7 @@ void asidInit(int chip) {
 	asidState.selectButtonCounter = 0;
 	asidState.soloedChannel = ASID_SOLO_FLAG_NO_SOLO;
 	asidState.lastDuplicatedChip = asidState.isSidFmMode ? 0 : 1;
+	asidState.lastFilterSetupState = true;
 
 	// FM Channels
 	for (byte i = 0; i < OPL_NUM_CHANNELS_MAX; i++) {
@@ -486,6 +492,13 @@ void displayAsidShiftMode() {
 	digit(0, DIGIT_S);
 	digit(1, DIGIT_H);
 	asidState.displayState = DISPLAY_ASID_SHIFT;
+}
+
+void displayAsidFilterSetupMode() {
+	// "uC", "nC" shows the state of the filter calibration (on/off)
+	digit(0, asidState.lastFilterSetupState ? DIGIT_U : DIGIT_M);
+	digit(1, DIGIT_C);
+	asidState.displayState = DISPLAY_ASID_SETUP;
 }
 
 void displayAsidCleanMode() {
@@ -819,6 +832,10 @@ void handleAsidFrameUpdate(byte currentChip, byte* buffer) {
 	if (asidState.isShiftMode) {
 		if (asidState.displayState != DISPLAY_ASID_SHIFT) {
 			displayAsidShiftMode();
+		}
+	} else if (asidState.isFilterSetupMode) {
+		if (asidState.displayState != DISPLAY_ASID_SETUP) {
+			displayAsidFilterSetupMode();
 		}
 	} else if (asidState.isCleanMode) {
 		if (asidState.displayState != DISPLAY_ASID_CLEAN) {
@@ -1713,5 +1730,16 @@ void asidMuteSidChip(byte chip) {
 	// Mute each SID voice in this chip
 	for (byte v = 0; v < SIDVOICES_PER_CHIP; v++) {
 		sid_chips[chip].send_update_immediate(SID_VC_CONTROL + 7 * v, 0);
+	}
+}
+
+/*
+ * switches the filter calibration on/off
+ */
+void asidToggleFilterSetup() {
+	asidState.lastFilterSetupState = !asidState.lastFilterSetupState;
+
+	for (byte chip = 0; chip <= SIDCHIPS - 1; chip++) {
+		sid_chips[chip].enable_filtersetup(asidState.lastFilterSetupState);
 	}
 }

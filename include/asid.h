@@ -36,6 +36,7 @@ void asidClearDefaultChip();
 void asidUpdateLastRemixState(int chip);
 void asidUpdateOverrides(int chip);
 void asidMuteSidChip(byte chip);
+void asidToggleFilterSetup();
 
 #define SID_REGISTERS_ASID (SID_REGISTERS + 3)
 
@@ -105,6 +106,7 @@ struct asidState_t {
 
 	bool isCleanMode;
 	bool isShiftMode;
+	bool isFilterSetupMode;
 	bool isCutoffAdjustModeScaling;
 	byte displayState;
 
@@ -120,6 +122,7 @@ struct asidState_t {
 	byte selectButtonCounter;
 
 	byte lastDuplicatedChip;
+	byte lastFilterSetupState;
 
 	// FM OPL stuff
 	bool isSidFmMode;

@@ -145,6 +145,20 @@ void setup() {
 		value = EEPROM_FORMAT_VERSION_V3;
 		EEPROM.put(EEPROM_ADDR_VERSION, value);
 	}
+	if (value == EEPROM_FORMAT_VERSION_V3) {
+		// Convert from V3 to V4:
+
+		// New values
+		byte newRegsV4[] = {EEPROM_ADDR_SID1_OFFSET, EEPROM_ADDR_SID1_RANGE,  EEPROM_ADDR_SID2_OFFSET,
+		                    EEPROM_ADDR_SID2_RANGE,  EEPROM_ADDR_SID3_OFFSET, EEPROM_ADDR_SID3_RANGE};
+
+		for (byte r = 0; r < sizeof(newRegsV4) / sizeof(*newRegsV4); r++) {
+			setDefaultEEPROMvalue(newRegsV4[r]);
+		}
+
+		value = EEPROM_FORMAT_VERSION_V4;
+		EEPROM.put(EEPROM_ADDR_VERSION, value);
+	}
 
 	// are we holding reset (to reset globals)?
 	mux(7);

@@ -6,9 +6,6 @@
 #include "globals.h"
 #include "ui_controller.h"
 
-static const int POT_NONE = 20;
-static const int DONTCARE = 123;
-
 static int scaleFine(int input) {
 	input = map(input, 0, 1023, -50, 50);
 
@@ -109,17 +106,32 @@ void UiDisplayController::update_leds(const Preset& p, const UiState& ui_state) 
 			break;
 	}
 
+		// display filter setup state / lfo mapping (default)
+#if SIDCHIPS > 2
 	if (ui_state.lastPot != POT_NONE) {
 		// lastPot != none
-		set_led(13, p.lfo[0].mapping[ui_state.lastPot]);
-		set_led(14, p.lfo[1].mapping[ui_state.lastPot]);
+		set_led(13, ui_state.filterSetupMode ? filterSetupBlink : p.lfo[0].mapping[ui_state.lastPot]);
+		set_led(14, ui_state.filterSetupMode ? filterSetupBlink : p.lfo[1].mapping[ui_state.lastPot]);
+		set_led(15, ui_state.filterSetupMode ? filterSetupBlink : p.lfo[2].mapping[ui_state.lastPot]);
+	} else {
+		// lastPot == none
+		set_led(13, ui_state.filterSetupMode ? filterSetupBlink : false);
+		set_led(14, ui_state.filterSetupMode ? filterSetupBlink : false);
+		set_led(15, ui_state.filterSetupMode ? filterSetupBlink : false);
+	}
+#else
+	if (ui_state.lastPot != POT_NONE) {
+		// lastPot != none
+		set_led(13, ui_state.filterSetupMode ? filterSetupBlink : p.lfo[0].mapping[ui_state.lastPot]);
+		set_led(14, ui_state.filterSetupMode ? filterSetupBlink : p.lfo[1].mapping[ui_state.lastPot]);
 		set_led(15, p.lfo[2].mapping[ui_state.lastPot]);
 	} else {
 		// lastPot == none
-		set_led(13, false);
-		set_led(14, false);
+		set_led(13, ui_state.filterSetupMode ? filterSetupBlink : false);
+		set_led(14, ui_state.filterSetupMode ? filterSetupBlink : false);
 		set_led(15, false);
 	}
+#endif
 
 	for (int shape = 1; shape <= 5; shape++) {
 		if (lfoStep[ui_state.selectedLfo] < 10 && lfoSpeed[ui_state.selectedLfo]) {
@@ -140,6 +152,19 @@ void UiDisplayController::show_changed(int value) {
 
 	temp_7seg(value / 10, value % 10, 250);
 }
+
+void UiDisplayController::show_byte(byte value, bool center) {
+	if (center)
+		value = (value - 0x7F < 0) ? (0x7F - value) : (value - 0x7F);
+
+	temp_7seg(value / 16, value % 16, 250);
+}
+
+void UiDisplayController::show_filterSetupOffset(byte chip) {
+	show_byte(sid_chips[chip].get_filtersetup_offset(), true);
+}
+
+void UiDisplayController::show_filterSetupRange(byte chip) { show_byte(sid_chips[chip].get_filtersetup_range(), true); }
 
 void UiDisplayController::show_arp_mode(int arp_mode) {
 	switch (arp_mode) {
@@ -213,15 +238,65 @@ void UiDisplayController::update_7seg(int preset_number, const Preset& preset, c
 			show_changed(v.release);
 	}
 
-	for (int i = 0; i < 3; i++) {
-		const auto& l = preset.lfo[i];
-		const auto& ol = old_preset.lfo[i];
+	// display filter setup pot changes
+#if SIDCHIPS > 2
+	if (ui_state.filterSetupMode) {
+#else
+	if (ui_state.filterSetupMode && ui_state.lastPot != 13 && ui_state.lastPot != 14) {
+#endif
+		// detect pot offset
+		byte chip = 0xFF; // NONE
 
-		if (l.speed != ol.speed)
-			show_changed(scale100(l.speed / 1.3f));
+		if (ui_state.lastPot == 9)
+			chip = 0;
+		if (ui_state.lastPot == 11)
+			chip = 1;
+		if (ui_state.lastPot == 13)
+			chip = 2;
 
-		if (l.depth != ol.depth)
-			show_changed(scale100(l.depth));
+		if (chip != 0xFF)
+			show_filterSetupOffset(chip);
+
+		// detect pot range
+		chip = 0xFF; // NONE
+
+		if (ui_state.lastPot == 10)
+			chip = 0;
+		if (ui_state.lastPot == 12)
+			chip = 1;
+		if (ui_state.lastPot == 14)
+			chip = 2;
+
+		if (chip != 0xFF)
+			show_filterSetupRange(chip);
+
+	} else {
+		for (int i = 0; i < 3; i++) {
+			const auto& l = preset.lfo[i];
+			const auto& ol = old_preset.lfo[i];
+
+			if (l.speed != ol.speed)
+				show_changed(scale100(l.speed / 1.3f));
+
+			if (l.depth != ol.depth)
+				show_changed(scale100(l.depth));
+		}
+	}
+
+	// display filter setup current values
+	if (ui_state.filterSetupMode && filterSetupShowOfSid) {
+
+		byte chip = filterSetupShowOfSid - 1;
+
+		if (filterSetupShowIndex) {
+			show_filterSetupRange(chip);
+		} else {
+			show_filterSetupOffset(chip);
+		}
+
+		// next index
+		filterSetupShowIndex = !filterSetupShowIndex;
+		filterSetupShowOfSid = 0;
 	}
 
 	if (preset.cutoff != old_preset.cutoff)
