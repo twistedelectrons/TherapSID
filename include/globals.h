@@ -70,7 +70,7 @@ extern optional<byte> control_voltage_note;
 extern byte* voice_index; // array of size SIDVOICES_TOTAL, set depending on preset.paraphonic
 
 // EEPROM Memory Mapping
-#define EEPROM_ADDR_COOKIE 0x0000 // Two bytes
+#define EEPROM_ADDR_COOKIE 0x0000  // Two bytes
 #define EEPROM_ADDR_VERSION 0x0002 // Two bytes
 #define EEPROM_ADDR_PRESET_LAST 0x0004
 #define EEPROM_ADDR_MIDI_IN_CH_MASTER 0x0005
