@@ -3,6 +3,7 @@
 
 void panic(int num7seg, int numvoice);
 void trace(int num7seg, int numvoice);
+int rescale(int val, int min, int max, int minN, int maxN);
 
 #define DEBUG // TODO
 

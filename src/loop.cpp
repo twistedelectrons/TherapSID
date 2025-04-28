@@ -168,6 +168,13 @@ void loop() {
 		if (millis() > 1400) {
 			load(preset);
 			loadedAfterStartup = true;
+
+			// init filter setup
+			for (int i = 0; i < SIDCHIPS; i++) {
+
+				sid_chips[i].set_filtersetup_offset(filterSetupSidOffset[i]);
+				sid_chips[i].set_filtersetup_range(filterSetupSidRange[i]);
+			}
 		}
 	}
 

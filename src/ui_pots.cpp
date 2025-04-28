@@ -3,6 +3,7 @@
 #include "midi.h"
 #include "ui_vars.h"
 #include "asid.h"
+#include "sid.h"
 
 static int arpDivisions[] = {1, 3, 6, 8, 12, 24, 32, 48};
 
@@ -238,16 +239,28 @@ void movedPot(byte number, int value, bool isMidi) {
 			case Pot::LFO_RATE1:
 			case Pot::LFO_RATE2:
 			case Pot::LFO_RATE3:
-				lfoClockSpeedPending[potmap->index] = 1 + (value >> 7);
-				preset_data.lfo[potmap->index].speed = value * 1.3;
-				ui_state.selectedLfo = potmap->index;
+				if (ui_state.filterSetupMode && potmap->index < SIDCHIPS) {
+					sid_chips[potmap->index].set_filtersetup_offset(value >> 2);
+					sid_chips[potmap->index].send_update_immediate(0x16, preset_data.cutoff);
+
+				} else {
+					lfoClockSpeedPending[potmap->index] = 1 + (value >> 7);
+					preset_data.lfo[potmap->index].speed = value * 1.3;
+					ui_state.selectedLfo = potmap->index;
+				}
 				break;
 
 			case Pot::LFO_DEPTH1:
 			case Pot::LFO_DEPTH2:
 			case Pot::LFO_DEPTH3:
-				preset_data.lfo[potmap->index].depth = value;
-				ui_state.selectedLfo = potmap->index;
+				if (ui_state.filterSetupMode && potmap->index < SIDCHIPS) {
+					sid_chips[potmap->index].set_filtersetup_range(value >> 2);
+					sid_chips[potmap->index].send_update_immediate(0x16, preset_data.cutoff);
+
+				} else {
+					preset_data.lfo[potmap->index].depth = value;
+					ui_state.selectedLfo = potmap->index;
+				}
 				break;
 
 			case Pot::CUTOFF:

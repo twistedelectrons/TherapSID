@@ -15,6 +15,29 @@
 #define SIDVOICES_PER_CHIP 3
 #define SIDVOICES_TOTAL (SIDCHIPS * SIDVOICES_PER_CHIP)
 #define SID_REGISTERS 25
+#define SID_FILTER_CALIBRATION 1               // activate/deactivate matching filter curves between all chips
+#define SID_FILTER_CALIBRATION_OFFSET_FACTOR 3 // upscaling factor for offset steps
+/*
+  Filter Setup Mode:
+  - allows software-based filter calibration via offset & range for each individual chip (cutoff HI register)
+  - initially the filter offset and it's range is set to 00 (center), where the range represents a whole byte (FF)
+  - current values can be displayed and changed directly via the LFO CHAIN (buttons, pots)
+  - a changed offset permanently shifts its original offset value (+/-) and can also be inc/dec by factor 3
+  - the range param scales up- or downwards (max 2x zoom out)
+  - the calibration can be saved but also reset again
+  - the following calibration workflow can be used with these hotkeys:
+    - enter "filter setup mode": long-pressed ARP MODE + LFO CHAIN button
+        - "filter setup mode" is indicated by "FC" and LFO LEDs flash for available SIDs
+    - show current calibration: push LFO CHAIN button 1,2 (or 3) for respective SID
+    - calibrate: turn any RATE (= offset) and DEPTH (= range) for the respective SID
+    - cancel "filter setup mode": push ARP MODE button again
+    - store calibration: long-pressed LFO CHAIN button stores and exits setup; indicated by "SC"
+    - reset calibration: pushed RESET button resets any calibration, while long pressed stores and exits setup
+        - indicated by "rC"
+  - in ASID mode, the calibration can be switched on and off using the LFO TRI button:
+    - indicated by "nC" - no calibration
+    - indicated by "uC" - use calibration
+ */
 
 void sidReset();
 void init1MhzClock();
@@ -59,6 +82,13 @@ class Sid {
 
 	void set_volume(uint8_t value);
 
+	void set_filtersetup_offset(uint8_t value);
+	void set_filtersetup_range(uint8_t value);
+	uint8_t get_filtersetup_offset();
+	uint8_t get_filtersetup_range();
+	void enable_filtersetup(bool value);
+	void reset_filtersetup();
+
 	uint8_t filter_mode();
 
   private:
@@ -77,6 +107,9 @@ class Sid {
 	bool force_initial_update = true;
 	byte registers[SID_REGISTERS];
 	byte registers_sent[SID_REGISTERS];
+	uint8_t filtersetup_offset = 0x7F; // cnt
+	uint8_t filtersetup_range = 0x7F;  // cnt
+	bool filtersetup_enabled = true;   // on
 };
 
 extern Sid sid_chips[SIDCHIPS];
