@@ -202,7 +202,6 @@ void asidInit(int chip) {
 	asidState.selectButtonCounter = 0;
 	asidState.soloedChannel = ASID_SOLO_FLAG_NO_SOLO;
 	asidState.lastDuplicatedChip = asidState.isSidFmMode ? 0 : 1;
-	asidState.lastFilterSetupState = true;
 
 	// FM Channels
 	for (byte i = 0; i < OPL_NUM_CHANNELS_MAX; i++) {
@@ -809,6 +808,9 @@ void handleAsidFrameUpdate(byte currentChip, byte* buffer) {
 		initializeSids();
 		asidRestore(-1);
 		asidState.isCutoffAdjustModeScaling = false;
+
+		// update filter calibration state
+		asidUpdateFilterSetupState();
 
 #ifdef ASID_PROFILER
 		maxSidTime = 0;
@@ -1734,11 +1736,17 @@ void asidMuteSidChip(byte chip) {
 }
 
 /*
- * switches the filter calibration on/off
+ * switch the filter calibration on/off
  */
 void asidToggleFilterSetup() {
 	asidState.lastFilterSetupState = !asidState.lastFilterSetupState;
+	asidUpdateFilterSetupState();
+}
 
+/*
+ * update last filter calibration state
+ */
+void asidUpdateFilterSetupState() {
 	for (byte chip = 0; chip <= SIDCHIPS - 1; chip++) {
 		sid_chips[chip].enable_filtersetup(asidState.lastFilterSetupState);
 	}
