@@ -206,6 +206,12 @@ void setup() {
 	armsidConfigChip(0, flash_armsid);
 	armsidConfigChip(1, flash_armsid);
 
+	// init filter setup
+	for (int i = 0; i < SIDCHIPS; i++) {
+		sid_chips[i].set_filtersetup_offset(filterSetupSidOffset[i]);
+		sid_chips[i].set_filtersetup_range(filterSetupSidRange[i]);
+	}
+
 	// Setup ASID without enabling it
 	asidState.enabled = false;
 	asidState.isSidFmMode = false;

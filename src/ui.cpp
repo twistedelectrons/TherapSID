@@ -41,10 +41,6 @@ void ui_loop() {
 	if (jumble && !asidState.enabled) {
 		load(1);
 		jumble = 0;
-
-		// reactivate filter calibration
-		for (int i = 0; i < SIDCHIPS; i++)
-			sid_chips[i].enable_filtersetup(true);
 	}
 
 	if (!ui_state.saveMode && presetLast != preset) {
@@ -95,6 +91,12 @@ void ui_tick() {
 				ui_state.filterSetupMode = false;
 
 			} else {
+
+				// re-activate filter calibration for synth engine
+				for (byte chip = 0; chip <= SIDCHIPS - 1; chip++) {
+					sid_chips[chip].enable_filtersetup(true);
+				}
+
 				jumble = 1;
 			}
 		}
