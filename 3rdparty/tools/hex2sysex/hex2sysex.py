@@ -1,4 +1,4 @@
-#!/usr/bin/python2.5
+#!/usr/bin/python3
 #
 # Copyright 2009 Emilie Gillet.
 #
@@ -69,7 +69,7 @@ def CreateMidifile(
   # first SysEx block everytime stop/play is pressed.
   time = 1
   syx_data = []
-  for i in xrange(0, size, page_size):
+  for i in range(0, size, page_size):
     block = ''.join(map(chr, data[i:i+page_size]))
     padding = page_size - len(block)
     block += '\x00' * padding

@@ -8,7 +8,7 @@ Find the official releases at [the official product page](https://www.twistedele
 
 ## Building and flashing the source code:
 
-Install `platformio` and `python2`. (Yes. I am so sorry :(.)
+Install `platformio`.
 
 To compile the firmware and to generate the firmware update sysex, run:
 
