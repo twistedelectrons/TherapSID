@@ -53,5 +53,5 @@ void trace(int num7seg, int numvoice) {
 
 // linear conversion
 int rescale(int val, int minO, int maxO, int minN, int maxN) {
-	return (int)(float((val - minO) / (float)(maxO - minO)) * (maxN - minN) + minN);
+	return (val - minO) / (float)(maxO - minO) * (maxN - minN) + minN;
 }
