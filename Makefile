@@ -13,7 +13,7 @@ check_fmt:
 	touch $@ # because platformio is strange
 
 firmware.syx: .pio/build/ATmega1284P/firmware.hex
-	PYTHONPATH=3rdparty python2 3rdparty/tools/hex2sysex/hex2sysex.py -s -o $@ -v 0x7f $<
+	PYTHONPATH=3rdparty python3 3rdparty/tools/hex2sysex/hex2sysex.py -s -o $@ -v 0x7f $<
 
 TESTS=mono_voice_tracker poly_voice_allocator glide voice_state util
 

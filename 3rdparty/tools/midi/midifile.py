@@ -1,4 +1,4 @@
-#!/usr/bin/python2.5
+#!/usr/bin/python3
 #
 # Copyright 2009 Emilie Gillet.
 #
@@ -47,7 +47,7 @@ def PackVariableLengthInteger(value):
     to_write = value & 0x7f
     value = value >> 7
     output.insert(0, to_write)
-  for i in xrange(len(output) - 1):
+  for i in range(len(output) - 1):
     output[i] |= 0x80
   output = ''.join(map(chr, output))
   return output
@@ -387,7 +387,7 @@ class Reader(object):
     self.ppq = struct.unpack('>h', f.read(2))[0]
     self._tempo_map = []
     
-    for i in xrange(num_tracks):
+    for i in range(num_tracks):
       self.tracks.append(self._ReadTrack(f))
     self._CreateCumulativeTempoMap()
     
@@ -513,7 +513,7 @@ class Reader(object):
         value = UnpackInteger('\x00' + bytes, size=4)
         event = TempoEvent(60000000.0 / value)
       elif event_type == 0x54:
-        event = SMPTEOffsetEvent(*map(ord, bytes))
+        event = SMPTEOffsetEvent(*list(map(ord, bytes)))
       elif event_type == 0x58:
         event = TimeSignatureEvent(ord(bytes[0]), 2 ** ord(bytes[1]))
       elif event_type == 0x59:
@@ -527,7 +527,7 @@ class Reader(object):
       size += event_size
       event = SysExEvent(bytes[0:3], bytes[3:5], bytes[5:-1])
     else:
-      print event_byte, '!!'
+      print(event_byte, '!!')
       event = None
     return delta_t, event, size
     

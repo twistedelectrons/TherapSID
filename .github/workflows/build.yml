@@ -9,7 +9,7 @@ jobs:
     steps:
       - run: sudo sed -i -e "s/# \(deb.*universe.*\)/\1/g" /etc/apt/sources.list
       - run: sudo apt-get update
-      - run: sudo apt-get install python2 python3 python3-pip clang-format
+      - run: sudo apt-get install python3 python3-pip clang-format
       - run: pip3 install -U platformio
       - uses: actions/checkout@v2
       - run: make check_fmt
