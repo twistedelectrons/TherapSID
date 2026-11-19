@@ -131,15 +131,19 @@ void movedPotAsid(Pot pot, int value) {
 					case Pot::TUNE1:
 					case Pot::TUNE2:
 					case Pot::TUNE3: {
-						// Octaves, -1, 0, +1: even spaced
+						// Octaves, -2, -1, 0, +1, +2: even spaced
 						int8_t octave;
 
-						if (value < 1 * 1023 / 3) {
+						if (value < 20) {
+							octave = -2;
+						} else if (value < 1 * 1023 / 3) {
 							octave = -1;
 						} else if (value < 2 * 1023 / 3) {
 							octave = 0;
-						} else {
+						} else if (value < 1003) {
 							octave = 1;
+						} else {
+							octave = 2;
 						}
 						asidState.adjustOctave[i][potmap->index] = octave;
 
